@@ -219,59 +219,59 @@ export class ImageManager {
   }
 
 
-  static requestAnimation(filename: string, hue: number) {
+  static requestAnimation(filename: string, hue?: number) {
     return this.requestBitmap('img/animations/', filename, hue, true)
   }
 
-  static requestBattleback1(filename: string, hue: number) {
+  static requestBattleback1(filename: string, hue?: number) {
     return this.requestBitmap('img/battlebacks1/', filename, hue, true)
   }
 
-  static requestBattleback2(filename: string, hue: number) {
+  static requestBattleback2(filename: string, hue?: number) {
     return this.requestBitmap('img/battlebacks2/', filename, hue, true)
   }
 
-  static requestEnemy(filename: string, hue: number) {
+  static requestEnemy(filename: string, hue?: number) {
     return this.requestBitmap('img/enemies/', filename, hue, true)
   }
 
-  static requestCharacter(filename: string, hue: number) {
+  static requestCharacter(filename: string, hue?: number) {
     return this.requestBitmap('img/characters/', filename, hue, false)
   }
 
-  static requestFace(filename: string, hue: number) {
+  static requestFace(filename: string, hue?: number) {
     return this.requestBitmap('img/faces/', filename, hue, true)
   }
 
-  static requestParallax(filename: string, hue: number) {
+  static requestParallax(filename: string, hue?: number) {
     return this.requestBitmap('img/parallaxes/', filename, hue, true)
   }
 
-  static requestPicture(filename: string, hue: number) {
+  static requestPicture(filename: string, hue?: number) {
     return this.requestBitmap('img/pictures/', filename, hue, true)
   }
 
-  static requestSvActor(filename: string, hue: number) {
+  static requestSvActor(filename: string, hue?: number) {
     return this.requestBitmap('img/sv_actors/', filename, hue, false)
   }
 
-  static requestSvEnemy(filename: string, hue: number) {
+  static requestSvEnemy(filename: string, hue?: number) {
     return this.requestBitmap('img/sv_enemies/', filename, hue, true)
   }
 
-  static requestSystem(filename: string, hue: number) {
+  static requestSystem(filename: string, hue?: number) {
     return this.requestBitmap('img/system/', filename, hue, false)
   }
 
-  static requestTileset(filename: string, hue: number) {
+  static requestTileset(filename: string, hue?: number) {
     return this.requestBitmap('img/tilesets/', filename, hue, false)
   }
 
-  static requestTitle1(filename: string, hue: number) {
+  static requestTitle1(filename: string, hue?: number) {
     return this.requestBitmap('img/titles1/', filename, hue, true)
   }
 
-  static requestTitle2(filename: string, hue: number) {
+  static requestTitle2(filename: string, hue?: number) {
     return this.requestBitmap('img/titles2/', filename, hue, true)
   }
 

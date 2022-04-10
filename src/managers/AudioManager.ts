@@ -160,7 +160,7 @@ export class AudioManager {
     }
   }
 
-  static playBgs(bgs, pos) {
+  static playBgs(bgs, pos = 0) {
     if (this.isCurrentBgs(bgs)) {
       this.updateBgsParameters(bgs)
     } else {

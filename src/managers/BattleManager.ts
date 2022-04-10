@@ -3,6 +3,7 @@ import {AudioManager} from './AudioManager'
 import {SceneManager} from './SceneManager'
 import {SoundManager} from './SoundManager'
 import {TextManager} from './TextManager'
+import {Game_Action} from '../objects/Game_Action'
 
 type Rewards = { gold?: number, exp?: number, items?: any[] }
 
