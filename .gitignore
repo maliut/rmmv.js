@@ -130,6 +130,7 @@ dist
 .pnp.*
 
 .idea/
+/project/js/bundle.js
 
 # RPG Maker large media files
 /project/audio/*

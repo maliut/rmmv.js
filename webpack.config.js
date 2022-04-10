@@ -15,8 +15,11 @@ module.exports = {
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ]
   },
+  externals: {
+    'pixi.js': 'PIXI'
+  },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'project')
+    path: path.resolve(__dirname, 'project/js')
   }
 }
