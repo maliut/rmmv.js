@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js'
 import {Tilemap} from './Tilemap'
+import {PluginManager} from '../managers/PluginManager'
 
 // we need this constant for some platforms (Samsung S4, S5, Tab4, HTC One H8)
 PIXI.glCore.VertexArrayObject.FORCE_NATIVE = true

@@ -1,6 +1,7 @@
 import {ResourceHandler} from './ResourceHandler'
 import {Utils} from './Utils'
 import * as PIXI from 'pixi.js'
+import {SceneManager} from '../managers/SceneManager'
 
 export class Graphics {
   private static _cssFontLoading = document.fonts && document.fonts.ready
@@ -791,7 +792,6 @@ export class Graphics {
 
   private static _createFPSMeter() {
     const options = {graph: 1, decimals: 0, theme: 'transparent', toggleOn: null}
-    // @ts-ignore
     this._fpsMeter = new FPSMeter(options)
     this._fpsMeter.hide()
   }

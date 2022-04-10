@@ -1,4 +1,6 @@
 declare let nw: any
+declare let FPSMeter: any
+declare let LZString: any
 
 // todo 完善插件定义
 declare namespace PIXI {

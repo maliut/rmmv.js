@@ -1,4 +1,6 @@
 import {Bitmap} from './Bitmap'
+import { global } from '../managers/DataManager'
+import {AudioManager} from '../managers/AudioManager'
 
 export class Decrypter {
   static hasEncryptedImages = false
@@ -116,6 +118,6 @@ export class Decrypter {
   }
 
   static readEncryptionkey() {
-    this._encryptionKey = $dataSystem.encryptionKey.split(/(.{2})/).filter(Boolean)
+    this._encryptionKey = global.$dataSystem.encryptionKey.split(/(.{2})/).filter(Boolean)
   }
 }

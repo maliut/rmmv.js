@@ -1,4 +1,5 @@
 import {Graphics} from './Graphics'
+import {SceneManager} from '../managers/SceneManager'
 
 /**
  * The static class that handles resource loading.
@@ -9,7 +10,7 @@ export class ResourceHandler {
   private static _reloaders: (() => void)[] = []
   private static _defaultRetryInterval = [500, 1000, 3000]
 
-  static createLoader(url: string, retryMethod: () => void, resignMethod: () => void, retryInterval = this._defaultRetryInterval) {
+  static createLoader(url: string, retryMethod: () => void, resignMethod?: () => void, retryInterval = this._defaultRetryInterval) {
     const reloaders = this._reloaders
     let retryCount = 0
     return function() {

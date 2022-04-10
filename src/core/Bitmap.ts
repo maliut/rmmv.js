@@ -896,7 +896,7 @@ export class Bitmap {
     }
   }
 
-  request(url: string) {
+  static request(url: string) {
     const bitmap = Object.create(Bitmap.prototype)
     bitmap._defer = true
     bitmap.initialize()

@@ -1,4 +1,6 @@
-type CacheItem = { bitmap: any, touch: number, key: string, reservationId?: any }
+import {Bitmap} from './Bitmap'
+
+type CacheItem = { bitmap: Bitmap, touch: number, key: string, reservationId?: any }
 
 export class ImageCache {
   static limit = 10 * 1000 * 1000
@@ -13,7 +15,7 @@ export class ImageCache {
     this._items = {}
   }
 
-  add(key: string, value: any) {
+  add(key: string, value: Bitmap) {
     this._items[key] = {
       bitmap: value,
       touch: Date.now(),
@@ -23,7 +25,7 @@ export class ImageCache {
     this._truncateCache()
   }
 
-  get(key: string): any {
+  get(key: string): Bitmap | null {
     if (this._items[key]) {
       const item = this._items[key]
       item.touch = Date.now()
@@ -33,7 +35,7 @@ export class ImageCache {
     return null
   }
 
-  reserve(key: string, value: any, reservationId: any) {
+  reserve(key: string, value: Bitmap, reservationId: any) {
     if (!this._items[key]) {
       this._items[key] = {
         bitmap: value,

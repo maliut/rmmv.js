@@ -29,12 +29,12 @@ export class Utils {
    */
   static isOptionValid(name: string) {
     if (location.search.slice(1).split('&').includes(name)) {
-      return 1
+      return true
     }
     if (typeof nw !== 'undefined' && nw.App.argv.length > 0 && nw.App.argv[0].split('&').includes(name)) {
-      return 1
+      return true
     }
-    return 0
+    return false
   }
 
   /**
