@@ -19,6 +19,7 @@ import {Game_Party} from '../objects/Game_Party'
 import {Game_Troop} from '../objects/Game_Troop'
 import {Game_Player} from '../objects/Game_Player'
 import {Game_Map} from '../objects/Game_Map'
+import {Scene_Boot} from '../scenes/Scene_Boot'
 
 // 全局变量，嵌套一层，避免转译后潜在不一致问题，并方便遍历处理. 缺点是外部使用的时候都要处理下
 // todo 以后可将 json 直接导入，无需额外 load

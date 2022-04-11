@@ -32,8 +32,8 @@ export class Game_Player extends Game_Character {
     this.setTransparent(global.$dataSystem.optTransparent)
   }
 
-  initMembers() {
-    Game_Character.prototype.initMembers.call(this)
+  override initMembers() {
+    super.initMembers()
     this._vehicleType = 'walk'
     this._vehicleGettingOn = false
     this._vehicleGettingOff = false
@@ -69,14 +69,14 @@ export class Game_Player extends Game_Character {
     this._followers.refresh()
   }
 
-  isStopping() {
+  override isStopping() {
     if (this._vehicleGettingOn || this._vehicleGettingOff) {
       return false
     }
-    return Game_Character.prototype.isStopping.call(this)
+    return super.isStopping()
   }
 
-  reserveTransfer(mapId, x, y, d, fadeType) {
+  reserveTransfer(mapId, x, y, d = 0, fadeType = 0) { // changed
     this._transferring = true
     this._newMapId = mapId
     this._newX = x
@@ -114,12 +114,12 @@ export class Game_Player extends Game_Character {
     }
   }
 
-  isMapPassable(x, y, d) {
+  override isMapPassable(x, y, d) {
     const vehicle = this.vehicle()
     if (vehicle) {
       return vehicle.isMapPassable(x, y, d)
     } else {
-      return Game_Character.prototype.isMapPassable.call(this, x, y, d)
+      return super.isMapPassable(x, y, d)
     }
   }
 
@@ -147,11 +147,11 @@ export class Game_Player extends Game_Character {
     return this._vehicleType === 'walk' && !this.isMoveRouteForcing()
   }
 
-  isDashing() {
+  override isDashing() {
     return this._dashing
   }
 
-  isDebugThrough() {
+  override isDebugThrough() {
     return Input.isPressed('control') && global.$gameTemp.isPlaytest()
   }
 
@@ -175,8 +175,8 @@ export class Game_Player extends Game_Character {
     return global.$gameMap.setDisplayPos(x - this.centerX(), y - this.centerY())
   }
 
-  locate(x, y) {
-    Game_Character.prototype.locate.call(this, x, y)
+  override locate(x, y) {
+    super.locate(x, y)
     this.center(x, y)
     this.makeEncounterCount()
     if (this.isInVehicle()) {
@@ -185,8 +185,8 @@ export class Game_Player extends Game_Character {
     this._followers.synchronize(x, y, this.direction())
   }
 
-  increaseSteps() {
-    Game_Character.prototype.increaseSteps.call(this)
+  override increaseSteps() {
+    super.increaseSteps()
     if (this.isNormal()) {
       global.$gameParty.increaseSteps()
     }
@@ -297,7 +297,7 @@ export class Game_Player extends Game_Character {
     if (sceneActive) {
       this.moveByInput()
     }
-    Game_Character.prototype.update.call(this)
+    super.update()
     this.updateScroll(lastScrolledX, lastScrolledY)
     this.updateVehicle()
     if (!this.isMoving()) {

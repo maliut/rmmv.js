@@ -19,59 +19,59 @@ export class ImageManager {
     return path + ':' + hue
   }
 
-  static loadAnimation(filename: string, hue: number) {
+  static loadAnimation(filename: string, hue?: number) {
     return this.loadBitmap('img/animations/', filename, hue, true)
   }
 
-  static loadBattleback1(filename: string, hue: number) {
+  static loadBattleback1(filename: string, hue?: number) {
     return this.loadBitmap('img/battlebacks1/', filename, hue, true)
   }
 
-  static loadBattleback2(filename: string, hue: number) {
+  static loadBattleback2(filename: string, hue?: number) {
     return this.loadBitmap('img/battlebacks2/', filename, hue, true)
   }
 
-  static loadEnemy(filename: string, hue: number) {
+  static loadEnemy(filename: string, hue?: number) {
     return this.loadBitmap('img/enemies/', filename, hue, true)
   }
 
-  static loadCharacter(filename: string, hue: number) {
+  static loadCharacter(filename: string, hue?: number) {
     return this.loadBitmap('img/characters/', filename, hue, false)
   }
 
-  static loadFace(filename: string, hue: number) {
+  static loadFace(filename: string, hue?: number) {
     return this.loadBitmap('img/faces/', filename, hue, true)
   }
 
-  static loadParallax(filename: string, hue: number) {
+  static loadParallax(filename: string, hue?: number) {
     return this.loadBitmap('img/parallaxes/', filename, hue, true)
   }
 
-  static loadPicture(filename: string, hue: number) {
+  static loadPicture(filename: string, hue?: number) {
     return this.loadBitmap('img/pictures/', filename, hue, true)
   }
 
-  static loadSvActor(filename: string, hue: number) {
+  static loadSvActor(filename: string, hue?: number) {
     return this.loadBitmap('img/sv_actors/', filename, hue, false)
   }
 
-  static loadSvEnemy(filename: string, hue: number) {
+  static loadSvEnemy(filename: string, hue?: number) {
     return this.loadBitmap('img/sv_enemies/', filename, hue, true)
   }
 
-  static loadSystem(filename: string, hue: number) {
+  static loadSystem(filename: string, hue?: number) {
     return this.loadBitmap('img/system/', filename, hue, false)
   }
 
-  static loadTileset(filename: string, hue: number) {
+  static loadTileset(filename: string, hue?: number) {
     return this.loadBitmap('img/tilesets/', filename, hue, false)
   }
 
-  static loadTitle1(filename: string, hue: number) {
+  static loadTitle1(filename: string, hue?: number) {
     return this.loadBitmap('img/titles1/', filename, hue, true)
   }
 
-  static loadTitle2(filename: string, hue: number) {
+  static loadTitle2(filename: string, hue?: number) {
     return this.loadBitmap('img/titles2/', filename, hue, true)
   }
 
