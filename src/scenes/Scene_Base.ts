@@ -21,9 +21,9 @@ export abstract class Scene_Base extends Stage {
   private _active = false
   private _fadeSign = 0
   private _fadeDuration = 0
-  private _fadeSprite = null
+  protected _fadeSprite = null
   private _imageReservationId = Utils.generateRuntimeId()
-  private _windowLayer
+  protected _windowLayer
 
   /**
    * Attach a reservation to the reserve queue.

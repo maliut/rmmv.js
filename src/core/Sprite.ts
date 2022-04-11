@@ -26,7 +26,7 @@ export class Sprite extends PIXI.Sprite {
    * @type {boolean}
    * @private
    */
-  private _isPicture = false
+  protected _isPicture = false
 
   spriteId = Sprite._counter++
   opaque = false

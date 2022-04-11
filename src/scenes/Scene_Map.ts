@@ -8,6 +8,12 @@ import {AudioManager} from '../managers/AudioManager'
 import {Input} from '../core/Input'
 import {SceneManager} from '../managers/SceneManager'
 import {Scene_Title} from './Scene_Title'
+import {Scene_Load} from './Scene_Load'
+import {Scene_Battle} from './Scene_Battle'
+import {Scene_Gameover} from './Scene_Gameover'
+import {Spriteset_Map} from '../sprites/Spriteset_Map'
+import {Scene_Menu} from './Scene_Menu'
+import {Scene_Debug} from './Scene_Debug'
 
 // Scene_Map
 //
@@ -22,8 +28,7 @@ export class Scene_Map extends Scene_Base {
   private _mapNameWindow
   private _messageWindow
   private _spriteset
-  private _fadeSprite
-  private _windowLayer
+  private _scrollTextWindow
   menuCalling
 
   override create() {

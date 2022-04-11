@@ -62,7 +62,7 @@ export class TilingSprite extends PIXI.extras.PictureTilingSprite {
    * @constructor
    * @param {Bitmap} bitmap The image for the tiling sprite
    */
-  constructor(bitmap: Bitmap) {
+  constructor(bitmap?: Bitmap) {
     super(new PIXI.Texture(new PIXI.BaseTexture()))
     this.bitmap = bitmap
   }

@@ -7,6 +7,9 @@ import {Graphics} from '../core/Graphics'
 import {DataManager} from '../managers/DataManager'
 import {AudioManager} from '../managers/AudioManager'
 import {global} from '../managers/DataManager'
+import {Scene_Map} from './Scene_Map'
+import {Scene_Load} from './Scene_Load'
+import {Scene_Options} from './Scene_Options'
 
 // Scene_Title
 //

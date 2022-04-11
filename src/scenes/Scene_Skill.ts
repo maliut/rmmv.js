@@ -7,10 +7,8 @@ import {Graphics} from '../core/Graphics'
 // The scene class of the skill screen.
 export class Scene_Skill extends Scene_ItemBase {
 
-  private _helpWindow
   private _skillTypeWindow
   private _statusWindow
-  private _itemWindow
 
   override create() {
     super.create()

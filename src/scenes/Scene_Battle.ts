@@ -7,6 +7,7 @@ import {Scene_Title} from './Scene_Title'
 import {Graphics} from '../core/Graphics'
 import {global} from '../managers/DataManager'
 import {Scene_Gameover} from './Scene_Gameover'
+import {Spriteset_Battle} from '../sprites/Spriteset_Battle'
 
 // Scene_Battle
 //
