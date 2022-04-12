@@ -1,6 +1,7 @@
 import {Scene_MenuBase} from './Scene_MenuBase'
 import {SceneManager} from '../managers/SceneManager'
 import {Scene_Title} from './Scene_Title'
+import {Window_GameEnd} from '../windows/Window_GameEnd'
 
 // Scene_GameEnd
 //

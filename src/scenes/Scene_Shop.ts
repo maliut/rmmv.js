@@ -2,6 +2,14 @@ import {Scene_MenuBase} from './Scene_MenuBase'
 import {Graphics} from '../core/Graphics'
 import {global} from '../managers/DataManager'
 import {SoundManager} from '../managers/SoundManager'
+import {Window_Gold} from '../windows/Window_Gold'
+import {Window_ShopStatus} from '../windows/Window_ShopStatus'
+import {Window_Base} from '../windows/Window_Base'
+import {Window_ItemCategory} from '../windows/Window_ItemCategory'
+import {Window_ShopSell} from '../windows/Window_ShopSell'
+import {Window_ShopCommand} from '../windows/Window_ShopCommand'
+import {Window_ShopBuy} from '../windows/Window_ShopBuy'
+import {Window_ShopNumber} from '../windows/Window_ShopNumber'
 
 // Scene_Shop
 //
@@ -13,7 +21,6 @@ export class Scene_Shop extends Scene_MenuBase {
   private _item
   private _goldWindow
   private _commandWindow
-  private _helpWindow
   private _dummyWindow
   private _numberWindow
   private _statusWindow

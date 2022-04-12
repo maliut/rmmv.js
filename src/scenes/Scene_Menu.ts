@@ -9,6 +9,9 @@ import {Scene_GameEnd} from './Scene_GameEnd'
 import {Scene_Skill} from './Scene_Skill'
 import {Scene_Equip} from './Scene_Equip'
 import {Scene_Status} from './Scene_Status'
+import {Window_MenuCommand} from '../windows/Window_MenuCommand'
+import {Window_Gold} from '../windows/Window_Gold'
+import {Window_MenuStatus} from '../windows/Window_MenuStatus'
 
 // Scene_Menu
 //

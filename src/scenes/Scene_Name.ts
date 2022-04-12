@@ -1,5 +1,7 @@
 import {Scene_MenuBase} from './Scene_MenuBase'
 import {global} from '../managers/DataManager'
+import {Window_NameEdit} from '../windows/Window_NameEdit'
+import {Window_NameInput} from '../windows/Window_NameInput'
 
 // Scene_Name
 //
@@ -8,7 +10,6 @@ export class Scene_Name extends Scene_MenuBase {
 
   private _actorId
   private _maxLength
-  private _actor
   private _editWindow
   private _inputWindow
 

@@ -47,6 +47,28 @@ export class TouchInput {
   private static _date = 0
 
   /**
+   * [read-only] The horizontal scroll amount.
+   *
+   * @static
+   * @property wheelX
+   * @type Number
+   */
+  static get wheelX() {
+    return this._wheelX;
+  }
+
+  /**
+   * [read-only] The vertical scroll amount.
+   *
+   * @static
+   * @property wheelY
+   * @type Number
+   */
+  static get wheelY() {
+    return this._wheelY;
+  }
+
+  /**
    * [read-only] The x coordinate on the canvas area of the latest touch event.
    *
    * @static

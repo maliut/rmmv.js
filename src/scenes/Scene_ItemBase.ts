@@ -5,6 +5,7 @@ import {Game_Action} from '../objects/Game_Action'
 import {SoundManager} from '../managers/SoundManager'
 import {SceneManager} from '../managers/SceneManager'
 import {Scene_Map} from './Scene_Map'
+import {Window_MenuActor} from '../windows/Window_MenuActor'
 
 // Scene_ItemBase
 //

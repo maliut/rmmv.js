@@ -1,6 +1,9 @@
 import {Scene_ItemBase} from './Scene_ItemBase'
 import {SoundManager} from '../managers/SoundManager'
 import {Graphics} from '../core/Graphics'
+import {Window_SkillType} from '../windows/Window_SkillType'
+import {Window_SkillList} from '../windows/Window_SkillList'
+import {Window_SkillStatus} from '../windows/Window_SkillStatus'
 
 // Scene_Skill
 //

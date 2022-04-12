@@ -389,9 +389,7 @@ export class Bitmap {
    * @param {Number} [dw=sw] The width to draw the image in the destination
    * @param {Number} [dh=sh] The height to draw the image in the destination
    */
-  blt(source: Bitmap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number) {
-    dw = dw || sw
-    dh = dh || sh
+  blt(source: Bitmap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw = sw, dh = sh) {
     if (sx >= 0 && sy >= 0 && sw > 0 && sh > 0 && dw > 0 && dh > 0 &&
       sx + sw <= source.width && sy + sh <= source.height) {
       this._context.globalCompositeOperation = 'source-over'
@@ -519,7 +517,7 @@ export class Bitmap {
    * @param {String} color2 The gradient ending color
    * @param {Boolean} vertical Wether the gradient should be draw as vertical or not
    */
-  gradientFillRect(x: number, y: number, width: number, height: number, color1: string, color2: string, vertical: boolean) {
+  gradientFillRect(x: number, y: number, width: number, height: number, color1: string, color2: string, vertical = false) {
     const context = this._context
     let grad
     if (vertical) {
@@ -567,7 +565,7 @@ export class Bitmap {
    * @param {Number} lineHeight The height of the text line
    * @param {String} align The alignment of the text
    */
-  drawText(text: string, x: number, y: number, maxWidth: number, lineHeight: number, align: CanvasTextAlign) {
+  drawText(text: string, x: number, y: number, maxWidth = 0xffffffff, lineHeight: number, align: CanvasTextAlign = 'left') {
     // Note: Firefox has a bug with textBaseline: Bug 737852
     //       So we use 'alphabetic' here.
     if (text !== undefined) {
@@ -575,7 +573,6 @@ export class Bitmap {
       const ty = y + lineHeight - (lineHeight - this.fontSize * 0.7) / 2
       const context = this._context
       const alpha = context.globalAlpha
-      maxWidth = maxWidth || 0xffffffff
       if (align === 'center') {
         tx += maxWidth / 2
       }

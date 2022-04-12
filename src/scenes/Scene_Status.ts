@@ -1,4 +1,5 @@
 import {Scene_MenuBase} from './Scene_MenuBase'
+import {Window_Status} from '../windows/Window_Status'
 
 // Scene_Status
 //

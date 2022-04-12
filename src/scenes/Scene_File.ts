@@ -1,6 +1,8 @@
 import {Scene_MenuBase} from './Scene_MenuBase'
 import {Graphics} from '../core/Graphics'
 import {DataManager} from '../managers/DataManager'
+import {Window_Help} from '../windows/Window_Help'
+import {Window_SavefileList} from '../windows/Window_SavefileList'
 
 // Scene_File
 //

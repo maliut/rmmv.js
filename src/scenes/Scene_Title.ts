@@ -10,6 +10,7 @@ import {global} from '../managers/DataManager'
 import {Scene_Map} from './Scene_Map'
 import {Scene_Load} from './Scene_Load'
 import {Scene_Options} from './Scene_Options'
+import {Window_TitleCommand} from '../windows/Window_TitleCommand'
 
 // Scene_Title
 //

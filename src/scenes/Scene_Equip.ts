@@ -1,6 +1,10 @@
 import {Scene_MenuBase} from './Scene_MenuBase'
 import {SoundManager} from '../managers/SoundManager'
 import {Graphics} from '../core/Graphics'
+import {Window_EquipStatus} from '../windows/Window_EquipStatus'
+import {Window_EquipCommand} from '../windows/Window_EquipCommand'
+import {Window_EquipItem} from '../windows/Window_EquipItem'
+import {Window_EquipSlot} from '../windows/Window_EquipSlot'
 
 // Scene_Equip
 //

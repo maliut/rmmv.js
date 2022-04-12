@@ -1,5 +1,6 @@
 import {Scene_MenuBase} from './Scene_MenuBase'
 import {ConfigManager} from '../managers/ConfigManager'
+import {Window_Options} from '../windows/Window_Options'
 
 // Scene_Options
 //

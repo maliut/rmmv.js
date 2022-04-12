@@ -14,6 +14,10 @@ import {Scene_Gameover} from './Scene_Gameover'
 import {Spriteset_Map} from '../sprites/Spriteset_Map'
 import {Scene_Menu} from './Scene_Menu'
 import {Scene_Debug} from './Scene_Debug'
+import {Window_MapName} from '../windows/Window_MapName'
+import {Window_ScrollText} from '../windows/Window_ScrollText'
+import {Window_MenuCommand} from '../windows/Window_MenuCommand'
+import {Window_Message} from '../windows/Window_Message'
 
 // Scene_Map
 //

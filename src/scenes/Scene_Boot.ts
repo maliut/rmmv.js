@@ -9,6 +9,7 @@ import {Graphics} from '../core/Graphics'
 import {Scene_Battle} from './Scene_Battle'
 import {Scene_Map} from './Scene_Map'
 import {Scene_Title} from './Scene_Title'
+import {Window_TitleCommand} from '../windows/Window_TitleCommand'
 
 // Scene_Boot
 //

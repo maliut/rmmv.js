@@ -2,6 +2,8 @@ import {Scene_ItemBase} from './Scene_ItemBase'
 import {global} from '../managers/DataManager'
 import {Graphics} from '../core/Graphics'
 import {SoundManager} from '../managers/SoundManager'
+import {Window_ItemList} from '../windows/Window_ItemList'
+import {Window_ItemCategory} from '../windows/Window_ItemCategory'
 
 // Scene_Item
 //
