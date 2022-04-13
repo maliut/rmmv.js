@@ -1,4 +1,5 @@
 import {cloneDeep} from 'lodash-es'
+import {moduleMap} from '../modules'
 
 /**
  * The static class that handles JSON with object information.
@@ -155,7 +156,7 @@ export class JsonEx {
       registry[value['@c']] = value
 
       if (value['@']) {
-        const constructor = window[value['@']] // todo 此处意味着必须要把每个 constructor 挂到 window 上
+        const constructor = moduleMap[value['@']]
         if (constructor) {
           // @ts-ignore
           value = this._resetPrototype(value, constructor.prototype)
