@@ -9,6 +9,8 @@
         <link rel="apple-touch-icon" href="icon/icon.png">
         <link rel="stylesheet" type="text/css" href="fonts/gamefont.css">
         <title>Project1</title>
+        <!-- globalThis polyfill for running in rmmv with nw.js -->
+        <script>this.globalThis || (this.globalThis = this)</script>
     </head>
     <body style="background-color: black">
         <script type="text/javascript" src="js/libs/pixi.js"></script>
