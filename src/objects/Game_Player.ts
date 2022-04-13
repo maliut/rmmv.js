@@ -24,7 +24,7 @@ export class Game_Player extends Game_Character {
   private _newY = 0
   private _newDirection = 0
   private _fadeType = 0
-  private _followers = null
+  private _followers = new Game_Followers()
   private _encounterCount = 0
 
   constructor() {
@@ -34,19 +34,19 @@ export class Game_Player extends Game_Character {
 
   override initMembers() {
     super.initMembers()
-    this._vehicleType = 'walk'
-    this._vehicleGettingOn = false
-    this._vehicleGettingOff = false
-    this._dashing = false
-    this._needsMapReload = false
-    this._transferring = false
-    this._newMapId = 0
-    this._newX = 0
-    this._newY = 0
-    this._newDirection = 0
-    this._fadeType = 0
-    this._followers = new Game_Followers()
-    this._encounterCount = 0
+    // this._vehicleType = 'walk'
+    // this._vehicleGettingOn = false
+    // this._vehicleGettingOff = false
+    // this._dashing = false
+    // this._needsMapReload = false
+    // this._transferring = false
+    // this._newMapId = 0
+    // this._newX = 0
+    // this._newY = 0
+    // this._newDirection = 0
+    // this._fadeType = 0
+    // this._followers = new Game_Followers()
+    // this._encounterCount = 0
   }
 
   clearTransferInfo() {

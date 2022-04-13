@@ -32,10 +32,10 @@ export class Sprite_Actor extends Sprite_Battler {
     dead: {index: 17, loop: true}
   }
 
-  private _battlerName
-  private _motion
-  private _motionCount
-  private _pattern
+  private _battlerName = ''
+  private _motion = null
+  private _motionCount = 0
+  private _pattern = 0
   private _mainSprite
   private _shadowSprite
   private _weaponSprite
@@ -49,10 +49,10 @@ export class Sprite_Actor extends Sprite_Battler {
 
   override initMembers() {
     super.initMembers()
-    this._battlerName = ''
-    this._motion = null
-    this._motionCount = 0
-    this._pattern = 0
+    // this._battlerName = ''
+    // this._motion = null
+    // this._motionCount = 0
+    // this._pattern = 0
     this.createShadowSprite()
     this.createWeaponSprite()
     this.createMainSprite()

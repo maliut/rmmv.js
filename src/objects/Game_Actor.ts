@@ -25,8 +25,8 @@ export class Game_Actor extends Game_Battler {
   private _skills = []
   private _equips = []
   private _actionInputIndex = 0
-  private _lastMenuSkill = null
-  private _lastBattleSkill = null
+  private _lastMenuSkill = new Game_Item()
+  private _lastBattleSkill = new Game_Item()
   private _lastCommandSymbol = ''
   private _profile = ''
   private _stateSteps = {}
@@ -42,23 +42,23 @@ export class Game_Actor extends Game_Battler {
 
   override initMembers() {
     super.initMembers()
-    this._actorId = 0
-    this._name = ''
-    this._nickname = ''
-    this._classId = 0
-    this._level = 0
-    this._characterName = ''
-    this._characterIndex = 0
-    this._faceName = ''
-    this._faceIndex = 0
-    this._battlerName = ''
-    this._exp = {}
-    this._skills = []
-    this._equips = []
-    this._actionInputIndex = 0
-    this._lastMenuSkill = new Game_Item()
-    this._lastBattleSkill = new Game_Item()
-    this._lastCommandSymbol = ''
+    // this._actorId = 0
+    // this._name = ''
+    // this._nickname = ''
+    // this._classId = 0
+    // this._level = 0
+    // this._characterName = ''
+    // this._characterIndex = 0
+    // this._faceName = ''
+    // this._faceIndex = 0
+    // this._battlerName = ''
+    // this._exp = {}
+    // this._skills = []
+    // this._equips = []
+    // this._actionInputIndex = 0
+    // this._lastMenuSkill = new Game_Item()
+    // this._lastBattleSkill = new Game_Item()
+    // this._lastCommandSymbol = ''
   }
 
   setup(actorId) {
