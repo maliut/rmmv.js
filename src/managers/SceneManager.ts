@@ -113,7 +113,7 @@ export class SceneManager {
   static initNwjs() {
     if (Utils.isNwjs()) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const gui = require('nw.gui')
+      const gui = globalThis.require('nw.gui')
       const win = gui.Window.get()
       if (process.platform === 'darwin' && !win.menu) {
         const menubar = new gui.Menu({type: 'menubar'})
@@ -180,7 +180,7 @@ export class SceneManager {
       case 119:   // F8
         if (Utils.isNwjs() && Utils.isOptionValid('test')) {
           // eslint-disable-next-line @typescript-eslint/no-var-requires
-          require('nw.gui').Window.get().showDevTools()
+          globalThis.require('nw.gui').Window.get().showDevTools()
         }
         break
       }

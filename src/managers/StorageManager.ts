@@ -42,7 +42,7 @@ export class StorageManager {
         const data = this.loadFromLocalFile(savefileId)
         const compressed = LZString.compressToBase64(data)
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const fs = require('fs')
+        const fs = globalThis.require('fs')
         const dirPath = this.localFileDirectoryPath()
         const filePath = this.localFilePath(savefileId) + '.bak'
         if (!fs.existsSync(dirPath)) {
@@ -70,7 +70,7 @@ export class StorageManager {
     if (this.backupExists(savefileId)) {
       if (this.isLocalMode()) {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const fs = require('fs')
+        const fs = globalThis.require('fs')
         const dirPath = this.localFileDirectoryPath()
         const filePath = this.localFilePath(savefileId)
         fs.unlinkSync(filePath + '.bak')
@@ -87,7 +87,7 @@ export class StorageManager {
         const data = this.loadFromLocalBackupFile(savefileId)
         const compressed = LZString.compressToBase64(data)
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const fs = require('fs')
+        const fs = globalThis.require('fs')
         const dirPath = this.localFileDirectoryPath()
         const filePath = this.localFilePath(savefileId)
         if (!fs.existsSync(dirPath)) {
@@ -112,7 +112,7 @@ export class StorageManager {
   static saveToLocalFile(savefileId, json) {
     const data = LZString.compressToBase64(json)
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs')
+    const fs = globalThis.require('fs')
     const dirPath = this.localFileDirectoryPath()
     const filePath = this.localFilePath(savefileId)
     if (!fs.existsSync(dirPath)) {
@@ -124,7 +124,7 @@ export class StorageManager {
   static loadFromLocalFile(savefileId) {
     let data = null
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs')
+    const fs = globalThis.require('fs')
     const filePath = this.localFilePath(savefileId)
     if (fs.existsSync(filePath)) {
       data = fs.readFileSync(filePath, {encoding: 'utf8'})
@@ -135,7 +135,7 @@ export class StorageManager {
   static loadFromLocalBackupFile(savefileId) {
     let data = null
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs')
+    const fs = globalThis.require('fs')
     const filePath = this.localFilePath(savefileId) + '.bak'
     if (fs.existsSync(filePath)) {
       data = fs.readFileSync(filePath, {encoding: 'utf8'})
@@ -145,19 +145,19 @@ export class StorageManager {
 
   static localFileBackupExists(savefileId) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs')
+    const fs = globalThis.require('fs')
     return fs.existsSync(this.localFilePath(savefileId) + '.bak')
   }
 
   static localFileExists(savefileId) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs')
+    const fs = globalThis.require('fs')
     return fs.existsSync(this.localFilePath(savefileId))
   }
 
   static removeLocalFile(savefileId) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs')
+    const fs = globalThis.require('fs')
     const filePath = this.localFilePath(savefileId)
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath)
@@ -199,7 +199,7 @@ export class StorageManager {
 
   static localFileDirectoryPath() {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const path = require('path')
+    const path = globalThis.require('path')
 
     const base = path.dirname(process.mainModule.filename)
     return path.join(base, 'save/')

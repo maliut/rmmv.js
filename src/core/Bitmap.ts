@@ -267,8 +267,10 @@ export class Bitmap {
    * @constructor
    * @param {Number} width The width of the bitmap
    * @param {Number} height The height of the bitmap
+   * @param defer
    */
-  constructor(width?: number, height?: number) {
+  constructor(width?: number, height?: number, defer = false) {
+    this._defer = defer
     this.initialize(width, height)
   }
 
@@ -956,9 +958,9 @@ export class Bitmap {
    * @return Bitmap
    */
   static load(url: string): Bitmap {
-    const bitmap = Object.create(Bitmap.prototype)
-    bitmap._defer = true
-    bitmap.initialize()
+    const bitmap = new Bitmap(undefined, undefined, true)
+    // bitmap._defer = true
+    // bitmap.initialize()
 
     bitmap._decodeAfterRequest = true
     bitmap._requestImage(url)

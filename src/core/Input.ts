@@ -249,7 +249,7 @@ export class Input {
       const _alert = window.alert
       window.alert = function (...params) {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const gui = require('nw.gui')
+        const gui = globalThis.require('nw.gui')
         const win = gui.Window.get()
         _alert.apply(this, params)
         win.focus()

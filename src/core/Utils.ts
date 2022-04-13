@@ -45,7 +45,7 @@ export class Utils {
    * @return {Boolean} True if the platform is NW.js
    */
   static isNwjs() {
-    return typeof require === 'function' && typeof process === 'object'
+    return typeof globalThis.require === 'function' && typeof globalThis.process === 'object'
   }
 
   /**

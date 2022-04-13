@@ -7,6 +7,14 @@ import {ImageManager} from '../managers/ImageManager'
 import {AudioManager} from '../managers/AudioManager'
 import {Input} from '../core/Input'
 import {Utils} from '../core/Utils'
+import {Scene_Battle} from '../scenes/Scene_Battle'
+import {Scene_Menu} from '../scenes/Scene_Menu'
+import {Scene_Title} from '../scenes/Scene_Title'
+import {Scene_Save} from '../scenes/Scene_Save'
+import {Scene_Gameover} from '../scenes/Scene_Gameover'
+import {Window_MenuCommand} from '../windows/Window_MenuCommand'
+import {Scene_Name} from '../scenes/Scene_Name'
+import {Scene_Shop} from '../scenes/Scene_Shop'
 
 // Game_Interpreter
 //
