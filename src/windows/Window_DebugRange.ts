@@ -83,8 +83,7 @@ export class Window_DebugRange extends Window_Selectable {
   }
 
   override isCancelTriggered() {
-    return (Window_Selectable.prototype.isCancelTriggered() ||
-      Input.isTriggered('debug'))
+    return super.isCancelTriggered() || Input.isTriggered('debug')
   }
 
   override processCancel() {

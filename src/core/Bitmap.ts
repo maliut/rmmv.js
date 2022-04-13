@@ -896,9 +896,7 @@ export class Bitmap {
   }
 
   static request(url: string) {
-    const bitmap = Object.create(Bitmap.prototype)
-    bitmap._defer = true
-    bitmap.initialize()
+    const bitmap = new Bitmap(undefined, undefined, true)
 
     bitmap._url = url
     bitmap._loadingState = 'pending'
@@ -959,8 +957,6 @@ export class Bitmap {
    */
   static load(url: string): Bitmap {
     const bitmap = new Bitmap(undefined, undefined, true)
-    // bitmap._defer = true
-    // bitmap.initialize()
 
     bitmap._decodeAfterRequest = true
     bitmap._requestImage(url)
