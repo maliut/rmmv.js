@@ -10,7 +10,7 @@ export class Scene_Status extends Scene_MenuBase {
 
   override create() {
     super.create()
-    this._statusWindow = new Window_Status()
+    this._statusWindow = new Window_Status().initialize()
     this._statusWindow.setHandler('cancel', this.popScene.bind(this))
     this._statusWindow.setHandler('pagedown', this.nextActor.bind(this))
     this._statusWindow.setHandler('pageup', this.previousActor.bind(this))

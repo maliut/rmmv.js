@@ -12,6 +12,7 @@ export class Window_SavefileList extends Window_Selectable {
   override initialize(x, y, width, height) {
     super.initialize(x, y, width, height)
     this.activate()
+    return this
   }
 
   setMode(mode) {

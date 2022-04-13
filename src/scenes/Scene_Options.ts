@@ -20,7 +20,7 @@ export class Scene_Options extends Scene_MenuBase {
   }
 
   createOptionsWindow() {
-    this._optionsWindow = new Window_Options()
+    this._optionsWindow = new Window_Options().initialize()
     this._optionsWindow.setHandler('cancel', this.popScene.bind(this))
     this.addWindow(this._optionsWindow)
   }

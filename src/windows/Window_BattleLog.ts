@@ -31,6 +31,7 @@ export class Window_BattleLog extends Window_Selectable {
     this.createBackBitmap()
     this.createBackSprite()
     this.refresh()
+    return this
   }
 
   setSpriteset(spriteset) {

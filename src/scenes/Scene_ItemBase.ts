@@ -16,7 +16,7 @@ export abstract class Scene_ItemBase extends Scene_MenuBase {
   protected _itemWindow
 
   createActorWindow() {
-    this._actorWindow = new Window_MenuActor()
+    this._actorWindow = new Window_MenuActor().initialize()
     this._actorWindow.setHandler('ok', this.onActorOk.bind(this))
     this._actorWindow.setHandler('cancel', this.onActorCancel.bind(this))
     this.addWindow(this._actorWindow)

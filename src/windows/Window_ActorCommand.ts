@@ -16,6 +16,7 @@ export class Window_ActorCommand extends Window_Command {
     super.initialize(0, y)
     this.openness = 0
     this.deactivate()
+    return this
   }
 
   override windowWidth() {

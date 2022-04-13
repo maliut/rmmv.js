@@ -12,10 +12,15 @@ export class Window_ChoiceList extends Window_Command {
   private _background = 0
 
   constructor(messageWindow) {
-    super(0, 0)
+    super()
     this._messageWindow = messageWindow
+  }
+
+  override initialize() {
+    super.initialize(0, 0)
     this.openness = 0
     this.deactivate()
+    return this
   }
 
   start() {

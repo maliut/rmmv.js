@@ -18,11 +18,16 @@ export class Window_NumberInput extends Window_Selectable {
   private _buttons
 
   constructor(messageWindow) {
-    super(0, 0, 0, 0)
+    super()
     this._messageWindow = messageWindow
+  }
+
+  override initialize() {
+    super.initialize(0, 0, 0, 0)
     this.openness = 0
     this.createButtons()
     this.deactivate()
+    return this
   }
 
   start() {

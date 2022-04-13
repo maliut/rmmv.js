@@ -19,6 +19,7 @@ export class Window_TitleCommand extends Window_Command {
     this.updatePlacement()
     this.openness = 0
     this.selectLast()
+    return this
   }
 
   override windowWidth() {

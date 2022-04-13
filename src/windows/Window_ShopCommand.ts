@@ -17,6 +17,7 @@ export class Window_ShopCommand extends Window_HorzCommand {
 
   override initialize() {
     super.initialize(0, 0)
+    return this
   }
 
   override windowWidth() {

@@ -15,6 +15,7 @@ export class Window_BattleEnemy extends Window_Selectable {
     super.initialize(x, y, width, height)
     this.refresh()
     this.hide()
+    return this
   }
 
   windowWidth() {

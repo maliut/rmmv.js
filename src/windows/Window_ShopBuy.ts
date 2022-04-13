@@ -12,16 +12,17 @@ export class Window_ShopBuy extends Window_Selectable {
   private _price
   private _statusWindow
 
-  constructor(x, y, height, shopGoods) {
-    super(x, y, 0, height)
+  constructor(shopGoods) {
+    super()
     this._shopGoods = shopGoods
   }
 
-  override initialize(x, y, _, height) {
+  override initialize(x, y, height) {
     const width = this.windowWidth()
     super.initialize(x, y, width, height)
     this.refresh()
     this.select(0)
+    return this
   }
 
   windowWidth() {

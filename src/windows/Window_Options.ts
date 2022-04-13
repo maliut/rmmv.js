@@ -12,6 +12,7 @@ export class Window_Options extends Window_Command {
   override initialize() {
     super.initialize(0, 0)
     this.updatePlacement()
+    return this
   }
 
   override windowWidth() {

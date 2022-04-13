@@ -12,6 +12,7 @@ export class Window_GameEnd extends Window_Command {
     this.updatePlacement()
     this.openness = 0
     this.open()
+    return this
   }
 
   override windowWidth() {

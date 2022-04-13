@@ -25,6 +25,7 @@ export class Window_DebugRange extends Window_Selectable {
     this.setTopRow(Window_DebugRange.lastTopRow)
     this.select(Window_DebugRange.lastIndex)
     this.activate()
+    return this
   }
 
   windowWidth() {

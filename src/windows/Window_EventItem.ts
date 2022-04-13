@@ -12,8 +12,6 @@ export class Window_EventItem extends Window_ItemList {
   constructor(messageWindow) {
     super()
     this._messageWindow = messageWindow
-    this.openness = 0
-    this.deactivate()
     this.setHandler('ok', this.onOk.bind(this))
     this.setHandler('cancel', this.onCancel.bind(this))
   }
@@ -22,6 +20,9 @@ export class Window_EventItem extends Window_ItemList {
     const width = Graphics.boxWidth
     const height = this.windowHeight()
     super.initialize(0, 0, width, height)
+    this.openness = 0
+    this.deactivate()
+    return this
   }
 
   windowHeight() {

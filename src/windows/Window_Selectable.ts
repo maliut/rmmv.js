@@ -22,6 +22,7 @@ export class Window_Selectable extends Window_Base {
   override initialize(x, y, width, height) {
     super.initialize(x, y, width, height)
     this.deactivate()
+    return this
   }
 
   index() {

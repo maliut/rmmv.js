@@ -10,8 +10,13 @@ export class Window_BattleActor extends Window_BattleStatus {
     super()
     this.x = x
     this.y = y
+  }
+
+  override initialize() {
+    super.initialize()
     this.openness = 255
     this.hide()
+    return this
   }
 
   override show() {

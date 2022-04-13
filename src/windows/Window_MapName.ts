@@ -15,6 +15,7 @@ export class Window_MapName extends Window_Base {
     this.opacity = 0
     this.contentsOpacity = 0
     this.refresh()
+    return this
   }
 
   windowWidth() {

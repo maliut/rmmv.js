@@ -80,19 +80,21 @@ export class Window_NameInput extends Window_Selectable {
   protected _index = 0
 
   constructor(editWindow) {
-    const x = editWindow.x
-    const y = editWindow.y + editWindow.height + 8
-    const width = editWindow.width
-    super(x, y, width)
+    super()
     this._editWindow = editWindow
   }
 
-  override initialize(x, y, width) {
+  override initialize() {
+    const editWindow = this._editWindow
+    const x = editWindow.x
+    const y = editWindow.y + editWindow.height + 8
+    const width = editWindow.width
     const height = this.windowHeight()
     super.initialize(x, y, width, height)
     this.refresh()
     this.updateCursor()
     this.activate()
+    return this
   }
 
   windowHeight() {

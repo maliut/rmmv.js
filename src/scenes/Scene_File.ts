@@ -28,7 +28,7 @@ export abstract class Scene_File extends Scene_MenuBase {
   }
 
   override createHelpWindow() {
-    this._helpWindow = new Window_Help(1)
+    this._helpWindow = new Window_Help().initialize(1)
     this._helpWindow.setText(this.helpWindowText())
     this.addWindow(this._helpWindow)
   }
@@ -38,7 +38,7 @@ export abstract class Scene_File extends Scene_MenuBase {
     const y = this._helpWindow.height
     const width = Graphics.boxWidth
     const height = Graphics.boxHeight - y
-    this._listWindow = new Window_SavefileList(x, y, width, height)
+    this._listWindow = new Window_SavefileList().initialize(x, y, width, height)
     this._listWindow.setHandler('ok', this.onSavefileOk.bind(this))
     this._listWindow.setHandler('cancel', this.popScene.bind(this))
     this._listWindow.select(this.firstSavefileIndex())

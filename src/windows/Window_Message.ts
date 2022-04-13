@@ -38,6 +38,7 @@ export class Window_Message extends Window_Base {
     this.initMembers()
     this.createSubWindows()
     this.updatePlacement()
+    return this
   }
 
   initMembers() {
@@ -56,12 +57,12 @@ export class Window_Message extends Window_Base {
   }
 
   createSubWindows() {
-    this._goldWindow = new Window_Gold(0, 0)
+    this._goldWindow = new Window_Gold().initialize(0, 0)
     this._goldWindow.x = Graphics.boxWidth - this._goldWindow.width
     this._goldWindow.openness = 0
-    this._choiceWindow = new Window_ChoiceList(this)
-    this._numberWindow = new Window_NumberInput(this)
-    this._itemWindow = new Window_EventItem(this)
+    this._choiceWindow = new Window_ChoiceList(this).initialize()
+    this._numberWindow = new Window_NumberInput(this).initialize()
+    this._itemWindow = new Window_EventItem(this).initialize()
   }
 
   windowWidth() {

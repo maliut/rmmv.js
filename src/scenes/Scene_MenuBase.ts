@@ -39,7 +39,7 @@ export abstract class Scene_MenuBase extends Scene_Base {
   }
 
   createHelpWindow() {
-    this._helpWindow = new Window_Help()
+    this._helpWindow = new Window_Help().initialize()
     this.addWindow(this._helpWindow)
   }
 

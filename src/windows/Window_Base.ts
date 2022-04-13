@@ -20,20 +20,20 @@ export class Window_Base extends Window {
   private _closing = false
   private _dimmerSprite = null
 
-  constructor(x = 0, y = 0, width = 0, height = 0) {
+  constructor() {
     super()
     // 注：这里单独提取出 initialize 方法来做初始化，是因为子类中有需要在 super 前调用 this 的逻辑
-    // todo use ...args?
-    this.initialize(x, y, width, height)
+    // this.initialize(x, y, width, height)
   }
 
-  initialize(x, y, width, height) {
+  initialize(x = 0, y = 0, width = 0, height = 0) {
     this.loadWindowskin()
     this.move(x, y, width, height)
     this.updatePadding()
     this.updateBackOpacity()
     this.updateTone()
     this.createContents()
+    return this
   }
 
   lineHeight() {
@@ -110,8 +110,8 @@ export class Window_Base extends Window {
     this.changeTextColor(this.normalColor())
   }
 
-  update() {
-    Window.prototype.update.call(this)
+  override update() {
+    super.update()
     this.updateTone()
     this.updateOpen()
     this.updateClose()

@@ -13,12 +13,13 @@ export class Window_ScrollText extends Window_Base {
   private _text = ''
   private _allTextHeight = 0
 
-  constructor() {
+  override initialize() {
     const width = Graphics.boxWidth
     const height = Graphics.boxHeight
-    super(0, 0, width, height)
+    super.initialize(0, 0, width, height)
     this.opacity = 0
     this.hide()
+    return this
   }
 
   override update() {

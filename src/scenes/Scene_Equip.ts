@@ -27,7 +27,7 @@ export class Scene_Equip extends Scene_MenuBase {
   }
 
   createStatusWindow() {
-    this._statusWindow = new Window_EquipStatus(0, this._helpWindow.height)
+    this._statusWindow = new Window_EquipStatus().initialize(0, this._helpWindow.height)
     this.addWindow(this._statusWindow)
   }
 
@@ -35,7 +35,7 @@ export class Scene_Equip extends Scene_MenuBase {
     const wx = this._statusWindow.width
     const wy = this._helpWindow.height
     const ww = Graphics.boxWidth - this._statusWindow.width
-    this._commandWindow = new Window_EquipCommand(wx, wy, ww)
+    this._commandWindow = new Window_EquipCommand(ww).initialize(wx, wy)
     this._commandWindow.setHelpWindow(this._helpWindow)
     this._commandWindow.setHandler('equip', this.commandEquip.bind(this))
     this._commandWindow.setHandler('optimize', this.commandOptimize.bind(this))
@@ -51,7 +51,7 @@ export class Scene_Equip extends Scene_MenuBase {
     const wy = this._commandWindow.y + this._commandWindow.height
     const ww = Graphics.boxWidth - this._statusWindow.width
     const wh = this._statusWindow.height - this._commandWindow.height
-    this._slotWindow = new Window_EquipSlot(wx, wy, ww, wh)
+    this._slotWindow = new Window_EquipSlot().initialize(wx, wy, ww, wh)
     this._slotWindow.setHelpWindow(this._helpWindow)
     this._slotWindow.setStatusWindow(this._statusWindow)
     this._slotWindow.setHandler('ok', this.onSlotOk.bind(this))
@@ -64,7 +64,7 @@ export class Scene_Equip extends Scene_MenuBase {
     const wy = this._statusWindow.y + this._statusWindow.height
     const ww = Graphics.boxWidth
     const wh = Graphics.boxHeight - wy
-    this._itemWindow = new Window_EquipItem(wx, wy, ww, wh)
+    this._itemWindow = new Window_EquipItem().initialize(wx, wy, ww, wh)
     this._itemWindow.setHelpWindow(this._helpWindow)
     this._itemWindow.setStatusWindow(this._statusWindow)
     this._itemWindow.setHandler('ok', this.onItemOk.bind(this))

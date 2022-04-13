@@ -21,7 +21,7 @@ export class Scene_Item extends Scene_ItemBase {
   }
 
   createCategoryWindow() {
-    this._categoryWindow = new Window_ItemCategory()
+    this._categoryWindow = new Window_ItemCategory().initialize()
     this._categoryWindow.setHelpWindow(this._helpWindow)
     this._categoryWindow.y = this._helpWindow.height
     this._categoryWindow.setHandler('ok', this.onCategoryOk.bind(this))
@@ -32,7 +32,7 @@ export class Scene_Item extends Scene_ItemBase {
   createItemWindow() {
     const wy = this._categoryWindow.y + this._categoryWindow.height
     const wh = Graphics.boxHeight - wy
-    this._itemWindow = new Window_ItemList(0, wy, Graphics.boxWidth, wh)
+    this._itemWindow = new Window_ItemList().initialize(0, wy, Graphics.boxWidth, wh)
     this._itemWindow.setHelpWindow(this._helpWindow)
     this._itemWindow.setHandler('ok', this.onItemOk.bind(this))
     this._itemWindow.setHandler('cancel', this.onItemCancel.bind(this))

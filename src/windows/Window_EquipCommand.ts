@@ -8,7 +8,7 @@ export class Window_EquipCommand extends Window_HorzCommand {
 
   private readonly _windowWidth
 
-  constructor(x, y, width) {
+  constructor(width) {
     super()
     this._windowWidth = width
   }

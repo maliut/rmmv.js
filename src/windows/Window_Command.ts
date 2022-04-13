@@ -16,6 +16,7 @@ export class Window_Command extends Window_Selectable {
     this.refresh()
     this.select(0)
     this.activate()
+    return this
   }
 
   windowWidth() {

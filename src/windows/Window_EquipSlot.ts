@@ -13,6 +13,7 @@ export class Window_EquipSlot extends Window_Selectable {
   override initialize(x, y, width, height) {
     super.initialize(x, y, width, height)
     this.refresh()
+    return this
   }
 
   setActor(actor) {

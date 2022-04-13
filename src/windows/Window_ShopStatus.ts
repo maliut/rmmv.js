@@ -18,6 +18,7 @@ export class Window_ShopStatus extends Window_Base {
   override initialize(x, y, width, height) {
     super.initialize(x, y, width, height)
     this.refresh()
+    return this
   }
 
   refresh() {

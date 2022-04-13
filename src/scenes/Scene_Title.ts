@@ -89,7 +89,7 @@ export class Scene_Title extends Scene_Base {
   }
 
   createCommandWindow() {
-    this._commandWindow = new Window_TitleCommand()
+    this._commandWindow = new Window_TitleCommand().initialize()
     this._commandWindow.setHandler('newGame', this.commandNewGame.bind(this))
     this._commandWindow.setHandler('continue', this.commandContinue.bind(this))
     this._commandWindow.setHandler('options', this.commandOptions.bind(this))

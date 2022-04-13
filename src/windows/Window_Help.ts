@@ -12,6 +12,7 @@ export class Window_Help extends Window_Base {
     const width = Graphics.boxWidth
     const height = this.fittingHeight(numLines)
     super.initialize(0, 0, width, height)
+    return this
   }
 
   setText(text) {

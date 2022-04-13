@@ -178,17 +178,17 @@ export class Scene_Battle extends Scene_Base {
   }
 
   createLogWindow() {
-    this._logWindow = new Window_BattleLog()
+    this._logWindow = new Window_BattleLog().initialize()
     this.addWindow(this._logWindow)
   }
 
   createStatusWindow() {
-    this._statusWindow = new Window_BattleStatus()
+    this._statusWindow = new Window_BattleStatus().initialize()
     this.addWindow(this._statusWindow)
   }
 
   createPartyCommandWindow() {
-    this._partyCommandWindow = new Window_PartyCommand()
+    this._partyCommandWindow = new Window_PartyCommand().initialize()
     this._partyCommandWindow.setHandler('fight', this.commandFight.bind(this))
     this._partyCommandWindow.setHandler('escape', this.commandEscape.bind(this))
     this._partyCommandWindow.deselect()
@@ -196,7 +196,7 @@ export class Scene_Battle extends Scene_Base {
   }
 
   createActorCommandWindow() {
-    this._actorCommandWindow = new Window_ActorCommand()
+    this._actorCommandWindow = new Window_ActorCommand().initialize()
     this._actorCommandWindow.setHandler('attack', this.commandAttack.bind(this))
     this._actorCommandWindow.setHandler('skill', this.commandSkill.bind(this))
     this._actorCommandWindow.setHandler('guard', this.commandGuard.bind(this))
@@ -206,7 +206,7 @@ export class Scene_Battle extends Scene_Base {
   }
 
   createHelpWindow() {
-    this._helpWindow = new Window_Help()
+    this._helpWindow = new Window_Help().initialize()
     this._helpWindow.visible = false
     this.addWindow(this._helpWindow)
   }
@@ -214,7 +214,7 @@ export class Scene_Battle extends Scene_Base {
   createSkillWindow() {
     const wy = this._helpWindow.y + this._helpWindow.height
     const wh = this._statusWindow.y - wy
-    this._skillWindow = new Window_BattleSkill(0, wy, Graphics.boxWidth, wh)
+    this._skillWindow = new Window_BattleSkill().initialize(0, wy, Graphics.boxWidth, wh)
     this._skillWindow.setHelpWindow(this._helpWindow)
     this._skillWindow.setHandler('ok', this.onSkillOk.bind(this))
     this._skillWindow.setHandler('cancel', this.onSkillCancel.bind(this))
@@ -224,7 +224,7 @@ export class Scene_Battle extends Scene_Base {
   createItemWindow() {
     const wy = this._helpWindow.y + this._helpWindow.height
     const wh = this._statusWindow.y - wy
-    this._itemWindow = new Window_BattleItem(0, wy, Graphics.boxWidth, wh)
+    this._itemWindow = new Window_BattleItem().initialize(0, wy, Graphics.boxWidth, wh)
     this._itemWindow.setHelpWindow(this._helpWindow)
     this._itemWindow.setHandler('ok', this.onItemOk.bind(this))
     this._itemWindow.setHandler('cancel', this.onItemCancel.bind(this))
@@ -232,14 +232,14 @@ export class Scene_Battle extends Scene_Base {
   }
 
   createActorWindow() {
-    this._actorWindow = new Window_BattleActor(0, this._statusWindow.y)
+    this._actorWindow = new Window_BattleActor(0, this._statusWindow.y).initialize()
     this._actorWindow.setHandler('ok', this.onActorOk.bind(this))
     this._actorWindow.setHandler('cancel', this.onActorCancel.bind(this))
     this.addWindow(this._actorWindow)
   }
 
   createEnemyWindow() {
-    this._enemyWindow = new Window_BattleEnemy(0, this._statusWindow.y)
+    this._enemyWindow = new Window_BattleEnemy().initialize(0, this._statusWindow.y)
     this._enemyWindow.x = Graphics.boxWidth - this._enemyWindow.width
     this._enemyWindow.setHandler('ok', this.onEnemyOk.bind(this))
     this._enemyWindow.setHandler('cancel', this.onEnemyCancel.bind(this))
@@ -247,7 +247,7 @@ export class Scene_Battle extends Scene_Base {
   }
 
   createMessageWindow() {
-    this._messageWindow = new Window_Message()
+    this._messageWindow = new Window_Message().initialize()
     this.addWindow(this._messageWindow)
     this._messageWindow.subWindows().forEach(function (window) {
       this.addWindow(window)
@@ -255,7 +255,7 @@ export class Scene_Battle extends Scene_Base {
   }
 
   createScrollTextWindow() {
-    this._scrollTextWindow = new Window_ScrollText()
+    this._scrollTextWindow = new Window_ScrollText().initialize()
     this.addWindow(this._scrollTextWindow)
   }
 

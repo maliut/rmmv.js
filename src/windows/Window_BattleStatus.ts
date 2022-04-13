@@ -15,6 +15,7 @@ export class Window_BattleStatus extends Window_Selectable {
     super.initialize(x, y, width, height)
     this.refresh()
     this.openness = 0
+    return this
   }
 
   windowWidth() {

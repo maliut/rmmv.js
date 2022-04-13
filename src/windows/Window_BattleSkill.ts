@@ -5,9 +5,10 @@ import {Window_SkillList} from './Window_SkillList'
 // The window for selecting a skill to use on the battle screen.
 export class Window_BattleSkill extends Window_SkillList {
 
-  constructor(x, y, width, height) {
-    super(x, y, width, height)
+  override initialize(x, y, width, height) {
+    super.initialize(x, y, width, height)
     this.hide()
+    return this
   }
 
   override show() {

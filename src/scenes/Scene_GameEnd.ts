@@ -26,7 +26,7 @@ export class Scene_GameEnd extends Scene_MenuBase {
   }
 
   createCommandWindow() {
-    this._commandWindow = new Window_GameEnd()
+    this._commandWindow = new Window_GameEnd().initialize()
     this._commandWindow.setHandler('toTitle',  this.commandToTitle.bind(this))
     this._commandWindow.setHandler('cancel',   this.popScene.bind(this))
     this.addWindow(this._commandWindow)

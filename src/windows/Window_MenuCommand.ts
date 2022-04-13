@@ -17,6 +17,7 @@ export class Window_MenuCommand extends Window_Command {
   override initialize(x, y) {
     super.initialize(x, y)
     this.selectLast()
+    return this
   }
 
   override windowWidth() {

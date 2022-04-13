@@ -21,7 +21,7 @@ export class Scene_Shop extends Scene_MenuBase {
   private _item
   private _goldWindow
   private _commandWindow
-  private _dummyWindow
+  private _dummyWindow: Window_Base
   private _numberWindow
   private _statusWindow
   private _buyWindow
@@ -48,13 +48,13 @@ export class Scene_Shop extends Scene_MenuBase {
   }
 
   createGoldWindow() {
-    this._goldWindow = new Window_Gold(0, this._helpWindow.height)
+    this._goldWindow = new Window_Gold().initialize(0, this._helpWindow.height)
     this._goldWindow.x = Graphics.boxWidth - this._goldWindow.width
     this.addWindow(this._goldWindow)
   }
 
   createCommandWindow() {
-    this._commandWindow = new Window_ShopCommand(this._goldWindow.x, this._purchaseOnly)
+    this._commandWindow = new Window_ShopCommand(this._goldWindow.x, this._purchaseOnly).initialize()
     this._commandWindow.y = this._helpWindow.height
     this._commandWindow.setHandler('buy', this.commandBuy.bind(this))
     this._commandWindow.setHandler('sell', this.commandSell.bind(this))
@@ -65,14 +65,14 @@ export class Scene_Shop extends Scene_MenuBase {
   createDummyWindow() {
     const wy = this._commandWindow.y + this._commandWindow.height
     const wh = Graphics.boxHeight - wy
-    this._dummyWindow = new Window_Base(0, wy, Graphics.boxWidth, wh)
+    this._dummyWindow = new Window_Base().initialize(0, wy, Graphics.boxWidth, wh)
     this.addWindow(this._dummyWindow)
   }
 
   createNumberWindow() {
     const wy = this._dummyWindow.y
     const wh = this._dummyWindow.height
-    this._numberWindow = new Window_ShopNumber(0, wy, wh)
+    this._numberWindow = new Window_ShopNumber().initialize(0, wy, wh)
     this._numberWindow.hide()
     this._numberWindow.setHandler('ok', this.onNumberOk.bind(this))
     this._numberWindow.setHandler('cancel', this.onNumberCancel.bind(this))
@@ -84,7 +84,7 @@ export class Scene_Shop extends Scene_MenuBase {
     const wy = this._dummyWindow.y
     const ww = Graphics.boxWidth - wx
     const wh = this._dummyWindow.height
-    this._statusWindow = new Window_ShopStatus(wx, wy, ww, wh)
+    this._statusWindow = new Window_ShopStatus().initialize(wx, wy, ww, wh)
     this._statusWindow.hide()
     this.addWindow(this._statusWindow)
   }
@@ -92,7 +92,7 @@ export class Scene_Shop extends Scene_MenuBase {
   createBuyWindow() {
     const wy = this._dummyWindow.y
     const wh = this._dummyWindow.height
-    this._buyWindow = new Window_ShopBuy(0, wy, wh, this._goods)
+    this._buyWindow = new Window_ShopBuy(this._goods).initialize(0, wy, wh, )
     this._buyWindow.setHelpWindow(this._helpWindow)
     this._buyWindow.setStatusWindow(this._statusWindow)
     this._buyWindow.hide()
@@ -102,7 +102,7 @@ export class Scene_Shop extends Scene_MenuBase {
   }
 
   createCategoryWindow() {
-    this._categoryWindow = new Window_ItemCategory()
+    this._categoryWindow = new Window_ItemCategory().initialize()
     this._categoryWindow.setHelpWindow(this._helpWindow)
     this._categoryWindow.y = this._dummyWindow.y
     this._categoryWindow.hide()
@@ -115,7 +115,7 @@ export class Scene_Shop extends Scene_MenuBase {
   createSellWindow() {
     const wy = this._categoryWindow.y + this._categoryWindow.height
     const wh = Graphics.boxHeight - wy
-    this._sellWindow = new Window_ShopSell(0, wy, Graphics.boxWidth, wh)
+    this._sellWindow = new Window_ShopSell().initialize(0, wy, Graphics.boxWidth, wh)
     this._sellWindow.setHelpWindow(this._helpWindow)
     this._sellWindow.hide()
     this._sellWindow.setHandler('ok', this.onSellOk.bind(this))

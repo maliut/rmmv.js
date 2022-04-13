@@ -17,6 +17,7 @@ export class Window_MenuStatus extends Window_Selectable {
     const height = this.windowHeight()
     super.initialize(x, y, width, height)
     this.refresh()
+    return this
   }
 
   windowWidth() {

@@ -19,14 +19,11 @@ export class Window_ShopNumber extends Window_Selectable {
   private _currencyUnit = TextManager.currencyUnit
   private _buttons
 
-  constructor(x, y, height) {
-    super(x, y, 0, height)
-  }
-
-  override initialize(x, y, _, height) {
+  override initialize(x, y, height) {
     const width = this.windowWidth()
     super.initialize(x, y, width, height)
     this.createButtons()
+    return this
   }
 
   windowWidth() {

@@ -15,6 +15,7 @@ export class Window_Status extends Window_Selectable {
     super.initialize(0, 0, width, height)
     this.refresh()
     this.activate()
+    return this
   }
 
   setActor(actor) {

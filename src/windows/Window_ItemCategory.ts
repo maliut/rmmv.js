@@ -11,6 +11,7 @@ export class Window_ItemCategory extends Window_HorzCommand {
 
   override initialize() {
     super.initialize(0, 0)
+    return this
   }
 
   override windowWidth() {

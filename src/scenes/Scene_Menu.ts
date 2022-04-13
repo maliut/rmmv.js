@@ -35,7 +35,7 @@ export class Scene_Menu extends Scene_MenuBase {
   }
 
   createCommandWindow() {
-    this._commandWindow = new Window_MenuCommand(0, 0)
+    this._commandWindow = new Window_MenuCommand().initialize(0, 0)
     this._commandWindow.setHandler('item', this.commandItem.bind(this))
     this._commandWindow.setHandler('skill', this.commandPersonal.bind(this))
     this._commandWindow.setHandler('equip', this.commandPersonal.bind(this))
@@ -49,13 +49,13 @@ export class Scene_Menu extends Scene_MenuBase {
   }
 
   createGoldWindow() {
-    this._goldWindow = new Window_Gold(0, 0)
+    this._goldWindow = new Window_Gold().initialize(0, 0)
     this._goldWindow.y = Graphics.boxHeight - this._goldWindow.height
     this.addWindow(this._goldWindow)
   }
 
   createStatusWindow() {
-    this._statusWindow = new Window_MenuStatus(this._commandWindow.width, 0)
+    this._statusWindow = new Window_MenuStatus().initialize(this._commandWindow.width, 0)
     this._statusWindow.reserveFaceImages()
     this.addWindow(this._statusWindow)
   }

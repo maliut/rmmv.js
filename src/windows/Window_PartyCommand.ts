@@ -13,6 +13,7 @@ export class Window_PartyCommand extends Window_Command {
     super.initialize(0, y)
     this.openness = 0
     this.deactivate()
+    return this
   }
 
   override windowWidth() {

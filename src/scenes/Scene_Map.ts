@@ -227,12 +227,12 @@ export class Scene_Map extends Scene_Base {
   }
 
   createMapNameWindow() {
-    this._mapNameWindow = new Window_MapName()
+    this._mapNameWindow = new Window_MapName().initialize()
     this.addChild(this._mapNameWindow)
   }
 
   createMessageWindow() {
-    this._messageWindow = new Window_Message()
+    this._messageWindow = new Window_Message().initialize()
     this.addWindow(this._messageWindow)
     this._messageWindow.subWindows().forEach(function (window) {
       this.addWindow(window)
@@ -240,7 +240,7 @@ export class Scene_Map extends Scene_Base {
   }
 
   createScrollTextWindow() {
-    this._scrollTextWindow = new Window_ScrollText()
+    this._scrollTextWindow = new Window_ScrollText().initialize()
     this.addWindow(this._scrollTextWindow)
   }
 

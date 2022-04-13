@@ -11,6 +11,7 @@ export class Window_MenuActor extends Window_MenuStatus {
   override initialize() {
     super.initialize(0, 0)
     this.hide()
+    return this
   }
 
   override processOk() {

@@ -14,6 +14,7 @@ export class Window_EquipStatus extends Window_Base {
     const height = this.windowHeight()
     super.initialize(x, y, width, height)
     this.refresh()
+    return this
   }
 
   windowWidth() {

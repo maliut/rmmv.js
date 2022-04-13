@@ -32,6 +32,7 @@ export class Window_NameEdit extends Window_Base {
     super.initialize(x, y, width, height)
     this.deactivate()
     this.refresh()
+    return this
   }
 
   windowWidth() {

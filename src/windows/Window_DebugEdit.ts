@@ -15,6 +15,7 @@ export class Window_DebugEdit extends Window_Selectable {
     const height = this.fittingHeight(10)
     super.initialize(x, y, width, height)
     this.refresh()
+    return this
   }
 
   override maxItems() {
