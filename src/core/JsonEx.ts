@@ -66,7 +66,6 @@ export class JsonEx {
     const contents = this._decode(JSON.parse(json), circular, registry)
     this._cleanMetadata(contents)
     this._linkCircularReference(contents, circular, registry)
-
     return contents
   }
 

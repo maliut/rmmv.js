@@ -4,10 +4,6 @@ module.exports = {
     'node': true,
     'es2021': true
   },
-  // "globals": {
-  //   "var1": "writable",
-  //   "var2": "readonly"
-  // },
   'extends': [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended'
