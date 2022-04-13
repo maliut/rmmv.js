@@ -54,7 +54,7 @@ export class TouchInput {
    * @type Number
    */
   static get wheelX() {
-    return this._wheelX;
+    return this._wheelX
   }
 
   /**
@@ -65,7 +65,7 @@ export class TouchInput {
    * @type Number
    */
   static get wheelY() {
-    return this._wheelY;
+    return this._wheelY
   }
 
   /**
