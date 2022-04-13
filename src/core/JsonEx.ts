@@ -1,3 +1,5 @@
+import {cloneDeep} from 'lodash-es'
+
 /**
  * The static class that handles JSON with object information.
  *
@@ -101,9 +103,8 @@ export class JsonEx {
    * @param {Object} object The object to be copied
    * @return {Object} The copied object
    */
-  static makeDeepCopy(object) {
-    // todo _.cloneDeep
-    return this.parse(this.stringify(object))
+  static makeDeepCopy<T>(object: T) {
+    return cloneDeep<T>(object)
   }
 
   private static _encode(value, circular, depth = 0) {
