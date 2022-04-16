@@ -131,6 +131,8 @@ dist
 
 .idea/
 /project/js/bundle.js
+/project/index.html
+/project/bundle.js
 
 # RPG Maker large media files
 /project/audio/*

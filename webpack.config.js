@@ -1,5 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   entry: './src/main.ts',
@@ -20,6 +20,18 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'project/js')
+    path: path.resolve(__dirname, './project')
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Project2',
+      template: './template.html',
+      inject: 'body'
+    })
+  ],
+  devServer: {
+    static: {
+      directory: path.join(__dirname, './project'),
+    }
   }
 }
