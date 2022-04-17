@@ -1,4 +1,4 @@
-# RPG Maker MV 脚本工程化改造
+# rmmv.js - RPG Maker MV 脚本工程化改造
 
 使用 Webpack、TypeScript 等现代前端工具对 RPG Maker MV 的默认脚本进行重构改造，使之更易于理解和二次开发。
 
@@ -23,3 +23,29 @@ RPG Maker MV 使用 JavaScript 作为脚本语言，使得它拥有了无限的�
 - 完善项目中各方法和第三方库的 TypeScript 定义
 - 进一步对代码进行优化
 - 对 PixiJS 底层进行升级
+
+---
+
+Refactor RPG Maker MV default scripts using modern frontend tools such as Webpack and TypeScript to make them easier to understand and further development.
+
+RPG Maker MV uses JavaScript as its scripting language, which makes its possibilities endless. However, its usage is outdated and this refactoring will greatly facilitate its seamless integration with the current powerful front-end ecosystem.
+
+We should no longer think of RPG Maker MV as a simple game creation tool, but as a full-fledged PixiJS-based game framework with a powerful low-code editor that facilitates collaboration between different types of work. We can optimize and iterate on the original framework and customize it for our own games more easily.
+
+## Usage
+
+1. Clone this project. The `/project` directory is the project directory of RMMV. This repository does not contain resource files, so please copy the corresponding files to the `/audio` and `/img` folders.
+2. `npm install` the dependencies.
+3. Run `npm start` and the game will run in the browser. 
+4. You can also run `npm build` to generate the corresponding file and then run it in RPG Maker MV.
+
+## Changes
+- All classes and global variables are no longer mounted to the `window` object. Classes should be referenced using ES6 `import`. Global variables starting with `$` are referenced with `import {global} from './DataManager'`.
+- Classes are rewritten to `class` syntax. The original `initialize` methods are implemented using constructors. A special case is the `Window_XXX` related classes, which cannot be rewritten imperceptibly due to the execution order. So these classes need to be initialized manually by calling the `initialize` method after `new`.
+- The code is implemented natively using TypeScript. However, it is currently only rewritten mindlessly, and there are still a lot of `any` and `@ts-ignore`, which will be improved in the future.
+- Since it is just a simple rewrite, we have not tested all the features. If you get any error, feel free to issue.
+
+## Future plans
+- Improve the definition of TypeScript for each method and third-party library in the project
+- Optimize the code further
+- Upgrade PixiJS version
