@@ -10,25 +10,26 @@ import {Window_ShopSell} from '../windows/Window_ShopSell'
 import {Window_ShopCommand} from '../windows/Window_ShopCommand'
 import {Window_ShopBuy} from '../windows/Window_ShopBuy'
 import {Window_ShopNumber} from '../windows/Window_ShopNumber'
+import {Data_Armor, Data_Item, Data_Weapon} from '../types/global'
 
 // Scene_Shop
 //
 // The scene class of the shop screen.
 export class Scene_Shop extends Scene_MenuBase {
 
-  private _goods
-  private _purchaseOnly
-  private _item
-  private _goldWindow
-  private _commandWindow
-  private _dummyWindow: Window_Base
-  private _numberWindow
-  private _statusWindow
-  private _buyWindow
-  private _categoryWindow
-  private _sellWindow
+  private _goods!: number[][]
+  private _purchaseOnly!: boolean
+  private _item: Data_Armor | Data_Weapon | Data_Item | null = null
+  private _goldWindow!: Window_Gold
+  private _commandWindow!: Window_ShopCommand
+  private _dummyWindow!: Window_Base
+  private _numberWindow!: Window_ShopNumber
+  private _statusWindow!: Window_ShopStatus
+  private _buyWindow!: Window_ShopBuy
+  private _categoryWindow!: Window_ItemCategory
+  private _sellWindow!: Window_ShopSell
 
-  prepare(goods, purchaseOnly) {
+  prepare(goods: number[][], purchaseOnly = false) {
     this._goods = goods
     this._purchaseOnly = purchaseOnly
     this._item = null
@@ -271,6 +272,7 @@ export class Scene_Shop extends Scene_MenuBase {
   }
 
   sellingPrice() {
-    return Math.floor(this._item.price / 2)
+    const price = (this._item as Data_Item | Data_Weapon | Data_Armor)?.price || 0
+    return Math.floor(price / 2)
   }
 }

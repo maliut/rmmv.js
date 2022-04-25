@@ -8,7 +8,7 @@ import {Window_GameEnd} from '../windows/Window_GameEnd'
 // The scene class of the game end screen.
 export class Scene_GameEnd extends Scene_MenuBase {
 
-  private _commandWindow
+  private _commandWindow!: Window_GameEnd
 
   override create() {
     super.create()

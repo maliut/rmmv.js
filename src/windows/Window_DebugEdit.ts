@@ -11,7 +11,7 @@ export class Window_DebugEdit extends Window_Selectable {
   private _mode = 'switch'
   private _topId = 1
 
-  override initialize(x, y, width) {
+  override initialize(x: number, y: number, width: number) {
     const height = this.fittingHeight(10)
     super.initialize(x, y, width, height)
     this.refresh()
@@ -27,7 +27,7 @@ export class Window_DebugEdit extends Window_Selectable {
     this.drawAllItems()
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     const dataId = this._topId + index
     const idText = dataId.padZero(4) + ':'
     const idWidth = this.textWidth(idText)
@@ -43,7 +43,7 @@ export class Window_DebugEdit extends Window_Selectable {
     this.drawText(status, rect.x + rect.width, rect.y, statusWidth, 'right')
   }
 
-  itemName(dataId) {
+  itemName(dataId: number) {
     if (this._mode === 'switch') {
       return global.$dataSystem.switches[dataId]
     } else {
@@ -51,7 +51,7 @@ export class Window_DebugEdit extends Window_Selectable {
     }
   }
 
-  itemStatus(dataId) {
+  itemStatus(dataId: number) {
     if (this._mode === 'switch') {
       return global.$gameSwitches.value(dataId) ? '[ON]' : '[OFF]'
     } else {
@@ -59,14 +59,14 @@ export class Window_DebugEdit extends Window_Selectable {
     }
   }
 
-  setMode(mode) {
+  setMode(mode: string) {
     if (this._mode !== mode) {
       this._mode = mode
       this.refresh()
     }
   }
 
-  setTopId(id) {
+  setTopId(id: number) {
     if (this._topId !== id) {
       this._topId = id
       this.refresh()

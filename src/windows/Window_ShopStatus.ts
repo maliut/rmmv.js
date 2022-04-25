@@ -5,6 +5,8 @@ import {SoundManager} from '../managers/SoundManager'
 import {DataManager} from '../managers/DataManager'
 import {TextManager} from '../managers/TextManager'
 import {global} from '../managers/DataManager'
+import {Data_Armor, Data_Item, Data_Weapon} from '../types/global'
+import {Game_Actor} from '../objects/Game_Actor'
 
 // Window_ShopStatus
 //
@@ -12,10 +14,10 @@ import {global} from '../managers/DataManager'
 // equipment on the shop screen.
 export class Window_ShopStatus extends Window_Base {
 
-  private _item = null
+  private _item: Data_Armor | Data_Weapon | Data_Item | null = null
   private _pageIndex = 0
 
-  override initialize(x, y, width, height) {
+  override initialize(x: number, y: number, width: number, height: number) {
     super.initialize(x, y, width, height)
     this.refresh()
     return this
@@ -32,7 +34,7 @@ export class Window_ShopStatus extends Window_Base {
     }
   }
 
-  setItem(item) {
+  setItem(item: Data_Armor | Data_Weapon | Data_Item | null) {
     this._item = item
     this.refresh()
   }
@@ -41,16 +43,16 @@ export class Window_ShopStatus extends Window_Base {
     return DataManager.isWeapon(this._item) || DataManager.isArmor(this._item)
   }
 
-  drawPossession(x, y) {
+  drawPossession(x: number, y: number) {
     const width = this.contents.width - this.textPadding() - x
     const possessionWidth = this.textWidth('0000')
     this.changeTextColor(this.systemColor())
     this.drawText(TextManager.possession, x, y, width - possessionWidth)
     this.resetTextColor()
-    this.drawText(global.$gameParty.numItems(this._item), x, y, width, 'right')
+    this.drawText(global.$gameParty.numItems(this._item).toString(), x, y, width, 'right')
   }
 
-  drawEquipInfo(x, y) {
+  drawEquipInfo(x: number, y: number) {
     const members = this.statusMembers()
     for (let i = 0; i < members.length; i++) {
       this.drawActorEquipInfo(x, y + this.lineHeight() * (i * 2.4), members[i])
@@ -71,12 +73,12 @@ export class Window_ShopStatus extends Window_Base {
     return Math.floor((global.$gameParty.size() + this.pageSize() - 1) / this.pageSize())
   }
 
-  drawActorEquipInfo(x, y, actor) {
+  drawActorEquipInfo(x: number, y: number, actor: Game_Actor) {
     const enabled = actor.canEquip(this._item)
     this.changePaintOpacity(enabled)
     this.resetTextColor()
     this.drawText(actor.name(), x, y, 168)
-    const item1 = this.currentEquippedItem(actor, this._item.etypeId)
+    const item1 = this.currentEquippedItem(actor, (this._item as Data_Weapon | Data_Armor).etypeId)
     if (enabled) {
       this.drawActorParamChange(x, y, actor, item1)
     }
@@ -84,10 +86,10 @@ export class Window_ShopStatus extends Window_Base {
     this.changePaintOpacity(true)
   }
 
-  drawActorParamChange(x, y, actor, item1) {
+  drawActorParamChange(x: number, y: number, actor: Game_Actor, item1: Data_Armor | Data_Weapon | null) {
     const width = this.contents.width - this.textPadding() - x
     const paramId = this.paramId()
-    const change = this._item.params[paramId] - (item1 ? item1.params[paramId] : 0)
+    const change = (this._item as Data_Weapon | Data_Armor).params[paramId] - (item1 ? item1.params[paramId] : 0)
     this.changeTextColor(this.paramchangeTextColor(change))
     this.drawText((change > 0 ? '+' : '') + change, x, y, width, 'right')
   }
@@ -96,8 +98,8 @@ export class Window_ShopStatus extends Window_Base {
     return DataManager.isWeapon(this._item) ? 2 : 3
   }
 
-  currentEquippedItem(actor, etypeId) {
-    const list = []
+  currentEquippedItem(actor: Game_Actor, etypeId: number) {
+    const list: (Data_Armor | Data_Weapon)[] = []
     const equips = actor.equips()
     const slots = actor.equipSlots()
     for (let i = 0; i < slots.length; i++) {
@@ -107,7 +109,7 @@ export class Window_ShopStatus extends Window_Base {
     }
     const paramId = this.paramId()
     let worstParam = Number.MAX_VALUE
-    let worstItem = null
+    let worstItem: Data_Armor | Data_Weapon | null = null
     for (let j = 0; j < list.length; j++) {
       if (list[j] && list[j].params[paramId] < worstParam) {
         worstParam = list[j].params[paramId]

@@ -12,19 +12,12 @@ export class Sprite_Weapon extends Sprite_Base {
 
   constructor() {
     super()
-    this.initMembers()
-  }
-
-  initMembers() {
-    this._weaponImageId = 0
-    this._animationCount = 0
-    this._pattern = 0
     this.anchor.x = 0.5
     this.anchor.y = 1
     this.x = -16
   }
 
-  setup(weaponImageId) {
+  setup(weaponImageId: number) {
     this._weaponImageId = weaponImageId
     this._animationCount = 0
     this._pattern = 0

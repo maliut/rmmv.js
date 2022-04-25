@@ -1,5 +1,6 @@
 import {global} from '../managers/DataManager'
 import {Game_Picture} from './Game_Picture'
+import {WeatherType} from '../types/index'
 
 // Game_Screen
 //
@@ -25,25 +26,11 @@ export class Game_Screen {
   private _zoomScale = 1
   private _zoomScaleTarget = 1
   private _zoomDuration = 0
-  private _weatherType = 'none'
+  private _weatherType: WeatherType = 'none'
   private _weatherPower = 0
   private _weatherPowerTarget = 0
   private _weatherDuration = 0
-  private _pictures = []
-
-  constructor() {
-    this.clear()
-  }
-
-  clear() {
-    this.clearFade()
-    this.clearTone()
-    this.clearFlash()
-    this.clearShake()
-    this.clearZoom()
-    this.clearWeather()
-    this.clearPictures()
-  }
+  private _pictures: (Game_Picture | null)[] = []
 
   onBattleStart() {
     this.clearFade()
@@ -89,12 +76,12 @@ export class Game_Screen {
     return this._weatherPower
   }
 
-  picture(pictureId) {
+  picture(pictureId: number) {
     const realPictureId = this.realPictureId(pictureId)
     return this._pictures[realPictureId]
   }
 
-  realPictureId(pictureId) {
+  realPictureId(pictureId: number) {
     if (global.$gameParty.inBattle()) {
       return pictureId + this.maxPictures()
     } else {
@@ -154,17 +141,17 @@ export class Game_Screen {
     return 100
   }
 
-  startFadeOut(duration) {
+  startFadeOut(duration: number) {
     this._fadeOutDuration = duration
     this._fadeInDuration = 0
   }
 
-  startFadeIn(duration) {
+  startFadeIn(duration: number) {
     this._fadeInDuration = duration
     this._fadeOutDuration = 0
   }
 
-  startTint(tone, duration) {
+  startTint(tone: number[], duration: number) {
     this._toneTarget = tone.clone()
     this._toneDuration = duration
     if (this._toneDuration === 0) {
@@ -172,31 +159,31 @@ export class Game_Screen {
     }
   }
 
-  startFlash(color, duration) {
+  startFlash(color: number[], duration: number) {
     this._flashColor = color.clone()
     this._flashDuration = duration
   }
 
-  startShake(power, speed, duration) {
+  startShake(power: number, speed: number, duration: number) {
     this._shakePower = power
     this._shakeSpeed = speed
     this._shakeDuration = duration
   }
 
-  startZoom(x, y, scale, duration) {
+  startZoom(x: number, y: number, scale: number, duration: number) {
     this._zoomX = x
     this._zoomY = y
     this._zoomScaleTarget = scale
     this._zoomDuration = duration
   }
 
-  setZoom(x, y, scale) {
+  setZoom(x: number, y: number, scale: number) {
     this._zoomX = x
     this._zoomY = y
     this._zoomScale = scale
   }
 
-  changeWeather(type, power, duration) {
+  changeWeather(type: WeatherType, power: number, duration: number) {
     if (type !== 'none' || duration === 0) {
       this._weatherType = type
     }
@@ -303,30 +290,30 @@ export class Game_Screen {
     this.startFlash([255, 0, 0, 128], 8)
   }
 
-  showPicture(pictureId, name, origin, x, y,
-    scaleX, scaleY, opacity, blendMode) {
+  showPicture(pictureId: number, name: string, origin: number, x: number, y: number,
+    scaleX: number, scaleY: number, opacity: number, blendMode: number) {
     const realPictureId = this.realPictureId(pictureId)
     const picture = new Game_Picture()
     picture.show(name, origin, x, y, scaleX, scaleY, opacity, blendMode)
     this._pictures[realPictureId] = picture
   }
 
-  movePicture(pictureId, origin, x, y, scaleX,
-    scaleY, opacity, blendMode, duration) {
+  movePicture(pictureId: number, origin: number, x: number, y: number, scaleX: number,
+    scaleY: number, opacity: number, blendMode: number, duration: number) {
     const picture = this.picture(pictureId)
     if (picture) {
       picture.move(origin, x, y, scaleX, scaleY, opacity, blendMode, duration)
     }
   }
 
-  rotatePicture(pictureId, speed) {
+  rotatePicture(pictureId: number, speed: number) {
     const picture = this.picture(pictureId)
     if (picture) {
       picture.rotate(speed)
     }
   }
 
-  tintPicture(pictureId, tone, duration) {
+  tintPicture(pictureId: number, tone: number[], duration: number) {
     const picture = this.picture(pictureId)
     if (picture) {
       picture.tint(tone, duration)

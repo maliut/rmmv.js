@@ -3,8 +3,9 @@ import {Point} from './Point'
 import {Graphics} from './Graphics'
 import {Sprite} from './Sprite'
 import {Bitmap} from './Bitmap'
+import {IUpdatable} from '../utils'
 
-export class Tilemap extends PIXI.Container {
+export class Tilemap extends PIXI.Container implements IUpdatable {
 
   protected _margin = 20
   protected _width = Graphics.width + this._margin * 2
@@ -13,10 +14,12 @@ export class Tilemap extends PIXI.Container {
   protected _tileHeight = 48
   private _mapWidth = 0
   private _mapHeight = 0
-  private _mapData = null // todo
+  private _mapData: number[] = []
   protected _layerWidth = 0
   protected _layerHeight = 0
-  private _lastTiles = [] // todo
+  private _lastTiles: number[][][][] = []
+
+  override children: (Sprite | PIXI.tilemap.ZLayer)[] = []
 
   /**
    * The bitmaps used as a tileset.
@@ -40,7 +43,7 @@ export class Tilemap extends PIXI.Container {
    * @property flags
    * @type Array
    */
-  flags = [] // todo
+  flags: number[] = []
 
   /**
    * The animation count for autotiles.
@@ -75,8 +78,8 @@ export class Tilemap extends PIXI.Container {
   protected _lastStartY?: number
   private _lowerBitmap: Bitmap | null = null
   private _upperBitmap: Bitmap | null = null
-  private _lowerLayer: Sprite | null = null
-  private _upperLayer: Sprite | null = null
+  private _lowerLayer: PIXI.Container | null = null
+  private _upperLayer: PIXI.Container | null = null
 
   /**
    * The width of the screen in pixels.
@@ -168,7 +171,7 @@ export class Tilemap extends PIXI.Container {
    * @param {Number} height The height of the map in number of tiles
    * @param {Array} data The one dimensional array for the map data
    */
-  setData(width: number, height: number, data: any[]) {
+  setData(width: number, height: number, data: number[]) {
     this._mapWidth = width
     this._mapHeight = height
     this._mapData = data
@@ -198,14 +201,11 @@ export class Tilemap extends PIXI.Container {
   update() {
     this.animationCount++
     this.animationFrame = Math.floor(this.animationCount / 30)
-    this.children.forEach(function(child) {
-      // @ts-ignore
-      child.update?.()
+    this.children.forEach((child) => {
+      (child as unknown as IUpdatable).update?.()
     })
-    for (let i=0; i<this.bitmaps.length;i++) {
-      if (this.bitmaps[i]) {
-        this.bitmaps[i].touch()
-      }
+    for (let i = 0; i < this.bitmaps.length; i++) {
+      this.bitmaps[i].touch()
     }
   }
 
@@ -216,6 +216,15 @@ export class Tilemap extends PIXI.Container {
    */
   refresh() {
     this._lastTiles.length = 0
+  }
+
+  /**
+   * Forces to refresh the tileset
+   *
+   * @method refresh
+   */
+  refreshTileset() {
+    // empty
   }
 
   override updateTransform() {
@@ -264,28 +273,25 @@ export class Tilemap extends PIXI.Container {
      * 9 : Destination
      */
 
-    this._lowerLayer = new Sprite()
-    // @ts-ignore todo
-    this._lowerLayer.move(-margin, -margin, width, height)
-    // @ts-ignore todo
-    this._lowerLayer.z = 0
+    const lowerLayer = this._lowerLayer = new Sprite()
+    lowerLayer.move(-margin, -margin)
+    lowerLayer.z = 0
 
-    this._upperLayer = new Sprite()
-    // @ts-ignore todo
-    this._upperLayer.move(-margin, -margin, width, height)
-    // @ts-ignore todo
-    this._upperLayer.z = 4
+    const upperLayer = this._upperLayer = new Sprite()
+    upperLayer.move(-margin, -margin)
+    upperLayer.z = 4
 
     for (let i = 0; i < 4; i++) {
       this._lowerLayer.addChild(new Sprite(this._lowerBitmap))
       this._upperLayer.addChild(new Sprite(this._upperBitmap))
     }
 
+    // todo _createLayers 重复调用，是否存在重复添加的问题
     this.addChild(this._lowerLayer)
     this.addChild(this._upperLayer)
   }
 
-  protected _updateLayerPositions(startX, startY) {
+  protected _updateLayerPositions(startX: number, startY: number) {
     const m = this._margin
     const ox = Math.floor(this.origin.x)
     const oy = Math.floor(this.origin.y)
@@ -299,9 +305,9 @@ export class Tilemap extends PIXI.Container {
     for (let i = 0; i < 2; i++) {
       let children
       if (i === 0) {
-        children = this._lowerLayer.children
+        children = this._lowerLayer!.children
       } else {
-        children = this._upperLayer.children
+        children = this._upperLayer!.children
       }
       children[0].move(0, 0, w1, h1)
       children[0].setFrame(x2, y2, w1, h1)
@@ -324,7 +330,7 @@ export class Tilemap extends PIXI.Container {
     }
   }
 
-  protected _paintTiles(startX, startY, x, y) {
+  protected _paintTiles(startX: number, startY: number, x: number, y: number) {
     const tableEdgeVirtualId = 10000
     const mx = startX + x
     const my = startY + y
@@ -338,8 +344,8 @@ export class Tilemap extends PIXI.Container {
     const tileId3 = this._readMapData(mx, my, 3)
     const shadowBits = this._readMapData(mx, my, 4)
     const upperTileId1 = this._readMapData(mx, my - 1, 1)
-    const lowerTiles = []
-    const upperTiles = []
+    const lowerTiles: number[] = []
+    const upperTiles: number[] = []
 
     if (this._isHigherTile(tileId0)) {
       upperTiles.push(tileId0)
@@ -379,15 +385,15 @@ export class Tilemap extends PIXI.Container {
     const lastLowerTiles = this._readLastTiles(0, lx, ly)
     if (!lowerTiles.equals(lastLowerTiles) ||
       (Tilemap.isTileA1(tileId0) && this._frameUpdated)) {
-      this._lowerBitmap.clearRect(dx, dy, this._tileWidth, this._tileHeight)
+      this._lowerBitmap!.clearRect(dx, dy, this._tileWidth, this._tileHeight)
       for (let i = 0; i < lowerTiles.length; i++) {
         const lowerTileId = lowerTiles[i]
         if (lowerTileId < 0) {
-          this._drawShadow(this._lowerBitmap, shadowBits, dx, dy)
+          this._drawShadow(this._lowerBitmap!, shadowBits, dx, dy)
         } else if (lowerTileId >= tableEdgeVirtualId) {
-          this._drawTableEdge(this._lowerBitmap, upperTileId1, dx, dy)
+          this._drawTableEdge(this._lowerBitmap!, upperTileId1, dx, dy)
         } else {
-          this._drawTile(this._lowerBitmap, lowerTileId, dx, dy)
+          this._drawTile(this._lowerBitmap!, lowerTileId, dx, dy)
         }
       }
       this._writeLastTiles(0, lx, ly, lowerTiles)
@@ -395,15 +401,15 @@ export class Tilemap extends PIXI.Container {
 
     const lastUpperTiles = this._readLastTiles(1, lx, ly)
     if (!upperTiles.equals(lastUpperTiles)) {
-      this._upperBitmap.clearRect(dx, dy, this._tileWidth, this._tileHeight)
+      this._upperBitmap!.clearRect(dx, dy, this._tileWidth, this._tileHeight)
       for (let j = 0; j < upperTiles.length; j++) {
-        this._drawTile(this._upperBitmap, upperTiles[j], dx, dy)
+        this._drawTile(this._upperBitmap!, upperTiles[j], dx, dy)
       }
       this._writeLastTiles(1, lx, ly, upperTiles)
     }
   }
 
-  private _readLastTiles(i: number, x: number, y: number): any[] {
+  private _readLastTiles(i: number, x: number, y: number): number[] {
     const array1 = this._lastTiles[i]
     if (array1) {
       const array2 = array1[y]
@@ -417,7 +423,7 @@ export class Tilemap extends PIXI.Container {
     return []
   }
 
-  private _writeLastTiles(i: number, x: number, y: number, tiles: any[]) {
+  private _writeLastTiles(i: number, x: number, y: number, tiles: number[]) {
     let array1 = this._lastTiles[i]
     if (!array1) {
       array1 = this._lastTiles[i] = []
@@ -440,7 +446,7 @@ export class Tilemap extends PIXI.Container {
   }
 
   protected _drawNormalTile(bitmap: Bitmap, tileId: number, dx: number, dy: number) {
-    let setNumber = 0
+    let setNumber
 
     if (Tilemap.isTileA5(tileId)) {
       setNumber = 4
@@ -490,8 +496,7 @@ export class Tilemap extends PIXI.Container {
         by = ty * 6 + Math.floor(tx / 2) % 2 * 3
         if (kind % 2 === 0) {
           bx += waterSurfaceIndex * 2
-        }
-        else {
+        } else {
           bx += 6
           autotileTable = Tilemap.WATERFALL_AUTOTILE_TABLE
           by += this.animationFrame % 3
@@ -534,13 +539,13 @@ export class Tilemap extends PIXI.Container {
           let qsx2 = qsx
           const qsy2 = 3
           if (qsy === 1) {
-            qsx2 = [0,3,2,1][qsx]
+            qsx2 = [0, 3, 2, 1][qsx]
           }
           const sx2 = (bx * 2 + qsx2) * w1
           const sy2 = (by * 2 + qsy2) * h1
           bitmap.bltImage(source, sx2, sy2, w1, h1, dx1, dy1, w1, h1)
-          dy1 += h1/2
-          bitmap.bltImage(source, sx1, sy1, w1, h1/2, dx1, dy1, w1, h1/2)
+          dy1 += h1 / 2
+          bitmap.bltImage(source, sx1, sy1, w1, h1 / 2, dx1, dy1, w1, h1 / 2)
         } else {
           bitmap.bltImage(source, sx1, sy1, w1, h1, dx1, dy1, w1, h1)
         }
@@ -568,10 +573,10 @@ export class Tilemap extends PIXI.Container {
           const qsx = table[2 + i][0]
           const qsy = table[2 + i][1]
           const sx1 = (bx * 2 + qsx) * w1
-          const sy1 = (by * 2 + qsy) * h1 + h1/2
+          const sy1 = (by * 2 + qsy) * h1 + h1 / 2
           const dx1 = dx + (i % 2) * w1
           const dy1 = dy + Math.floor(i / 2) * h1
-          bitmap.bltImage(source, sx1, sy1, w1, h1/2, dx1, dy1, w1, h1/2)
+          bitmap.bltImage(source, sx1, sy1, w1, h1 / 2, dx1, dy1, w1, h1 / 2)
         }
       }
     }
@@ -620,36 +625,37 @@ export class Tilemap extends PIXI.Container {
     return Tilemap.isTileA2(tileId) && (this.flags[tileId] & 0x80)
   }
 
-  protected _isOverpassPosition(mx, my) {
+  protected _isOverpassPosition(mx: number, my: number) {
     return false
   }
 
   protected _sortChildren() {
-    this.children.sort(this._compareChildOrder.bind(this))
+    this.children.sort(Tilemap._compareChildOrder)
   }
 
-  private _compareChildOrder(a, b) { // todo
+  private static _compareChildOrder(a: Sprite | PIXI.tilemap.ZLayer, b: Sprite | PIXI.tilemap.ZLayer) {
     if (a.z !== b.z) {
       return a.z - b.z
     } else if (a.y !== b.y) {
       return a.y - b.y
     } else {
+      // @ts-ignore 原代码应该就有问题
       return a.spriteId - b.spriteId
     }
   }
 
   // Tile type checkers
 
-  static TILE_ID_B      = 0
-  static TILE_ID_C      = 256
-  static TILE_ID_D      = 512
-  static TILE_ID_E      = 768
-  static TILE_ID_A5     = 1536
-  static TILE_ID_A1     = 2048
-  static TILE_ID_A2     = 2816
-  static TILE_ID_A3     = 4352
-  static TILE_ID_A4     = 5888
-  static TILE_ID_MAX    = 8192
+  static TILE_ID_B = 0
+  static TILE_ID_C = 256
+  static TILE_ID_D = 512
+  static TILE_ID_E = 768
+  static TILE_ID_A5 = 1536
+  static TILE_ID_A1 = 2048
+  static TILE_ID_A2 = 2816
+  static TILE_ID_A3 = 4352
+  static TILE_ID_A4 = 5888
+  static TILE_ID_MAX = 8192
 
   static isVisibleTile(tileId: number) {
     return tileId > 0 && tileId < this.TILE_ID_MAX
@@ -756,45 +762,45 @@ export class Tilemap extends PIXI.Container {
   // Autotile shape number to coordinates of tileset images
 
   static FLOOR_AUTOTILE_TABLE = [
-    [[2,4],[1,4],[2,3],[1,3]],[[2,0],[1,4],[2,3],[1,3]],
-    [[2,4],[3,0],[2,3],[1,3]],[[2,0],[3,0],[2,3],[1,3]],
-    [[2,4],[1,4],[2,3],[3,1]],[[2,0],[1,4],[2,3],[3,1]],
-    [[2,4],[3,0],[2,3],[3,1]],[[2,0],[3,0],[2,3],[3,1]],
-    [[2,4],[1,4],[2,1],[1,3]],[[2,0],[1,4],[2,1],[1,3]],
-    [[2,4],[3,0],[2,1],[1,3]],[[2,0],[3,0],[2,1],[1,3]],
-    [[2,4],[1,4],[2,1],[3,1]],[[2,0],[1,4],[2,1],[3,1]],
-    [[2,4],[3,0],[2,1],[3,1]],[[2,0],[3,0],[2,1],[3,1]],
-    [[0,4],[1,4],[0,3],[1,3]],[[0,4],[3,0],[0,3],[1,3]],
-    [[0,4],[1,4],[0,3],[3,1]],[[0,4],[3,0],[0,3],[3,1]],
-    [[2,2],[1,2],[2,3],[1,3]],[[2,2],[1,2],[2,3],[3,1]],
-    [[2,2],[1,2],[2,1],[1,3]],[[2,2],[1,2],[2,1],[3,1]],
-    [[2,4],[3,4],[2,3],[3,3]],[[2,4],[3,4],[2,1],[3,3]],
-    [[2,0],[3,4],[2,3],[3,3]],[[2,0],[3,4],[2,1],[3,3]],
-    [[2,4],[1,4],[2,5],[1,5]],[[2,0],[1,4],[2,5],[1,5]],
-    [[2,4],[3,0],[2,5],[1,5]],[[2,0],[3,0],[2,5],[1,5]],
-    [[0,4],[3,4],[0,3],[3,3]],[[2,2],[1,2],[2,5],[1,5]],
-    [[0,2],[1,2],[0,3],[1,3]],[[0,2],[1,2],[0,3],[3,1]],
-    [[2,2],[3,2],[2,3],[3,3]],[[2,2],[3,2],[2,1],[3,3]],
-    [[2,4],[3,4],[2,5],[3,5]],[[2,0],[3,4],[2,5],[3,5]],
-    [[0,4],[1,4],[0,5],[1,5]],[[0,4],[3,0],[0,5],[1,5]],
-    [[0,2],[3,2],[0,3],[3,3]],[[0,2],[1,2],[0,5],[1,5]],
-    [[0,4],[3,4],[0,5],[3,5]],[[2,2],[3,2],[2,5],[3,5]],
-    [[0,2],[3,2],[0,5],[3,5]],[[0,0],[1,0],[0,1],[1,1]]
+    [[2, 4], [1, 4], [2, 3], [1, 3]], [[2, 0], [1, 4], [2, 3], [1, 3]],
+    [[2, 4], [3, 0], [2, 3], [1, 3]], [[2, 0], [3, 0], [2, 3], [1, 3]],
+    [[2, 4], [1, 4], [2, 3], [3, 1]], [[2, 0], [1, 4], [2, 3], [3, 1]],
+    [[2, 4], [3, 0], [2, 3], [3, 1]], [[2, 0], [3, 0], [2, 3], [3, 1]],
+    [[2, 4], [1, 4], [2, 1], [1, 3]], [[2, 0], [1, 4], [2, 1], [1, 3]],
+    [[2, 4], [3, 0], [2, 1], [1, 3]], [[2, 0], [3, 0], [2, 1], [1, 3]],
+    [[2, 4], [1, 4], [2, 1], [3, 1]], [[2, 0], [1, 4], [2, 1], [3, 1]],
+    [[2, 4], [3, 0], [2, 1], [3, 1]], [[2, 0], [3, 0], [2, 1], [3, 1]],
+    [[0, 4], [1, 4], [0, 3], [1, 3]], [[0, 4], [3, 0], [0, 3], [1, 3]],
+    [[0, 4], [1, 4], [0, 3], [3, 1]], [[0, 4], [3, 0], [0, 3], [3, 1]],
+    [[2, 2], [1, 2], [2, 3], [1, 3]], [[2, 2], [1, 2], [2, 3], [3, 1]],
+    [[2, 2], [1, 2], [2, 1], [1, 3]], [[2, 2], [1, 2], [2, 1], [3, 1]],
+    [[2, 4], [3, 4], [2, 3], [3, 3]], [[2, 4], [3, 4], [2, 1], [3, 3]],
+    [[2, 0], [3, 4], [2, 3], [3, 3]], [[2, 0], [3, 4], [2, 1], [3, 3]],
+    [[2, 4], [1, 4], [2, 5], [1, 5]], [[2, 0], [1, 4], [2, 5], [1, 5]],
+    [[2, 4], [3, 0], [2, 5], [1, 5]], [[2, 0], [3, 0], [2, 5], [1, 5]],
+    [[0, 4], [3, 4], [0, 3], [3, 3]], [[2, 2], [1, 2], [2, 5], [1, 5]],
+    [[0, 2], [1, 2], [0, 3], [1, 3]], [[0, 2], [1, 2], [0, 3], [3, 1]],
+    [[2, 2], [3, 2], [2, 3], [3, 3]], [[2, 2], [3, 2], [2, 1], [3, 3]],
+    [[2, 4], [3, 4], [2, 5], [3, 5]], [[2, 0], [3, 4], [2, 5], [3, 5]],
+    [[0, 4], [1, 4], [0, 5], [1, 5]], [[0, 4], [3, 0], [0, 5], [1, 5]],
+    [[0, 2], [3, 2], [0, 3], [3, 3]], [[0, 2], [1, 2], [0, 5], [1, 5]],
+    [[0, 4], [3, 4], [0, 5], [3, 5]], [[2, 2], [3, 2], [2, 5], [3, 5]],
+    [[0, 2], [3, 2], [0, 5], [3, 5]], [[0, 0], [1, 0], [0, 1], [1, 1]]
   ]
 
   static WALL_AUTOTILE_TABLE = [
-    [[2,2],[1,2],[2,1],[1,1]],[[0,2],[1,2],[0,1],[1,1]],
-    [[2,0],[1,0],[2,1],[1,1]],[[0,0],[1,0],[0,1],[1,1]],
-    [[2,2],[3,2],[2,1],[3,1]],[[0,2],[3,2],[0,1],[3,1]],
-    [[2,0],[3,0],[2,1],[3,1]],[[0,0],[3,0],[0,1],[3,1]],
-    [[2,2],[1,2],[2,3],[1,3]],[[0,2],[1,2],[0,3],[1,3]],
-    [[2,0],[1,0],[2,3],[1,3]],[[0,0],[1,0],[0,3],[1,3]],
-    [[2,2],[3,2],[2,3],[3,3]],[[0,2],[3,2],[0,3],[3,3]],
-    [[2,0],[3,0],[2,3],[3,3]],[[0,0],[3,0],[0,3],[3,3]]
+    [[2, 2], [1, 2], [2, 1], [1, 1]], [[0, 2], [1, 2], [0, 1], [1, 1]],
+    [[2, 0], [1, 0], [2, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]],
+    [[2, 2], [3, 2], [2, 1], [3, 1]], [[0, 2], [3, 2], [0, 1], [3, 1]],
+    [[2, 0], [3, 0], [2, 1], [3, 1]], [[0, 0], [3, 0], [0, 1], [3, 1]],
+    [[2, 2], [1, 2], [2, 3], [1, 3]], [[0, 2], [1, 2], [0, 3], [1, 3]],
+    [[2, 0], [1, 0], [2, 3], [1, 3]], [[0, 0], [1, 0], [0, 3], [1, 3]],
+    [[2, 2], [3, 2], [2, 3], [3, 3]], [[0, 2], [3, 2], [0, 3], [3, 3]],
+    [[2, 0], [3, 0], [2, 3], [3, 3]], [[0, 0], [3, 0], [0, 3], [3, 3]]
   ]
 
   static WATERFALL_AUTOTILE_TABLE = [
-    [[2,0],[1,0],[2,1],[1,1]],[[0,0],[1,0],[0,1],[1,1]],
-    [[2,0],[3,0],[2,1],[3,1]],[[0,0],[3,0],[0,1],[3,1]]
+    [[2, 0], [1, 0], [2, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]],
+    [[2, 0], [3, 0], [2, 1], [3, 1]], [[0, 0], [3, 0], [0, 1], [3, 1]]
   ]
 }

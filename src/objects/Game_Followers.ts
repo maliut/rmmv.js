@@ -8,7 +8,7 @@ export class Game_Followers {
 
   private _visible = false
   private _gathering = false
-  private _data = []
+  private _data: Game_Follower[] = []
 
   constructor() {
     this._visible = global.$dataSystem.optFollowers
@@ -29,24 +29,22 @@ export class Game_Followers {
     this._visible = false
   }
 
-  follower(index) {
+  follower(index: number) {
     return this._data[index]
   }
 
-  forEach(callback, thisObject) {
-    this._data.forEach(callback, thisObject)
+  forEach(callback: (i: Game_Follower) => void) {
+    this._data.forEach(callback)
   }
 
-  reverseEach(callback, thisObject) {
+  reverseEach(callback: (i: Game_Follower) => void) {
     this._data.reverse()
-    this._data.forEach(callback, thisObject)
+    this._data.forEach(callback)
     this._data.reverse()
   }
 
   refresh() {
-    this.forEach(function (follower) {
-      return follower.refresh()
-    }, this)
+    this.forEach((follower) => follower.refresh())
   }
 
   update() {
@@ -58,9 +56,7 @@ export class Game_Followers {
         this._gathering = false
       }
     }
-    this.forEach(function (follower) {
-      follower.update()
-    }, this)
+    this.forEach((follower) => follower.update())
   }
 
   updateMove() {
@@ -81,11 +77,11 @@ export class Game_Followers {
     }
   }
 
-  synchronize(x, y, d) {
-    this.forEach(function (follower) {
+  synchronize(x: number, y: number, d: number) {
+    this.forEach((follower) => {
       follower.locate(x, y)
       follower.setDirection(d)
-    }, this)
+    })
   }
 
   gather() {
@@ -97,26 +93,20 @@ export class Game_Followers {
   }
 
   visibleFollowers() {
-    return this._data.filter(function (follower) {
-      return follower.isVisible()
-    }, this)
+    return this._data.filter((follower) => follower.isVisible())
   }
 
   areMoving() {
-    return this.visibleFollowers().some(function (follower) {
-      return follower.isMoving()
-    }, this)
+    return this.visibleFollowers().some((follower) => follower.isMoving())
   }
 
   areGathered() {
-    return this.visibleFollowers().every(function (follower) {
+    return this.visibleFollowers().every((follower) => {
       return !follower.isMoving() && follower.pos(global.$gamePlayer.x, global.$gamePlayer.y)
-    }, this)
+    })
   }
 
   isSomeoneCollided(x, y) {
-    return this.visibleFollowers().some(function (follower) {
-      return follower.pos(x, y)
-    }, this)
+    return this.visibleFollowers().some((follower) => follower.pos(x, y))
   }
 }

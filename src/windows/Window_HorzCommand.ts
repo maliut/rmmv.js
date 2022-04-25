@@ -13,7 +13,7 @@ export class Window_HorzCommand extends Window_Command {
     return 4
   }
 
-  override itemTextAlign() {
+  override itemTextAlign(): CanvasTextAlign {
     return 'center'
   }
 }

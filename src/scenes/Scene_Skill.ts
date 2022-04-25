@@ -10,8 +10,9 @@ import {Window_SkillStatus} from '../windows/Window_SkillStatus'
 // The scene class of the skill screen.
 export class Scene_Skill extends Scene_ItemBase {
 
-  private _skillTypeWindow
-  private _statusWindow
+  private _skillTypeWindow!: Window_SkillType
+  private _statusWindow!: Window_SkillStatus
+  protected override _itemWindow!: Window_SkillList
 
   override create() {
     super.create()

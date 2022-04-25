@@ -1,33 +1,27 @@
 import {Game_Character} from './Game_Character'
 import {global} from '../managers/DataManager'
 import {AudioManager} from '../managers/AudioManager'
+import {assert} from '../utils'
+import {Data_Audio} from '../types/global'
+import {VehicleType} from '../types/index'
 
 // Game_Vehicle
 //
 // The game object class for a vehicle.
 export class Game_Vehicle extends Game_Character {
 
-  private _type = ''
+  private readonly _type: VehicleType
   private _mapId = 0
   private _altitude = 0
   private _driving = false
-  private _bgm = null
+  private _bgm: Data_Audio | null = null
 
-  constructor(type) {
+  constructor(type: VehicleType) {
     super()
     this._type = type
     this.resetDirection()
     this.initMoveSpeed()
     this.loadSystemSettings()
-  }
-
-  override initMembers() {
-    super.initMembers()
-    this._type = ''
-    this._mapId = 0
-    this._altitude = 0
-    this._driving = false
-    this._bgm = null
   }
 
   isBoat() {
@@ -70,6 +64,7 @@ export class Game_Vehicle extends Game_Character {
 
   loadSystemSettings() {
     const vehicle = this.vehicle()
+    assert(vehicle !== null)
     this._mapId = vehicle.startMapId
     this.setPosition(vehicle.startX, vehicle.startY)
     this.setImage(vehicle.characterName, vehicle.characterIndex)
@@ -92,13 +87,13 @@ export class Game_Vehicle extends Game_Character {
     this.setTransparent(this._mapId !== global.$gameMap.mapId())
   }
 
-  setLocation(mapId, x, y) {
+  setLocation(mapId: number, x: number, y: number) {
     this._mapId = mapId
     this.setPosition(x, y)
     this.refresh()
   }
 
-  override pos(x, y) {
+  override pos(x: number, y: number) {
     if (this._mapId === global.$gameMap.mapId()) {
       return super.pos(x, y)
     } else {
@@ -106,7 +101,7 @@ export class Game_Vehicle extends Game_Character {
     }
   }
 
-  override isMapPassable(x, y, d) {
+  override isMapPassable(x: number, y: number, d: number) {
     const x2 = global.$gameMap.roundXWithDirection(x, d)
     const y2 = global.$gameMap.roundYWithDirection(y, d)
     if (this.isBoat()) {
@@ -136,12 +131,12 @@ export class Game_Vehicle extends Game_Character {
     global.$gameSystem.replayWalkingBgm()
   }
 
-  setBgm(bgm) {
+  setBgm(bgm: Data_Audio | null) {
     this._bgm = bgm
   }
 
   playBgm() {
-    AudioManager.playBgm(this._bgm || this.vehicle().bgm)
+    AudioManager.playBgm(this._bgm || this.vehicle()!.bgm)
   }
 
   syncWithPlayer() {
@@ -211,7 +206,7 @@ export class Game_Vehicle extends Game_Character {
     return global.$gamePlayer.areFollowersGathered()
   }
 
-  isLandOk(x, y, d) {
+  isLandOk(x: number, y: number, d: number) {
     if (this.isAirship()) {
       if (!global.$gameMap.isAirshipLandOk(x, y)) {
         return false

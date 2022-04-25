@@ -4,6 +4,8 @@ import {Graphics} from './Graphics'
 import {Rectangle} from './Rectangle'
 import {ResourceHandler} from './ResourceHandler'
 import {Decrypter} from './Decrypter'
+import {assert} from '../utils'
+import type {Stage} from './Stage'
 
 /**
  * Bitmap states(Bitmap._loadingState):
@@ -50,6 +52,9 @@ type BitmapState =
 type LoadListener = (bitmap: Bitmap) => void
 type HtmlImageListener = (this: HTMLImageElement, ev: Event) => any
 
+/**
+ * The basic object that represents an image.
+ */
 export class Bitmap {
 
   //for iOS. img consumes memory. so reuse it.
@@ -59,7 +64,7 @@ export class Bitmap {
    * Cache entry, for images. In all cases _url is the same as cacheEntry.key
    * @type CacheEntry
    */
-  cacheEntry: CacheEntry | null = null
+  // cacheEntry: CacheEntry | null = null
 
   /**
    * The face name of the font.
@@ -116,11 +121,10 @@ export class Bitmap {
   private _loadListeners: LoadListener[] = []
   private _loadingState: BitmapState = 'none'
   private _decodeAfterRequest = false
-  private _defer = false
   private _dirty = false
   _loadListener: HtmlImageListener | null = null
   _errorListener: HtmlImageListener | null = null
-  _loader: () => void | null = null
+  _loader: (() => void) | null = null
 
   /**
    * [read-only] The url of the image file.
@@ -172,23 +176,23 @@ export class Bitmap {
     }
   }
 
-  private __canvas: HTMLCanvasElement
-  private __context: CanvasRenderingContext2D
-  private __baseTexture: PIXI.BaseTexture
+  private __canvas: HTMLCanvasElement | null = null
+  private __context: CanvasRenderingContext2D | null = null
+  private __baseTexture: PIXI.BaseTexture | null = null
 
   private get _canvas() {
     if (!this.__canvas) this._createCanvas()
-    return this.__canvas
+    return this.__canvas!
   }
 
   private get _context() {
     if (!this.__context) this._createCanvas()
-    return this.__context
+    return this.__context!
   }
 
   private get _baseTexture() {
     if (!this.__baseTexture) this._createBaseTexture(this._image || this.__canvas)
-    return this.__baseTexture
+    return this.__baseTexture!
   }
 
   /**
@@ -270,19 +274,14 @@ export class Bitmap {
    * @param defer
    */
   constructor(width?: number, height?: number, defer = false) {
-    this._defer = defer
-    this.initialize(width, height)
-  }
-
-  initialize(width?: number, height?: number) {
-    if (!this._defer) {
+    if (!defer) {
       this._createCanvas(width, height)
     }
   }
 
   private _createCanvas(width = 0, height = 0) {
     this.__canvas = this.__canvas || document.createElement('canvas')
-    this.__context = this.__canvas.getContext('2d')
+    this.__context = this.__canvas.getContext('2d')!
 
     this.__canvas.width = Math.max(width, 1)
     this.__canvas.height = Math.max(height, 1)
@@ -300,7 +299,8 @@ export class Bitmap {
     this._setDirty()
   }
 
-  private _createBaseTexture(source) {
+  private _createBaseTexture(source: HTMLImageElement | HTMLCanvasElement | null) {
+    assert(source !== null)
     this.__baseTexture = new PIXI.BaseTexture(source)
     this.__baseTexture.mipmap = false
     this.__baseTexture.width = source.width
@@ -314,6 +314,7 @@ export class Bitmap {
   }
 
   private _clearImgInstance() {
+    assert(this._image !== null)
     this._image.src = ''
     this._image.onload = null
     this._image.onerror = null
@@ -356,9 +357,10 @@ export class Bitmap {
    * @method touch
    */
   touch() {
-    if (this.cacheEntry) {
-      this.cacheEntry.touch()
-    }
+    // todo seem useless
+    // if (this.cacheEntry) {
+    //   this.cacheEntry.touch()
+    // }
   }
 
   /**
@@ -414,9 +416,8 @@ export class Bitmap {
    * @param {Number} [dw=sw] The width to draw the image in the destination
    * @param {Number} [dh=sh] The height to draw the image in the destination
    */
-  bltImage(source: Bitmap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number) {
-    dw = dw || sw
-    dh = dh || sh
+  bltImage(source: Bitmap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw = sw, dh = sh) {
+    assert(source._image !== null)
     if (sx >= 0 && sy >= 0 && sw > 0 && sh > 0 && dw > 0 && dh > 0 &&
       sx + sw <= source.width && sy + sh <= source.height) {
       this._context.globalCompositeOperation = 'source-over'
@@ -715,7 +716,7 @@ export class Bitmap {
       const canvas = this._canvas
       const context = this._context
       const tempCanvas = document.createElement('canvas')
-      const tempContext = tempCanvas.getContext('2d')
+      const tempContext = tempCanvas.getContext('2d')!
       tempCanvas.width = w + 2
       tempCanvas.height = h + 2
       tempContext.drawImage(canvas, 0, 0, w, h, 1, 1, w, h)
@@ -796,8 +797,9 @@ export class Bitmap {
    * @private
    */
   _onLoad() {
-    this._image.removeEventListener('load', this._loadListener)
-    this._image.removeEventListener('error', this._errorListener)
+    assert(this._image !== null)
+    this._loadListener && this._image.removeEventListener('load', this._loadListener)
+    this._errorListener && this._image.removeEventListener('error', this._errorListener)
 
     this._renewCanvas()
 
@@ -840,8 +842,9 @@ export class Bitmap {
     case 'decrypting':
       this._decodeAfterRequest = true
       if (!this._loader) {
+        assert(this._image !== null)
         this._loader = ResourceHandler.createLoader(this._url, this._requestImage.bind(this, this._url), this._onError.bind(this))
-        this._image.removeEventListener('error', this._errorListener)
+        this._errorListener && this._image.removeEventListener('error', this._errorListener)
         this._image.addEventListener('error', this._errorListener = this._loader)
       }
       break
@@ -861,7 +864,7 @@ export class Bitmap {
    */
   private _callLoadListeners() {
     while (this._loadListeners.length > 0) {
-      const listener = this._loadListeners.shift()
+      const listener = this._loadListeners.shift()!
       listener(this)
     }
   }
@@ -871,8 +874,9 @@ export class Bitmap {
    * @private
    */
   _onError() {
-    this._image.removeEventListener('load', this._loadListener)
-    this._image.removeEventListener('error', this._errorListener)
+    assert(this._image !== null)
+    this._loadListener && this._image.removeEventListener('load', this._loadListener)
+    this._errorListener && this._image.removeEventListener('error', this._errorListener)
     this._loadingState = 'error'
   }
 
@@ -906,7 +910,7 @@ export class Bitmap {
 
   _requestImage(url: string) {
     if (Bitmap._reuseImages.length !== 0) {
-      this._image = Bitmap._reuseImages.pop()
+      this._image = Bitmap._reuseImages.pop()!
     } else {
       this._image = new Image()
     }
@@ -972,20 +976,20 @@ export class Bitmap {
    * @param {Stage} stage The stage object
    * @return Bitmap
    */
-  static snap(stage) {
+  static snap(stage: Stage | null) {
     const width = Graphics.width
     const height = Graphics.height
     const bitmap = new Bitmap(width, height)
     const context = bitmap._context
     const renderTexture = PIXI.RenderTexture.create(width, height)
     if (stage) {
-      Graphics._renderer.render(stage, renderTexture)
+      Graphics._renderer!.render(stage, renderTexture)
       stage.worldTransform.identity()
-      let canvas = null
+      let canvas
       if (Graphics.isWebGL()) {
-        canvas = Graphics._renderer.extract.canvas(renderTexture)
+        canvas = Graphics._renderer!.extract.canvas(renderTexture)
       } else {
-        // @ts-ignore TODO 这里应该要转一下类型
+        // @ts-ignore _canvasRenderTarget is protected
         canvas = renderTexture.baseTexture._canvasRenderTarget.canvas
       }
       context.drawImage(canvas, 0, 0)

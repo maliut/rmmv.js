@@ -1,5 +1,6 @@
 import {Sprite} from '../core/Sprite'
 import {ImageManager} from '../managers/ImageManager'
+import { Game_Battler } from '../objects/Game_Battler'
 
 // Sprite_Damage
 //
@@ -11,7 +12,7 @@ export class Sprite_Damage extends Sprite {
   private _flashDuration = 0
   private _damageBitmap = ImageManager.loadSystem('Damage')
 
-  setup(target) {
+  setup(target: Game_Battler) {
     const result = target.result()
     if (result.missed || result.evaded) {
       this.createMiss()
@@ -43,11 +44,10 @@ export class Sprite_Damage extends Sprite {
     const h = this.digitHeight()
     const sprite = this.createChildSprite()
     sprite.setFrame(0, 4 * h, 4 * w, h)
-    // @ts-ignore
     sprite.dy = 0
   }
 
-  createDigits(baseRow, value) {
+  createDigits(baseRow: number, value: number) {
     const string = Math.abs(value).toString()
     const row = baseRow + (value < 0 ? 1 : 0)
     const w = this.digitWidth()
@@ -57,7 +57,6 @@ export class Sprite_Damage extends Sprite {
       const n = Number(string[i])
       sprite.setFrame(n * w, row * h, w, h)
       sprite.x = (i - (string.length - 1) / 2) * w
-      // @ts-ignore
       sprite.dy = -i
     }
   }
@@ -68,7 +67,6 @@ export class Sprite_Damage extends Sprite {
     sprite.anchor.x = 0.5
     sprite.anchor.y = 1
     sprite.y = -40
-    // @ts-ignore
     sprite.ry = sprite.y
     this.addChild(sprite)
     return sprite
@@ -79,14 +77,14 @@ export class Sprite_Damage extends Sprite {
     if (this._duration > 0) {
       this._duration--
       for (let i = 0; i < this.children.length; i++) {
-        this.updateChild(this.children[i])
+        this.updateChild(this.children[i] as Sprite)
       }
     }
     this.updateFlash()
     this.updateOpacity()
   }
 
-  updateChild(sprite) {
+  updateChild(sprite: Sprite) {
     sprite.dy += 0.5
     sprite.ry += sprite.dy
     if (sprite.ry >= 0) {

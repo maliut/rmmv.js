@@ -1,10 +1,13 @@
 import {CacheMap} from './CacheMap'
 
-export class CacheEntry {
+/**
+ * The resource class. Allows to be collected as a garbage if not use for some time or ticks
+ */
+export class CacheEntry<T> {
 
-  cache: CacheMap // todo
-  key: string
-  item: any // todo
+  readonly cache: CacheMap<T>
+  readonly key: string
+  readonly item: T
   cached = false
   touchTicks = 0
   touchSeconds = 0
@@ -21,7 +24,7 @@ export class CacheEntry {
    * @param {string} key, url of the resource
    * @param {string} item - Bitmap, HTML5Audio, WebAudio - whatever you want to store in the cache
    */
-  constructor(cache, key, item) {
+  constructor(cache: CacheMap<T>, key: string, item: T) {
     this.cache = cache
     this.key = key
     this.item = item
@@ -42,7 +45,7 @@ export class CacheEntry {
    * Allocates the resource
    * @returns {CacheEntry}
    */
-  allocate(): CacheEntry {
+  allocate(): CacheEntry<T> {
     if (!this.cached) {
       this.cache._inner[this.key] = this
       this.cached = true
@@ -57,7 +60,7 @@ export class CacheEntry {
    * @param {number} seconds TTL in seconds, 0 if not set
    * @returns {CacheEntry}
    */
-  setTimeToLive(ticks = 0, seconds = 0): CacheEntry {
+  setTimeToLive(ticks = 0, seconds = 0): CacheEntry<T> {
     this.ttlTicks = ticks
     this.ttlSeconds = seconds
     return this

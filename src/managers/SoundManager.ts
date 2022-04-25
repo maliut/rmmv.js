@@ -12,16 +12,12 @@ export class SoundManager {
     this.loadSystemSound(3)
   }
 
-  static loadSystemSound(n) {
-    if (global.$dataSystem) {
-      AudioManager.loadStaticSe(global.$dataSystem.sounds[n])
-    }
+  static loadSystemSound(n: number) {
+    AudioManager.loadStaticSe(global.$dataSystem.sounds[n])
   }
 
-  static playSystemSound(n) {
-    if (global.$dataSystem) {
-      AudioManager.playStaticSe(global.$dataSystem.sounds[n])
-    }
+  static playSystemSound(n: number) {
+    AudioManager.playStaticSe(global.$dataSystem.sounds[n])
   }
 
   static playCursor() {

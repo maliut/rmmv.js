@@ -7,9 +7,9 @@ import {global} from '../managers/DataManager'
 // other than the front character, displayed in the party.
 export class Game_Follower extends Game_Character {
 
-  private readonly _memberIndex
+  private readonly _memberIndex: number
 
-  constructor(memberIndex) {
+  constructor(memberIndex: number) {
     super()
     this._memberIndex = memberIndex
     this.setTransparent(global.$dataSystem.optTransparent)
@@ -41,7 +41,7 @@ export class Game_Follower extends Game_Character {
     this.setTransparent(global.$gamePlayer.isTransparent())
   }
 
-  chaseCharacter(character) {
+  chaseCharacter(character: Game_Character) {
     const sx = this.deltaXFrom(character.x)
     const sy = this.deltaYFrom(character.y)
     if (sx !== 0 && sy !== 0) {

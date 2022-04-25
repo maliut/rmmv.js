@@ -7,6 +7,7 @@ import {TouchInput} from '../core/TouchInput'
 import {AudioManager} from './AudioManager'
 import {ImageManager} from './ImageManager'
 import {PluginManager} from './PluginManager'
+import {Scene_Base} from '../scenes/Scene_Base'
 
 // SceneManager
 //
@@ -23,13 +24,13 @@ export class SceneManager {
 
   static _currentTime = 0
 
-  private static _scene = null // todo
-  private static _nextScene = null
-  private static _stack = []
+  private static _scene: Scene_Base | null = null
+  private static _nextScene: Scene_Base | null = null
+  private static _stack: ((new() => Scene_Base) | null)[] = []
   private static _stopped = false
   private static _sceneStarted = false
   private static _exiting = false
-  private static _previousClass = null
+  private static _previousClass: (new() => Scene_Base) | null = null
   private static _backgroundBitmap: Bitmap | null = null
   private static _screenWidth = 816
   private static _screenHeight = 624
@@ -38,7 +39,7 @@ export class SceneManager {
   private static _deltaTime = 1.0 / 60.0
   private static _accumulator = 0.0
 
-  static run(sceneClass) { // todo
+  static run<T extends Scene_Base>(sceneClass: new() => T) {
     try {
       this.initialize()
       this.goto(sceneClass)
@@ -112,7 +113,6 @@ export class SceneManager {
 
   static initNwjs() {
     if (Utils.isNwjs()) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const gui = globalThis.require('nw.gui')
       const win = gui.Window.get()
       if (process.platform === 'darwin' && !win.menu) {
@@ -179,7 +179,6 @@ export class SceneManager {
         break
       case 119:   // F8
         if (Utils.isNwjs() && Utils.isOptionValid('test')) {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
           globalThis.require('nw.gui').Window.get().showDevTools()
         }
         break
@@ -216,6 +215,7 @@ export class SceneManager {
       this.changeScene()
       this.updateScene()
     } else {
+      // TODO PIXI.Ticker
       const newTime = this._getTimeInMsWithoutMobileSafari()
       let fTime = (newTime - this._currentTime) / 1000
       if (fTime > 0.25) fTime = 0.25
@@ -241,7 +241,7 @@ export class SceneManager {
       if (this._scene) {
         this._scene.terminate()
         this._scene.detachReservation()
-        this._previousClass = this._scene.constructor
+        this._previousClass = this._scene.constructor as (new() => Scene_Base)
       }
       this._scene = this._nextScene
       if (this._scene) {
@@ -295,22 +295,22 @@ export class SceneManager {
   }
 
   static isCurrentSceneBusy() {
-    return this._scene && this._scene.isBusy()
+    return !!this._scene?.isBusy()
   }
 
   static isCurrentSceneStarted() {
     return this._scene && this._sceneStarted
   }
 
-  static isNextScene(sceneClass) {
+  static isNextScene<T extends Scene_Base>(sceneClass: (new() => T) | null) {
     return this._nextScene && this._nextScene.constructor === sceneClass
   }
 
-  static isPreviousScene(sceneClass) {
+  static isPreviousScene<T extends Scene_Base>(sceneClass: (new() => T) | null) {
     return this._previousClass === sceneClass
   }
 
-  static goto(sceneClass) {
+  static goto<T extends Scene_Base>(sceneClass: (new() => T) | null) {
     if (sceneClass) {
       this._nextScene = new sceneClass()
     }
@@ -319,21 +319,21 @@ export class SceneManager {
     }
   }
 
-  static push(sceneClass) {
-    this._stack.push(this._scene.constructor)
+  static push<T extends Scene_Base>(sceneClass: new() => T) {
+    this._stack.push(this._scene?.constructor as (new() => Scene_Base))
     this.goto(sceneClass)
   }
 
   static pop() {
     if (this._stack.length > 0) {
-      this.goto(this._stack.pop())
+      this.goto(this._stack.pop()!) // length > 0 故不为 undefined
     } else {
       this.exit()
     }
   }
 
   static exit() {
-    this.goto(null)
+    this.goto(null) // TODO 干掉 null 的情况
     this._exiting = true
   }
 
@@ -346,7 +346,7 @@ export class SceneManager {
   }
 
   static prepareNextScene(...args) {
-    this._nextScene.prepare(...args)
+    this._nextScene?.prepare(...args)
   }
 
   static snap() {

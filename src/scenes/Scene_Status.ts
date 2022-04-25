@@ -6,7 +6,7 @@ import {Window_Status} from '../windows/Window_Status'
 // The scene class of the status screen.
 export class Scene_Status extends Scene_MenuBase {
 
-  private _statusWindow
+  private _statusWindow!: Window_Status
 
   override create() {
     super.create()

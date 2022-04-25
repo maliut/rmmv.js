@@ -2,6 +2,7 @@ import {ResourceHandler} from './ResourceHandler'
 import {Utils} from './Utils'
 import * as PIXI from 'pixi.js'
 import {SceneManager} from '../managers/SceneManager'
+import {Scene_Base} from '../scenes/Scene_Base'
 
 export class Graphics {
   private static _cssFontLoading = document.fonts && document.fonts.ready
@@ -100,18 +101,17 @@ export class Graphics {
     }
   }
 
-  // todo 各个类型
   private static _errorShowed = false
-  private static _errorPrinter: HTMLParagraphElement | null = null
-  private static _canvas: HTMLCanvasElement | null = null
-  private static _video: HTMLVideoElement | null = null
+  private static _errorPrinter: HTMLParagraphElement
+  private static _canvas: HTMLCanvasElement
+  private static _video: HTMLVideoElement
   private static _videoUnlocked = false
   private static _videoLoading = false
   private static _videoLoader: OnErrorEventHandler = null
-  private static _upperCanvas: HTMLCanvasElement | null = null
-  static _renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer | null = null
-  private static _fpsMeter = null // todo
-  private static _modeBox: HTMLDivElement | null = null
+  private static _upperCanvas: HTMLCanvasElement
+  static _renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer
+  private static _fpsMeter: any // todo
+  private static _modeBox: HTMLDivElement
   private static _skipCount = 0
   private static _maxSkip = 3
   private static _rendered = false
@@ -142,7 +142,8 @@ export class Graphics {
   }
 
 
-  private static _setupCssFontLoading = function () {
+  private static _setupCssFontLoading() {
+    // @ts-ignore 兼容性应该没问题
     if (Graphics._cssFontLoading) {
       document.fonts.ready.then(function (fonts) {
         Graphics._fontLoaded = fonts
@@ -236,7 +237,7 @@ export class Graphics {
    * @method render
    * @param {Stage} stage The stage object to be rendered
    */
-  static render(stage) { // todo
+  static render(stage: Scene_Base | null) {
     if (this._skipCount === 0) {
       const startTime = Date.now()
       if (stage) {
@@ -335,7 +336,7 @@ export class Graphics {
   static updateLoading() {
     this._loadingCount++
     this._paintUpperCanvas()
-    this._upperCanvas.style.opacity = String(1)
+    this._upperCanvas!.style.opacity = '1'
   }
 
   /**
@@ -346,7 +347,7 @@ export class Graphics {
    */
   static endLoading() {
     this._clearUpperCanvas()
-    this._upperCanvas.style.opacity = String(0)
+    this._upperCanvas!.style.opacity = '0'
   }
 
   /**
@@ -412,7 +413,7 @@ export class Graphics {
   static showFps() {
     if (this._fpsMeter) {
       this._fpsMeter.show()
-      this._modeBox.style.opacity = String(1)
+      this._modeBox!.style.opacity = String(1)
     }
   }
 
@@ -425,7 +426,7 @@ export class Graphics {
   static hideFps() {
     if (this._fpsMeter) {
       this._fpsMeter.hide()
-      this._modeBox.style.opacity = String(0)
+      this._modeBox!.style.opacity = String(0)
     }
   }
 
@@ -442,8 +443,8 @@ export class Graphics {
     const head = document.getElementsByTagName('head')
     const rule = '@font-face { font-family: "' + name + '"; src: url("' + url + '"); }'
     style.type = 'text/css'
-    head.item(0).appendChild(style)
-    style.sheet.insertRule(rule, 0)
+    head.item(0)!.appendChild(style)
+    style.sheet!.insertRule(rule, 0)
     this._createFontLoader(name)
   }
 
@@ -456,6 +457,7 @@ export class Graphics {
    * @return {Boolean} True if the font file is loaded
    */
   static isFontLoaded(name: string) {
+    // @ts-ignore 兼容性应该没问题
     if (Graphics._cssFontLoading) {
       if (Graphics._fontLoaded) {
         return Graphics._fontLoaded.check('10px "' + name + '"')
@@ -466,7 +468,7 @@ export class Graphics {
       if (!this._hiddenCanvas) {
         this._hiddenCanvas = document.createElement('canvas')
       }
-      const context = this._hiddenCanvas.getContext('2d')
+      const context = this._hiddenCanvas.getContext('2d')!
       const text = 'abcdefghijklmnopqrstuvwxyz'
       context.font = '40px ' + name + ', sans-serif'
       const width1 = context.measureText(text).width
@@ -594,7 +596,7 @@ export class Graphics {
    */
   static callGC() {
     if (Graphics.isWebGL()) {
-      (Graphics._renderer as PIXI.WebGLRenderer).textureGC.run()
+      (Graphics._renderer as PIXI.WebGLRenderer).textureGC?.run()
     }
   }
 
@@ -645,6 +647,7 @@ export class Graphics {
     canvas.width = 1
     canvas.height = 1
     const context = canvas.getContext('2d')
+    if (!context) return
     context.globalCompositeOperation = 'source-over'
     context.fillStyle = 'white'
     context.fillRect(0, 0, 1, 1)
@@ -668,7 +671,7 @@ export class Graphics {
     for (let i = 0; i < elements.length; i++) {
       const ele = elements[i] as HTMLElement
       if (Number(ele.style.zIndex) > 0) {
-        ele.style.zIndex = String(0)
+        ele.style.zIndex = '0'
       }
     }
   }
@@ -681,15 +684,12 @@ export class Graphics {
   }
 
   private static _updateErrorPrinter() {
-    // @ts-ignore todo
-    this._errorPrinter.width = this._width * 0.9
-    // @ts-ignore
-    this._errorPrinter.height = 40
-    this._errorPrinter.style.textAlign = 'center'
-    this._errorPrinter.style.textShadow = '1px 1px 3px #000'
-    this._errorPrinter.style.fontSize = '20px'
-    this._errorPrinter.style.zIndex = String(99)
-    this._centerElement(this._errorPrinter)
+    const printer = this._errorPrinter!
+    printer.style.textAlign = 'center'
+    printer.style.textShadow = '1px 1px 3px #000'
+    printer.style.fontSize = '20px'
+    printer.style.zIndex = '99'
+    this._centerElement(printer, this._width * 0.9, 40)
   }
 
   private static _createCanvas() {
@@ -700,29 +700,27 @@ export class Graphics {
   }
 
   private static _updateCanvas() {
-    this._canvas.width = this._width
-    this._canvas.height = this._height
-    this._canvas.style.zIndex = String(1)
-    this._centerElement(this._canvas)
+    const canvas = this._canvas!
+    canvas.style.zIndex = '1'
+    this._centerElement(canvas, this._width, this._height)
   }
 
   private static _createVideo() {
     this._video = document.createElement('video')
     this._video.id = 'GameVideo'
-    this._video.style.opacity = String(0)
+    this._video.style.opacity = '0'
     this._video.setAttribute('playsinline', '')
     this._video.volume = this._videoVolume
     this._updateVideo()
-    // @ts-ignore todo
-    makeVideoPlayableInline(this._video)
+    // 3rd lib
+    globalThis.makeVideoPlayableInline(this._video)
     document.body.appendChild(this._video)
   }
 
   private static _updateVideo() {
-    this._video.width = this._width
-    this._video.height = this._height
-    this._video.style.zIndex = String(2)
-    this._centerElement(this._video)
+    const video = this._video!
+    video.style.zIndex = '2'
+    this._centerElement(video, this._width, this._height)
   }
 
   private static _createUpperCanvas() {
@@ -733,24 +731,24 @@ export class Graphics {
   }
 
   private static _updateUpperCanvas() {
-    this._upperCanvas.width = this._width
-    this._upperCanvas.height = this._height
-    this._upperCanvas.style.zIndex = String(3)
-    this._centerElement(this._upperCanvas)
+    const canvas = this._upperCanvas!
+    canvas.style.zIndex = '3'
+    this._centerElement(canvas, this._width, this._height)
   }
 
   private static _clearUpperCanvas() {
-    const context = this._upperCanvas.getContext('2d')
-    context.clearRect(0, 0, this._width, this._height)
+    const context = this._upperCanvas?.getContext('2d')
+    context?.clearRect(0, 0, this._width, this._height)
   }
 
   private static _paintUpperCanvas() {
     this._clearUpperCanvas()
     if (this._loadingImage && this._loadingCount >= 20) {
-      const context = this._upperCanvas.getContext('2d')
+      const context = this._upperCanvas!.getContext('2d')
       const dx = (this._width - this._loadingImage.width) / 2
       const dy = (this._height - this._loadingImage.height) / 2
       const alpha = ((this._loadingCount - 20) / 30).clamp(0, 1)
+      if (!context) return
       context.save()
       context.globalAlpha = alpha
       context.drawImage(this._loadingImage, dx, dy)
@@ -762,7 +760,7 @@ export class Graphics {
     PIXI.utils.skipHello()
     const width = this._width
     const height = this._height
-    const options = {view: this._canvas}
+    const options: PIXI.RendererOptions = {view: this._canvas!}
     try {
       switch (this._rendererType) {
       case 'canvas':
@@ -777,22 +775,21 @@ export class Graphics {
       }
 
       if (this._renderer instanceof PIXI.WebGLRenderer) // changed
-        this._renderer.textureGC.maxIdle = 1
+        this._renderer.textureGC!.maxIdle = 1
 
     } catch (e) {
-      this._renderer = null
+      // this._renderer = null
     }
   }
 
   private static _updateRenderer() {
-    if (this._renderer) {
-      this._renderer.resize(this._width, this._height)
-    }
+    this._renderer.resize(this._width, this._height)
   }
 
   private static _createFPSMeter() {
     const options = {graph: 1, decimals: 0, theme: 'transparent', toggleOn: null}
     this._fpsMeter = new FPSMeter(options)
+    // @ts-ignore
     this._fpsMeter.hide()
   }
 
@@ -847,17 +844,17 @@ export class Graphics {
     document.body.appendChild(div)
   }
 
-  private static _centerElement(element: any) { // todo
-    const width = element.width * this._realScale
-    const height = element.height * this._realScale
+  private static _centerElement(element: HTMLElement, width: number, height: number) {
+    const _width = width * this._realScale
+    const _height = height * this._realScale
     element.style.position = 'absolute'
     element.style.margin = 'auto'
-    element.style.top = String(0)
-    element.style.left = String(0)
-    element.style.right = String(0)
-    element.style.bottom = String(0)
-    element.style.width = width + 'px'
-    element.style.height = height + 'px'
+    element.style.top = '0'
+    element.style.left = '0'
+    element.style.right = '0'
+    element.style.bottom = '0'
+    element.style.width = _width + 'px'
+    element.style.height = _height + 'px'
   }
 
   private static _disableTextSelection() {
@@ -876,21 +873,20 @@ export class Graphics {
       return false
     }
     for (let i = 0; i < elements.length; i++) {
-      // @ts-ignore
-      elements[i].oncontextmenu = oncontextmenu
+      (elements[i] as HTMLElement).oncontextmenu = oncontextmenu
     }
   }
 
   private static _applyCanvasFilter() {
     if (this._canvas) {
-      this._canvas.style.opacity = String(0.5)
+      this._canvas.style.opacity = '0.5'
       this._canvas.style.filter = 'blur(8px)'
       this._canvas.style.webkitFilter = 'blur(8px)'
     }
   }
 
   private static _onVideoLoad() {
-    this._video.play()
+    this._video!.play()
     this._updateVisibility(true)
     this._videoLoading = false
   }
@@ -905,12 +901,12 @@ export class Graphics {
   }
 
   private static _updateVisibility(videoVisible: boolean) {
-    this._video.style.opacity = String(videoVisible ? 1 : 0)
-    this._canvas.style.opacity = String(videoVisible ? 0 : 1)
+    this._video!.style.opacity = String(videoVisible ? 1 : 0)
+    this._canvas!.style.opacity = String(videoVisible ? 0 : 1)
   }
 
   private static _isVideoVisible() {
-    return Number(this._video.style.opacity) > 0
+    return Number(this._video!.style.opacity) > 0
   }
 
   private static _setupEventHandlers() {
@@ -946,11 +942,11 @@ export class Graphics {
 
   private static _onTouchEnd() {
     if (!this._videoUnlocked) {
-      this._video.play()
+      this._video!.play()
       this._videoUnlocked = true
     }
-    if (this._isVideoVisible() && this._video.paused) {
-      this._video.play()
+    if (this._isVideoVisible() && this._video!.paused) {
+      this._video!.play()
     }
   }
 
@@ -981,13 +977,13 @@ export class Graphics {
   }
 
   private static _isFullScreen() {
-    // @ts-ignore todo
+    // @ts-ignore
     return ((document.fullScreenElement) || (!document.mozFullScreen && !document.webkitFullscreenElement && !document.msFullscreenElement))
   }
 
   private static _requestFullScreen() {
     const element = document.body
-    // @ts-ignore todo
+    // @ts-ignore
     if (element.requestFullScreen) {
       // @ts-ignore
       element.requestFullScreen()

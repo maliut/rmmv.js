@@ -33,6 +33,7 @@ module.exports = {
       'error',
       'never'
     ],
-    '@typescript-eslint/ban-ts-comment': 'off'
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off'
   }
 }

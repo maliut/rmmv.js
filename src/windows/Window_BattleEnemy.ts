@@ -1,15 +1,16 @@
 import {Window_Selectable} from './Window_Selectable'
 import {Graphics} from '../core/Graphics'
 import {global} from '../managers/DataManager'
+import {Game_Battler} from '../objects/Game_Battler'
 
 // Window_BattleEnemy
 //
 // The window for selecting a target enemy on the battle screen.
 export class Window_BattleEnemy extends Window_Selectable {
 
-  private _enemies = []
+  private _enemies: Game_Battler[] = []
 
-  override initialize(x, y) {
+  override initialize(x: number, y: number) {
     const width = this.windowWidth()
     const height = this.windowHeight()
     super.initialize(x, y, width, height)
@@ -47,7 +48,7 @@ export class Window_BattleEnemy extends Window_Selectable {
     return enemy ? enemy.index() : -1
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     this.resetTextColor()
     const name = this._enemies[index].name()
     const rect = this.itemRectForText(index)
@@ -70,7 +71,7 @@ export class Window_BattleEnemy extends Window_Selectable {
     super.refresh()
   }
 
-  override select(index) {
+  override select(index: number) {
     super.select(index)
     global.$gameTroop.select(this.enemy())
   }

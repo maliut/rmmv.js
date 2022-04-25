@@ -6,14 +6,10 @@ import {global} from '../managers/DataManager'
 // The window for selecting a target actor on the battle screen.
 export class Window_BattleActor extends Window_BattleStatus {
 
-  constructor(x, y) {
-    super()
+  override initialize(x: number, y: number) {
+    super.initialize()
     this.x = x
     this.y = y
-  }
-
-  override initialize() {
-    super.initialize()
     this.openness = 255
     this.hide()
     return this
@@ -29,7 +25,7 @@ export class Window_BattleActor extends Window_BattleStatus {
     global.$gameParty.select(null)
   }
 
-  override select(index) {
+  override select(index: number) {
     super.select(index)
     global.$gameParty.select(this.actor())
   }

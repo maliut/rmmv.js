@@ -2,6 +2,9 @@ import {Game_Unit} from './Game_Unit'
 import {Game_Item} from './Game_Item'
 import {DataManager, global} from '../managers/DataManager'
 import {TextManager} from '../managers/TextManager'
+import {Data_Armor, Data_Item, Data_ItemBase, Data_Weapon} from '../types/global'
+import {assert} from '../utils'
+import { Game_Actor } from './Game_Actor'
 
 // Game_Party
 //
@@ -21,21 +24,10 @@ export class Game_Party extends Game_Unit {
   private _lastItem = new Game_Item()
   private _menuActorId = 0
   private _targetActorId = 0
-  private _actors = []
-  private _items = {}
-  private _weapons = {}
-  private _armors = {}
-
-  constructor() {
-    super()
-    this.initAllItems()
-  }
-
-  initAllItems() {
-    this._items = {}
-    this._weapons = {}
-    this._armors = {}
-  }
+  private _actors: number[] = []
+  private _items: Record<number, number> = {}
+  private _weapons: Record<number, number> = {}
+  private _armors: Record<number, number> = {}
 
   exists() {
     return this._actors.length > 0
@@ -54,15 +46,12 @@ export class Game_Party extends Game_Unit {
   }
 
   allMembers() {
-    return this._actors.map(function (id) {
-      return global.$gameActors.actor(id)
-    })
+    // _actors 赋值的时候已经做过判断 id 是否存在，因此这里肯定不为 null
+    return this._actors.map((id) => global.$gameActors.actor(id)!)
   }
 
   battleMembers() {
-    return this.allMembers().slice(0, this.maxBattleMembers()).filter(function (actor) {
-      return actor.isAppeared()
-    })
+    return this.allMembers().slice(0, this.maxBattleMembers()).filter((actor) => actor.isAppeared())
   }
 
   maxBattleMembers() {
@@ -74,7 +63,7 @@ export class Game_Party extends Game_Unit {
   }
 
   reviveBattleMembers() {
-    this.battleMembers().forEach(function (actor) {
+    this.battleMembers().forEach((actor) => {
       if (actor.isDead()) {
         actor.setHp(1)
       }
@@ -82,7 +71,7 @@ export class Game_Party extends Game_Unit {
   }
 
   items() {
-    const list = []
+    const list: Data_Item[] = []
     for (const id in this._items) {
       list.push(global.$dataItems[id])
     }
@@ -90,7 +79,7 @@ export class Game_Party extends Game_Unit {
   }
 
   weapons() {
-    const list = []
+    const list: Data_Weapon[] = []
     for (const id in this._weapons) {
       list.push(global.$dataWeapons[id])
     }
@@ -98,7 +87,7 @@ export class Game_Party extends Game_Unit {
   }
 
   armors() {
-    const list = []
+    const list: Data_Armor[] = []
     for (const id in this._armors) {
       list.push(global.$dataArmors[id])
     }
@@ -106,14 +95,14 @@ export class Game_Party extends Game_Unit {
   }
 
   equipItems() {
-    return this.weapons().concat(this.armors())
+    return [...this.weapons(), ...this.armors()]
   }
 
   allItems() {
-    return this.items().concat(this.equipItems())
+    return [...this.items(), ...this.equipItems()]
   }
 
-  itemContainer(item) {
+  itemContainer(item: Data_ItemBase | null) {
     if (!item) {
       return null
     } else if (DataManager.isItem(item)) {
@@ -129,11 +118,11 @@ export class Game_Party extends Game_Unit {
 
   setupStartingMembers() {
     this._actors = []
-    global.$dataSystem.partyMembers.forEach(function (actorId) {
+    global.$dataSystem.partyMembers.forEach((actorId) => {
       if (global.$gameActors.actor(actorId)) {
         this._actors.push(actorId)
       }
-    }, this)
+    })
   }
 
   name() {
@@ -153,7 +142,7 @@ export class Game_Party extends Game_Unit {
   }
 
   setupBattleTestMembers() {
-    global.$dataSystem.testBattlers.forEach(function (battler) {
+    global.$dataSystem.testBattlers.forEach((battler) => {
       const actor = global.$gameActors.actor(battler.actorId)
       if (actor) {
         actor.changeLevel(battler.level, false)
@@ -161,24 +150,22 @@ export class Game_Party extends Game_Unit {
         actor.recoverAll()
         this.addActor(battler.actorId)
       }
-    }, this)
+    })
   }
 
   setupBattleTestItems() {
-    global.$dataItems.forEach(function (item) {
+    global.$dataItems.forEach((item) => {
       if (item && item.name.length > 0) {
         this.gainItem(item, this.maxItems(item))
       }
-    }, this)
+    })
   }
 
   highestLevel() {
-    return Math.max.apply(null, this.members().map(function (actor) {
-      return actor.level
-    }))
+    return Math.max(...this.members().map((actor) => actor.level))
   }
 
-  addActor(actorId) {
+  addActor(actorId: number) {
     if (!this._actors.contains(actorId)) {
       this._actors.push(actorId)
       global.$gamePlayer.refresh()
@@ -186,7 +173,7 @@ export class Game_Party extends Game_Unit {
     }
   }
 
-  removeActor(actorId) {
+  removeActor(actorId: number) {
     if (this._actors.contains(actorId)) {
       this._actors.splice(this._actors.indexOf(actorId), 1)
       global.$gamePlayer.refresh()
@@ -198,11 +185,11 @@ export class Game_Party extends Game_Unit {
     return this._gold
   }
 
-  gainGold(amount) {
+  gainGold(amount: number) {
     this._gold = (this._gold + amount).clamp(0, this.maxGold())
   }
 
-  loseGold(amount) {
+  loseGold(amount: number) {
     this.gainGold(-amount)
   }
 
@@ -218,23 +205,20 @@ export class Game_Party extends Game_Unit {
     this._steps++
   }
 
-  numItems(item) {
+  numItems(item: Data_ItemBase | null) {
     const container = this.itemContainer(item)
-    return container ? container[item.id] || 0 : 0
+    return container ? container[item!.id] || 0 : 0
   }
 
-  maxItems(item) {
+  maxItems(item: Data_ItemBase | null) {
     return 99
   }
 
-  hasMaxItems(item) {
+  hasMaxItems(item: Data_ItemBase) {
     return this.numItems(item) >= this.maxItems(item)
   }
 
-  hasItem(item, includeEquip) {
-    if (includeEquip === undefined) {
-      includeEquip = false
-    }
+  hasItem(item: Data_ItemBase, includeEquip = false) {
     if (this.numItems(item) > 0) {
       return true
     } else if (includeEquip && this.isAnyMemberEquipped(item)) {
@@ -244,15 +228,14 @@ export class Game_Party extends Game_Unit {
     }
   }
 
-  isAnyMemberEquipped(item) {
-    return this.members().some(function (actor) {
-      return actor.equips().contains(item)
-    })
+  isAnyMemberEquipped(item: Data_ItemBase) {
+    return this.members().some((actor) => actor.equips().contains(item as (Data_Weapon | Data_Armor)))
   }
 
-  gainItem(item, amount, includeEquip) {
+  gainItem(item: Data_ItemBase | null, amount: number, includeEquip = false) {
     const container = this.itemContainer(item)
     if (container) {
+      assert(item !== null) // container 存在则 item 必不为 null
       const lastNumber = this.numItems(item)
       const newNumber = lastNumber + amount
       container[item.id] = newNumber.clamp(0, this.maxItems(item))
@@ -266,36 +249,32 @@ export class Game_Party extends Game_Unit {
     }
   }
 
-  discardMembersEquip(item, amount) {
+  discardMembersEquip(item: Data_ItemBase, amount: number) {
     let n = amount
-    this.members().forEach(function (actor) {
-      while (n > 0 && actor.isEquipped(item)) {
-        actor.discardEquip(item)
+    this.members().forEach((actor) => {
+      while (n > 0 && actor.isEquipped(item as (Data_Weapon | Data_Armor))) {
+        actor.discardEquip(item as (Data_Weapon | Data_Armor))
         n--
       }
     })
   }
 
-  loseItem(item, amount, includeEquip) {
+  loseItem(item: Data_ItemBase | null, amount: number, includeEquip = false) {
     this.gainItem(item, -amount, includeEquip)
   }
 
-  consumeItem(item) {
-    if (DataManager.isItem(item) && item.consumable) {
-      this.loseItem(item, 1 , false) // changed
+  consumeItem(item: Data_ItemBase | null) {
+    if (DataManager.isItem(item) && (item as Data_Item).consumable) {
+      this.loseItem(item, 1, false) // changed
     }
   }
 
-  canUse(item) {
-    return this.members().some(function (actor) {
-      return actor.canUse(item)
-    })
+  canUse(item: Data_ItemBase | null) {
+    return this.members().some((actor) => actor.canUse(item))
   }
 
   canInput() {
-    return this.members().some(function (actor) {
-      return actor.canInput()
-    })
+    return this.members().some((actor) => actor.canInput())
   }
 
   override isAllDead() {
@@ -314,13 +293,13 @@ export class Game_Party extends Game_Unit {
 
   menuActor() {
     let actor = global.$gameActors.actor(this._menuActorId)
-    if (!this.members().contains(actor)) {
+    if (!actor || !this.members().contains(actor)) {
       actor = this.members()[0]
     }
     return actor
   }
 
-  setMenuActor(actor) {
+  setMenuActor(actor: Game_Actor) {
     this._menuActorId = actor.actorId()
   }
 
@@ -346,13 +325,13 @@ export class Game_Party extends Game_Unit {
 
   targetActor() {
     let actor = global.$gameActors.actor(this._targetActorId)
-    if (!this.members().contains(actor)) {
+    if (!actor || !this.members().contains(actor)) {
       actor = this.members()[0]
     }
     return actor
   }
 
-  setTargetActor(actor) {
+  setTargetActor(actor: Game_Actor) {
     this._targetActorId = actor.actorId()
   }
 
@@ -360,33 +339,27 @@ export class Game_Party extends Game_Unit {
     return this._lastItem.object()
   }
 
-  setLastItem(item) {
+  setLastItem(item: Data_ItemBase | null) {
     this._lastItem.setObject(item)
   }
 
-  swapOrder(index1, index2) {
+  swapOrder(index1: number, index2: number) {
     const temp = this._actors[index1]
     this._actors[index1] = this._actors[index2]
     this._actors[index2] = temp
     global.$gamePlayer.refresh()
   }
 
-  charactersForSavefile() {
-    return this.battleMembers().map(function (actor) {
-      return [actor.characterName(), actor.characterIndex()]
-    })
+  charactersForSavefile(): [string, number][] {
+    return this.battleMembers().map((actor) => [actor.characterName(), actor.characterIndex()])
   }
 
-  facesForSavefile() {
-    return this.battleMembers().map(function (actor) {
-      return [actor.faceName(), actor.faceIndex()]
-    })
+  facesForSavefile(): [string, number][] {
+    return this.battleMembers().map((actor) => [actor.faceName(), actor.faceIndex()])
   }
 
-  partyAbility(abilityId) {
-    return this.battleMembers().some(function (actor) {
-      return actor.partyAbility(abilityId)
-    })
+  partyAbility(abilityId: number) {
+    return this.battleMembers().some((actor) => actor.partyAbility(abilityId))
   }
 
   hasEncounterHalf() {
@@ -413,7 +386,7 @@ export class Game_Party extends Game_Unit {
     return this.partyAbility(Game_Party.ABILITY_DROP_ITEM_DOUBLE)
   }
 
-  ratePreemptive(troopAgi) {
+  ratePreemptive(troopAgi: number) {
     let rate = this.agility() >= troopAgi ? 0.05 : 0.03
     if (this.hasRaisePreemptive()) {
       rate *= 4
@@ -421,7 +394,7 @@ export class Game_Party extends Game_Unit {
     return rate
   }
 
-  rateSurprise(troopAgi) {
+  rateSurprise(troopAgi: number) {
     let rate = this.agility() >= troopAgi ? 0.03 : 0.05
     if (this.hasCancelSurprise()) {
       rate = 0

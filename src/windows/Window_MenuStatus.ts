@@ -12,7 +12,7 @@ export class Window_MenuStatus extends Window_Selectable {
   private _formationMode = false
   private _pendingIndex = -1
 
-  override initialize(x, y) {
+  override initialize(x: number, y: number) {
     const width = this.windowWidth()
     const height = this.windowHeight()
     super.initialize(x, y, width, height)
@@ -47,13 +47,13 @@ export class Window_MenuStatus extends Window_Selectable {
     }, this)
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     this.drawItemBackground(index)
     this.drawItemImage(index)
     this.drawItemStatus(index)
   }
 
-  drawItemBackground(index) {
+  drawItemBackground(index: number) {
     if (index === this._pendingIndex) {
       const rect = this.itemRect(index)
       const color = this.pendingColor()
@@ -63,7 +63,7 @@ export class Window_MenuStatus extends Window_Selectable {
     }
   }
 
-  drawItemImage(index) {
+  drawItemImage(index: number) {
     const actor = global.$gameParty.members()[index]
     const rect = this.itemRect(index)
     this.changePaintOpacity(actor.isBattleMember())
@@ -71,7 +71,7 @@ export class Window_MenuStatus extends Window_Selectable {
     this.changePaintOpacity(true)
   }
 
-  drawItemStatus(index) {
+  drawItemStatus(index: number) {
     const actor = global.$gameParty.members()[index]
     const rect = this.itemRect(index)
     const x = rect.x + 162
@@ -102,7 +102,7 @@ export class Window_MenuStatus extends Window_Selectable {
     return this._formationMode
   }
 
-  setFormationMode(formationMode) {
+  setFormationMode(formationMode: boolean) {
     this._formationMode = formationMode
   }
 
@@ -110,7 +110,7 @@ export class Window_MenuStatus extends Window_Selectable {
     return this._pendingIndex
   }
 
-  setPendingIndex(index) {
+  setPendingIndex(index: number) {
     const lastPendingIndex = this._pendingIndex
     this._pendingIndex = index
     this.redrawItem(this._pendingIndex)

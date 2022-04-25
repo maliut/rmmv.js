@@ -2,13 +2,14 @@ import {Window_Command} from './Window_Command'
 import {Graphics} from '../core/Graphics'
 import {global} from '../managers/DataManager'
 import {Input} from '../core/Input'
+import {Window_Message} from './Window_Message'
 
 // Window_ChoiceList
 //
 // The window used for the event command [Show Choices].
 export class Window_ChoiceList extends Window_Command {
 
-  private readonly _messageWindow
+  private readonly _messageWindow!: Window_Message
   private _background = 0
 
   constructor(messageWindow) {
@@ -97,7 +98,7 @@ export class Window_ChoiceList extends Window_Command {
     return maxWidth
   }
 
-  textWidthEx(text) {
+  textWidthEx(text: string) {
     return this.drawTextEx(text, 0, this.contents.height)
   }
 
@@ -112,7 +113,7 @@ export class Window_ChoiceList extends Window_Command {
     }
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     const rect = this.itemRectForText(index)
     this.drawTextEx(this.commandName(index), rect.x, rect.y)
   }

@@ -9,20 +9,21 @@ import {Sprite_Character} from './Sprite_Character'
 import {Sprite} from '../core/Sprite'
 import {Sprite_Destination} from './Sprite_Destination'
 import {Weather} from '../core/Weather'
+import {Data_Tileset} from '../types/global'
 
 // Spriteset_Map
 //
 // The set of sprites on the map screen.
 export class Spriteset_Map extends Spriteset_Base {
 
-  private _characterSprites
-  private _parallax
-  private _tilemap
-  private _tileset
-  private _shadowSprite
-  private _destinationSprite
-  private _weather
-  private _parallaxName
+  private _characterSprites!: Sprite_Character[]
+  private _parallax!: TilingSprite
+  private _tilemap!: Tilemap
+  private _tileset!: Data_Tileset
+  private _shadowSprite!: Sprite
+  private _destinationSprite!: Sprite_Destination
+  private _weather!: Weather
+  private _parallaxName = ''
 
   override createLowerLayer() {
     super.createLowerLayer()
@@ -91,15 +92,15 @@ export class Spriteset_Map extends Spriteset_Base {
 
   createCharacters() {
     this._characterSprites = []
-    global.$gameMap.events().forEach(function (event) {
+    global.$gameMap.events().forEach((event) => {
       this._characterSprites.push(new Sprite_Character(event))
-    }, this)
-    global.$gameMap.vehicles().forEach(function (vehicle) {
+    })
+    global.$gameMap.vehicles().forEach((vehicle) => {
       this._characterSprites.push(new Sprite_Character(vehicle))
-    }, this)
-    global.$gamePlayer.followers().reverseEach(function (follower) {
+    })
+    global.$gamePlayer.followers().reverseEach((follower) => {
       this._characterSprites.push(new Sprite_Character(follower))
-    }, this)
+    })
     this._characterSprites.push(new Sprite_Character(global.$gamePlayer))
     for (let i = 0; i < this._characterSprites.length; i++) {
       this._tilemap.addChild(this._characterSprites[i])
@@ -148,7 +149,7 @@ export class Spriteset_Map extends Spriteset_Base {
     if (this._parallaxName !== global.$gameMap.parallaxName()) {
       this._parallaxName = global.$gameMap.parallaxName()
 
-      if (this._parallax.bitmap && Graphics.isWebGL() != true) {
+      if (this._parallax.bitmap && !Graphics.isWebGL()) {
         this._canvasReAddParallax()
       } else {
         this._parallax.bitmap = ImageManager.loadParallax(this._parallaxName)

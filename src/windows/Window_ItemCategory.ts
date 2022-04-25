@@ -1,13 +1,14 @@
 import {Window_HorzCommand} from './Window_HorzCommand'
 import {Graphics} from '../core/Graphics'
 import {TextManager} from '../managers/TextManager'
+import {Window_ItemList} from './Window_ItemList'
 
 // Window_ItemCategory
 //
 // The window for selecting a category of items on the item and shop screens.
 export class Window_ItemCategory extends Window_HorzCommand {
 
-  private _itemWindow
+  private _itemWindow: Window_ItemList | null = null
 
   override initialize() {
     super.initialize(0, 0)
@@ -36,7 +37,7 @@ export class Window_ItemCategory extends Window_HorzCommand {
     this.addCommand(TextManager.keyItem, 'keyItem')
   }
 
-  setItemWindow(itemWindow) {
+  setItemWindow(itemWindow: Window_ItemList) {
     this._itemWindow = itemWindow
   }
 }

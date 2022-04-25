@@ -3,8 +3,12 @@ import {Rectangle} from './Rectangle'
 import {Bitmap} from './Bitmap'
 import {Utils} from './Utils'
 import {Graphics} from './Graphics'
+import {assert, IUpdatable} from '../utils'
 
-export class Sprite extends PIXI.Sprite {
+/**
+ * The basic object that is rendered to the game screen.
+ */
+export class Sprite extends PIXI.Sprite implements IUpdatable {
 
   static voidFilter = new PIXI.filters.VoidFilter()
 
@@ -32,8 +36,13 @@ export class Sprite extends PIXI.Sprite {
   opaque = false
 
   // Weather 类中临时储存变量
-  ax?: number
-  ay?: number
+  ax = 0
+  ay = 0
+  // Sprite_Damage 中临时储存变量
+  dy = 0
+  ry = 0
+  // 临时储存变量？
+  z = 0
 
   /**
    * The image for the sprite.
@@ -112,7 +121,7 @@ export class Sprite extends PIXI.Sprite {
    * @constructor
    * @param {Bitmap} bitmap The image for the sprite
    */
-  constructor(bitmap?: Bitmap) {
+  constructor(bitmap: Bitmap | null = null) {
     super(new PIXI.Texture(new PIXI.BaseTexture()))
     this.bitmap = bitmap
   }
@@ -123,9 +132,8 @@ export class Sprite extends PIXI.Sprite {
    * @method update
    */
   update() {
-    this.children.forEach(function (child) {
-      // @ts-ignore
-      child.update?.()
+    this.children.forEach((child) => {
+      (child as unknown as IUpdatable).update?.()
     })
   }
 
@@ -170,7 +178,6 @@ export class Sprite extends PIXI.Sprite {
    * @return {Array} The blend color [r, g, b, a]
    */
   getBlendColor(): number[] {
-    // @ts-ignore
     return this._blendColor.clone()
   }
 
@@ -181,9 +188,6 @@ export class Sprite extends PIXI.Sprite {
    * @param {Array} color The blend color [r, g, b, a]
    */
   setBlendColor(color: number[]) {
-    if (!(color instanceof Array)) {
-      throw new Error('Argument must be an array')
-    }
     if (!this._blendColor.equals(color)) {
       this._blendColor = color.clone()
       this._refresh()
@@ -197,7 +201,6 @@ export class Sprite extends PIXI.Sprite {
    * @return {Array} The color tone [r, g, b, gray]
    */
   getColorTone(): number[] {
-    // @ts-ignore
     return this._colorTone.clone()
   }
 
@@ -208,9 +211,6 @@ export class Sprite extends PIXI.Sprite {
    * @param {Array} tone The color tone [r, g, b, gray]
    */
   setColorTone(tone: number[]) {
-    if (!(tone instanceof Array)) {
-      throw new Error('Argument must be an array')
-    }
     if (!this._colorTone.equals(tone)) {
       this._colorTone = tone.clone()
       this._refresh()
@@ -252,8 +252,8 @@ export class Sprite extends PIXI.Sprite {
       if (this._needsTint()) {
         this._createTinter(realW, realH)
         this._executeTint(realX, realY, realW, realH)
-        this._tintTexture.update()
-        this.texture.baseTexture = this._tintTexture
+        this._tintTexture!.update()
+        this.texture.baseTexture = this._tintTexture!
         this.texture.frame = new Rectangle(0, 0, realW, realH)
       } else {
         if (this._bitmap) {
@@ -282,10 +282,10 @@ export class Sprite extends PIXI.Sprite {
     return tone[0] || tone[1] || tone[2] || tone[3] || this._blendColor[3] > 0
   }
 
-  private _createTinter(w, h) {
+  private _createTinter(w: number, h: number) {
     if (!this._canvas) {
       this._canvas = document.createElement('canvas')
-      this._context = this._canvas.getContext('2d')
+      this._context = this._canvas.getContext('2d')!
     }
 
     this._canvas.width = w
@@ -297,7 +297,7 @@ export class Sprite extends PIXI.Sprite {
 
     this._tintTexture.width = w
     this._tintTexture.height = h
-    this._tintTexture.scaleMode = this._bitmap.baseTexture.scaleMode
+    this._tintTexture.scaleMode = this._bitmap!.baseTexture.scaleMode
   }
 
   private _executeTint(x: number, y: number, w: number, h: number) {
@@ -305,8 +305,9 @@ export class Sprite extends PIXI.Sprite {
     const tone = this._colorTone
     const color = this._blendColor
 
+    assert(context !== null)
     context.globalCompositeOperation = 'copy'
-    context.drawImage(this._bitmap.canvas, x, y, w, h, 0, 0, w, h)
+    context.drawImage(this._bitmap!.canvas, x, y, w, h, 0, 0, w, h)
 
     if (Graphics.canUseSaturationBlend()) {
       const gray = Math.max(0, tone[3])
@@ -350,7 +351,7 @@ export class Sprite extends PIXI.Sprite {
 
     context.globalCompositeOperation = 'destination-in'
     context.globalAlpha = 1
-    context.drawImage(this._bitmap.canvas, x, y, w, h, 0, 0, w, h)
+    context.drawImage(this._bitmap!.canvas, x, y, w, h, 0, 0, w, h)
   }
 
   protected override _renderCanvas(renderer: PIXI.CanvasRenderer) {

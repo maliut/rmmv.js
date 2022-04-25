@@ -1,15 +1,17 @@
 import {Bitmap} from './Bitmap'
 import { global } from '../managers/DataManager'
 import {AudioManager} from '../managers/AudioManager'
+import {assert} from '../utils'
+import {Data_Audio} from '../types/global'
 
 export class Decrypter {
   static hasEncryptedImages = false
   static hasEncryptedAudio = false
 
-  private static _requestImgFile = []
+  // private static _requestImgFile = []
   private static _headerlength = 16
   private static _xhrOk = 400
-  private static _encryptionKey = ''
+  private static _encryptionKey: string[] = []
   private static _ignoreList = [
     'img/system/Window.png'
   ]
@@ -35,6 +37,7 @@ export class Decrypter {
 
     requestFile.onload = function () {
       if (this.status < Decrypter._xhrOk) {
+        assert(bitmap._image !== null)
         const arrayBuffer = Decrypter.decryptArrayBuffer(requestFile.response)
         bitmap._image.src = Decrypter.createBlobUrl(arrayBuffer)
         bitmap._image.addEventListener('load', bitmap._loadListener = Bitmap.prototype._onLoad.bind(bitmap))
@@ -51,7 +54,7 @@ export class Decrypter {
     }
   }
 
-  static decryptHTML5Audio(url, bgm, pos) {
+  static decryptHTML5Audio(url: string, bgm: Data_Audio, pos: number) {
     const requestFile = new XMLHttpRequest()
     requestFile.open('GET', url)
     requestFile.responseType = 'arraybuffer'
@@ -66,12 +69,12 @@ export class Decrypter {
     }
   }
 
-  static cutArrayHeader(arrayBuffer, length) {
+  static cutArrayHeader(arrayBuffer: ArrayBuffer, length: number) {
     return arrayBuffer.slice(length)
   }
 
-  static decryptArrayBuffer(arrayBuffer) {
-    if (!arrayBuffer) return null
+  static decryptArrayBuffer(arrayBuffer: ArrayBuffer) {
+    assert(arrayBuffer !== null)
     const header = new Uint8Array(arrayBuffer, 0, this._headerlength)
 
     let i
@@ -100,14 +103,14 @@ export class Decrypter {
     return arrayBuffer
   }
 
-  static createBlobUrl(arrayBuffer) {
+  static createBlobUrl(arrayBuffer: ArrayBuffer) {
     const blob = new Blob([arrayBuffer])
     return window.URL.createObjectURL(blob)
   }
 
-  static extToEncryptExt(url) {
-    const ext = url.split('.').pop()
-    let encryptedExt = ext
+  static extToEncryptExt(url: string) {
+    const ext = url.split('.').pop() || ''
+    let encryptedExt
 
     if (ext === 'ogg') encryptedExt = '.rpgmvo'
     else if (ext === 'm4a') encryptedExt = '.rpgmvm'

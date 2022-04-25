@@ -2,16 +2,17 @@ import {Scene_MenuBase} from './Scene_MenuBase'
 import {global} from '../managers/DataManager'
 import {Window_NameEdit} from '../windows/Window_NameEdit'
 import {Window_NameInput} from '../windows/Window_NameInput'
+import {assert} from '../utils'
 
 // Scene_Name
 //
 // The scene class of the name input screen.
 export class Scene_Name extends Scene_MenuBase {
 
-  private _actorId
-  private _maxLength
-  private _editWindow
-  private _inputWindow
+  private _actorId!: number
+  private _maxLength!: number
+  private _editWindow!: Window_NameEdit
+  private _inputWindow!: Window_NameInput
 
   prepare(actorId, maxLength) {
     this._actorId = actorId
@@ -20,7 +21,9 @@ export class Scene_Name extends Scene_MenuBase {
 
   override create() {
     super.create()
-    this._actor = global.$gameActors.actor(this._actorId)
+    const actor = global.$gameActors.actor(this._actorId)
+    assert(actor !== null)
+    this._actor = actor
     this.createEditWindow()
     this.createInputWindow()
   }

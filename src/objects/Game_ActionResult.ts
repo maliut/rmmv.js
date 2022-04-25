@@ -17,15 +17,11 @@ export class Game_ActionResult {
   hpDamage = 0
   mpDamage = 0
   tpDamage = 0
-  addedStates = []
-  removedStates = []
-  addedBuffs = []
-  addedDebuffs = []
-  removedBuffs = []
-
-  constructor() {
-    this.clear()
-  }
+  addedStates: number[] = []
+  removedStates: number[] = []
+  addedBuffs: number[] = []
+  addedDebuffs: number[] = []
+  removedBuffs: number[] = []
 
   clear() {
     this.used = false
@@ -47,13 +43,13 @@ export class Game_ActionResult {
   }
 
   addedStateObjects() {
-    return this.addedStates.map(function (id) {
+    return this.addedStates.map((id) => {
       return global.$dataStates[id]
     })
   }
 
   removedStateObjects() {
-    return this.removedStates.map(function (id) {
+    return this.removedStates.map((id) => {
       return global.$dataStates[id]
     })
   }
@@ -68,51 +64,51 @@ export class Game_ActionResult {
     return this.used && !this.missed && !this.evaded
   }
 
-  isStateAdded(stateId) {
+  isStateAdded(stateId: number) {
     return this.addedStates.contains(stateId)
   }
 
-  pushAddedState(stateId) {
+  pushAddedState(stateId: number) {
     if (!this.isStateAdded(stateId)) {
       this.addedStates.push(stateId)
     }
   }
 
-  isStateRemoved(stateId) {
+  isStateRemoved(stateId: number) {
     return this.removedStates.contains(stateId)
   }
 
-  pushRemovedState(stateId) {
+  pushRemovedState(stateId: number) {
     if (!this.isStateRemoved(stateId)) {
       this.removedStates.push(stateId)
     }
   }
 
-  isBuffAdded(paramId) {
+  isBuffAdded(paramId: number) {
     return this.addedBuffs.contains(paramId)
   }
 
-  pushAddedBuff(paramId) {
+  pushAddedBuff(paramId: number) {
     if (!this.isBuffAdded(paramId)) {
       this.addedBuffs.push(paramId)
     }
   }
 
-  isDebuffAdded(paramId) {
+  isDebuffAdded(paramId: number) {
     return this.addedDebuffs.contains(paramId)
   }
 
-  pushAddedDebuff(paramId) {
+  pushAddedDebuff(paramId: number) {
     if (!this.isDebuffAdded(paramId)) {
       this.addedDebuffs.push(paramId)
     }
   }
 
-  isBuffRemoved(paramId) {
+  isBuffRemoved(paramId: number) {
     return this.removedBuffs.contains(paramId)
   }
 
-  pushRemovedBuff(paramId) {
+  pushRemovedBuff(paramId: number) {
     if (!this.isBuffRemoved(paramId)) {
       this.removedBuffs.push(paramId)
     }

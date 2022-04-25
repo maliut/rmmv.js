@@ -1,16 +1,19 @@
 import {Window_Selectable} from './Window_Selectable'
 import {global} from '../managers/DataManager'
+import {Data_ItemBase, Data_Skill} from '../types/global'
+import {Game_Actor} from '../objects/Game_Actor'
+import {assert} from '../utils'
 
 // Window_SkillList
 //
 // The window for selecting a skill on the skill screen.
 export class Window_SkillList extends Window_Selectable {
 
-  private _actor = null
+  private _actor: Game_Actor | null = null
   private _stypeId = 0
-  private _data = []
+  private _data: Data_Skill[] = []
 
-  setActor(actor) {
+  setActor(actor: Game_Actor | null) {
     if (this._actor !== actor) {
       this._actor = actor
       this.refresh()
@@ -18,7 +21,7 @@ export class Window_SkillList extends Window_Selectable {
     }
   }
 
-  setStypeId(stypeId) {
+  setStypeId(stypeId: number) {
     if (this._stypeId !== stypeId) {
       this._stypeId = stypeId
       this.refresh()
@@ -46,25 +49,24 @@ export class Window_SkillList extends Window_Selectable {
     return this.isEnabled(this._data[this.index()])
   }
 
-  includes(item) {
+  includes(item: Data_Skill | null) {
     return item && item.stypeId === this._stypeId
   }
 
-  isEnabled(item) {
-    return this._actor && this._actor.canUse(item)
+  isEnabled(item: Data_ItemBase | null) {
+    return !!this._actor && this._actor.canUse(item)
   }
 
   makeItemList() {
     if (this._actor) {
-      this._data = this._actor.skills().filter(function (item) {
-        return this.includes(item)
-      }, this)
+      this._data = this._actor.skills().filter((item) => this.includes(item))
     } else {
       this._data = []
     }
   }
 
   selectLast() {
+    assert(this._actor !== null)
     let skill
     if (global.$gameParty.inBattle()) {
       skill = this._actor.lastBattleSkill()
@@ -75,7 +77,7 @@ export class Window_SkillList extends Window_Selectable {
     this.select(index >= 0 ? index : 0)
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     const skill = this._data[index]
     if (skill) {
       const costWidth = this.costWidth()
@@ -84,7 +86,7 @@ export class Window_SkillList extends Window_Selectable {
       this.changePaintOpacity(this.isEnabled(skill))
       this.drawItemName(skill, rect.x, rect.y, rect.width - costWidth)
       this.drawSkillCost(skill, rect.x, rect.y, rect.width)
-      this.changePaintOpacity(1)
+      this.changePaintOpacity(true)
     }
   }
 
@@ -92,13 +94,14 @@ export class Window_SkillList extends Window_Selectable {
     return this.textWidth('000')
   }
 
-  drawSkillCost(skill, x, y, width) {
+  drawSkillCost(skill: Data_Skill, x: number, y: number, width: number) {
+    assert(this._actor !== null)
     if (this._actor.skillTpCost(skill) > 0) {
       this.changeTextColor(this.tpCostColor())
-      this.drawText(this._actor.skillTpCost(skill), x, y, width, 'right')
+      this.drawText(this._actor.skillTpCost(skill).toString(), x, y, width, 'right')
     } else if (this._actor.skillMpCost(skill) > 0) {
       this.changeTextColor(this.mpCostColor())
-      this.drawText(this._actor.skillMpCost(skill), x, y, width, 'right')
+      this.drawText(this._actor.skillMpCost(skill).toString(), x, y, width, 'right')
     }
   }
 

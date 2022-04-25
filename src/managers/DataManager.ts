@@ -20,10 +20,10 @@ import {Game_Troop} from '../objects/Game_Troop'
 import {Game_Player} from '../objects/Game_Player'
 import {Game_Map} from '../objects/Game_Map'
 import {Scene_Boot} from '../scenes/Scene_Boot'
+import {Data_Armor, Data_Item, Data_ItemBase, Data_Skill, Data_Weapon, GlobalVars} from '../types/global'
+import {GlobalInfo, SaveContent} from '../types/index'
 
 // 全局变量，嵌套一层，避免转译后潜在不一致问题，并方便遍历处理. 缺点是外部使用的时候都要处理下
-// todo 以后可将 json 直接导入，无需额外 load
-
 export const global = {
   $dataActors: null,
   $dataClasses: null,
@@ -54,7 +54,7 @@ export const global = {
   $gameMap: null,
   $gamePlayer: null,
   $testEvent: null,
-}
+} as unknown as GlobalVars // 元素的初始化时机是在 load 时
 
 // DataManager
 //
@@ -63,7 +63,7 @@ export class DataManager {
 
   private static _globalId = 'RPGMV'
   private static _lastAccessedId = 1
-  private static _errorUrl = null
+  private static _errorUrl: string | null = null
   private static _mapLoader?: () => void
 
   private static _databaseFiles = [
@@ -96,7 +96,7 @@ export class DataManager {
     }
   }
 
-  static loadDataFile(name, src) {
+  static loadDataFile(name: string, src: string) {
     const xhr = new XMLHttpRequest()
     const url = 'data/' + src
     xhr.open('GET', url)
@@ -124,9 +124,8 @@ export class DataManager {
     return true
   }
 
-  static loadMapData(mapId) {
+  static loadMapData(mapId: number) {
     if (mapId > 0) {
-      // @ts-ignore
       const filename = 'Map%1.json'.format(mapId.padZero(3))
       this._mapLoader = ResourceHandler.createLoader('data/' + filename, this.loadDataFile.bind(this, '$dataMap', filename))
       this.loadDataFile('$dataMap', filename)
@@ -136,12 +135,14 @@ export class DataManager {
   }
 
   static makeEmptyMap() {
-    global.$dataMap = {}
-    global.$dataMap.data = []
-    global.$dataMap.events = []
-    global.$dataMap.width = 100
-    global.$dataMap.height = 100
-    global.$dataMap.scrollType = 3
+    // @ts-ignore
+    global.$dataMap = {
+      data: [],
+      events: [],
+      width: 100,
+      height: 100,
+      scrollType: 3
+    }
   }
 
   static isMapLoaded() {
@@ -203,20 +204,20 @@ export class DataManager {
     return Utils.isOptionValid('etest')
   }
 
-  static isSkill(item) {
-    return item && global.$dataSkills.contains(item)
+  static isSkill(item: Data_ItemBase | null): boolean {
+    return !!item && global.$dataSkills.contains(item as Data_Skill)
   }
 
-  static isItem(item) {
-    return item && global.$dataItems.contains(item)
+  static isItem(item: Data_ItemBase | null): boolean {
+    return !!item && global.$dataItems.contains(item as Data_Item)
   }
 
-  static isWeapon(item) {
-    return item && global.$dataWeapons.contains(item)
+  static isWeapon(item: Data_ItemBase | null): boolean {
+    return !!item && global.$dataWeapons.contains(item as Data_Weapon)
   }
 
-  static isArmor(item) {
-    return item && global.$dataArmors.contains(item)
+  static isArmor(item: Data_ItemBase | null): boolean {
+    return !!item && global.$dataArmors.contains(item as Data_Armor)
   }
 
   static createGameObjects() {
@@ -253,14 +254,14 @@ export class DataManager {
   }
 
   static setupEventTest() {
-    this.createGameObjects()
+    // this.createGameObjects()
     this.selectSavefileForNewGame()
     global.$gameParty.setupStartingMembers()
     global.$gamePlayer.reserveTransfer(-1, 8, 6)
     global.$gamePlayer.setTransparent(false)
   }
 
-  static loadGlobalInfo() {
+  static loadGlobalInfo(): GlobalInfo[] {
     let json
     try {
       json = StorageManager.load(0)
@@ -281,11 +282,11 @@ export class DataManager {
     }
   }
 
-  static saveGlobalInfo(info) {
+  static saveGlobalInfo(info: GlobalInfo[]) {
     StorageManager.save(0, JSON.stringify(info))
   }
 
-  static isThisGameFile(savefileId) {
+  static isThisGameFile(savefileId: number) {
     const globalInfo = this.loadGlobalInfo()
     if (globalInfo && globalInfo[savefileId]) {
       if (StorageManager.isLocalMode()) {
@@ -356,7 +357,7 @@ export class DataManager {
     return 20
   }
 
-  static saveGame(savefileId) {
+  static saveGame(savefileId: number) {
     try {
       StorageManager.backup(savefileId)
       return this.saveGameWithoutRescue(savefileId)
@@ -372,7 +373,7 @@ export class DataManager {
     }
   }
 
-  static loadGame(savefileId) {
+  static loadGame(savefileId: number) {
     try {
       return this.loadGameWithoutRescue(savefileId)
     } catch (e) {
@@ -381,7 +382,7 @@ export class DataManager {
     }
   }
 
-  static loadSavefileInfo(savefileId) {
+  static loadSavefileInfo(savefileId: number) {
     const globalInfo = this.loadGlobalInfo()
     return (globalInfo && globalInfo[savefileId]) ? globalInfo[savefileId] : null
   }
@@ -390,7 +391,7 @@ export class DataManager {
     return this._lastAccessedId
   }
 
-  static saveGameWithoutRescue(savefileId) {
+  static saveGameWithoutRescue(savefileId: number) {
     const json = JsonEx.stringify(this.makeSaveContents())
     if (json.length >= 200000) {
       console.warn('Save data too big!')
@@ -403,12 +404,12 @@ export class DataManager {
     return true
   }
 
-  static loadGameWithoutRescue(savefileId) {
-    const globalInfo = this.loadGlobalInfo()
+  static loadGameWithoutRescue(savefileId: number) {
+    // const globalInfo = this.loadGlobalInfo()
     if (this.isThisGameFile(savefileId)) {
       const json = StorageManager.load(savefileId)
       this.createGameObjects()
-      this.extractSaveContents(JsonEx.parse(json))
+      this.extractSaveContents(JsonEx.parse(json) as SaveContent)
       this._lastAccessedId = savefileId
       return true
     } else {
@@ -439,34 +440,34 @@ export class DataManager {
     }
   }
 
-  static makeSavefileInfo() {
-    const info: Record<string, any> = {}
-    info.globalId = this._globalId
-    info.title = global.$dataSystem.gameTitle
-    info.characters = global.$gameParty.charactersForSavefile()
-    info.faces = global.$gameParty.facesForSavefile()
-    info.playtime = global.$gameSystem.playtimeText()
-    info.timestamp = Date.now()
-    return info
+  static makeSavefileInfo(): GlobalInfo {
+    return {
+      globalId: this._globalId,
+      title: global.$dataSystem.gameTitle,
+      characters: global.$gameParty.charactersForSavefile(),
+      faces: global.$gameParty.facesForSavefile(),
+      playtime: global.$gameSystem.playtimeText(),
+      timestamp: Date.now()
+    }
   }
 
-  static makeSaveContents() {
+  static makeSaveContents(): SaveContent {
     // A save data does not contain global.$gameTemp, global.$gameMessage, and global.$gameTroop.
-    const contents: Record<string, any> = {}
-    contents.system = global.$gameSystem
-    contents.screen = global.$gameScreen
-    contents.timer = global.$gameTimer
-    contents.switches = global.$gameSwitches
-    contents.variables = global.$gameVariables
-    contents.selfSwitches = global.$gameSelfSwitches
-    contents.actors = global.$gameActors
-    contents.party = global.$gameParty
-    contents.map = global.$gameMap
-    contents.player = global.$gamePlayer
-    return contents
+    return {
+      system: global.$gameSystem,
+      screen: global.$gameScreen,
+      timer: global.$gameTimer,
+      switches: global.$gameSwitches,
+      variables: global.$gameVariables,
+      selfSwitches: global.$gameSelfSwitches,
+      actors: global.$gameActors,
+      party: global.$gameParty,
+      map: global.$gameMap,
+      player: global.$gamePlayer
+    }
   }
 
-  static extractSaveContents(contents) {
+  static extractSaveContents(contents: SaveContent) {
     global.$gameSystem = contents.system
     global.$gameScreen = contents.screen
     global.$gameTimer = contents.timer
@@ -479,3 +480,4 @@ export class DataManager {
     global.$gamePlayer = contents.player
   }
 }
+

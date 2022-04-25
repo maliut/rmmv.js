@@ -5,6 +5,7 @@ import {Sprite} from '../core/Sprite'
 import {ImageManager} from '../managers/ImageManager'
 import {Sprite_Weapon} from './Sprite_Weapon'
 import {Sprite_StateOverlay} from './Sprite_StateOverlay'
+import {Game_Actor} from '../objects/Game_Actor'
 
 // Sprite_Actor
 //
@@ -33,34 +34,26 @@ export class Sprite_Actor extends Sprite_Battler {
   }
 
   private _battlerName = ''
-  private _motion = null
+  private _motion: { index: number, loop: boolean } | null = null
   private _motionCount = 0
   private _pattern = 0
-  private _mainSprite
-  private _shadowSprite
-  private _weaponSprite
-  private _stateSprite
-  private _actor
+  private _mainSprite!: Sprite_Base
+  private _shadowSprite!: Sprite
+  private _weaponSprite!: Sprite_Weapon
+  private _stateSprite!: Sprite_StateOverlay
+  private _actor: Game_Actor | null = null
 
-  constructor(battler?) {
-    super(battler)
-    this.moveToStartPosition()
-  }
-
-  override initMembers() {
-    super.initMembers()
-    // this._battlerName = ''
-    // this._motion = null
-    // this._motionCount = 0
-    // this._pattern = 0
+  constructor() {
+    super()
     this.createShadowSprite()
     this.createWeaponSprite()
     this.createMainSprite()
     this.createStateSprite()
+    this.moveToStartPosition()
   }
 
   createMainSprite() {
-    this._mainSprite = new Sprite_Base() // todo 这合理吗
+    this._mainSprite = new Sprite_Base()
     this._mainSprite.anchor.x = 0.5
     this._mainSprite.anchor.y = 1
     this.addChild(this._mainSprite)
@@ -86,7 +79,7 @@ export class Sprite_Actor extends Sprite_Battler {
     this.addChild(this._stateSprite)
   }
 
-  override setBattler(battler) {
+  override setBattler(battler: Game_Actor | null) {
     super.setBattler(battler)
     const changed = (battler !== this._actor)
     if (changed) {
@@ -103,7 +96,7 @@ export class Sprite_Actor extends Sprite_Battler {
     this.startMove(300, 0, 0)
   }
 
-  setActorHome(index) {
+  setActorHome(index: number) {
     this.setHome(600 + index * 32, 280 + index * 48)
   }
 
@@ -121,26 +114,26 @@ export class Sprite_Actor extends Sprite_Battler {
 
   override updateMain() {
     super.updateMain()
-    if (this._actor.isSpriteVisible() && !this.isMoving()) {
+    if (this._actor!.isSpriteVisible() && !this.isMoving()) {
       this.updateTargetPosition()
     }
   }
 
   setupMotion() {
-    if (this._actor.isMotionRequested()) {
-      this.startMotion(this._actor.motionType())
-      this._actor.clearMotion()
+    if (this._actor!.isMotionRequested()) {
+      this.startMotion(this._actor!.motionType()!)
+      this._actor!.clearMotion()
     }
   }
 
   setupWeaponAnimation() {
-    if (this._actor.isWeaponAnimationRequested()) {
-      this._weaponSprite.setup(this._actor.weaponImageId())
-      this._actor.clearWeaponAnimation()
+    if (this._actor!.isWeaponAnimationRequested()) {
+      this._weaponSprite.setup(this._actor!.weaponImageId())
+      this._actor!.clearWeaponAnimation()
     }
   }
 
-  startMotion(motionType) {
+  startMotion(motionType: string) {
     const newMotion = Sprite_Actor.MOTIONS[motionType]
     if (this._motion !== newMotion) {
       this._motion = newMotion
@@ -150,9 +143,9 @@ export class Sprite_Actor extends Sprite_Battler {
   }
 
   updateTargetPosition() {
-    if (this._actor.isInputting() || this._actor.isActing()) {
+    if (this._actor!.isInputting() || this._actor!.isActing()) {
       this.stepForward()
-    } else if (this._actor.canMove() && BattleManager.isEscaped()) {
+    } else if (this._actor!.canMove() && BattleManager.isEscaped()) {
       this.retreat()
     } else if (!this.inHomePosition()) {
       this.stepBack()
@@ -160,8 +153,7 @@ export class Sprite_Actor extends Sprite_Battler {
   }
 
   override updateBitmap() {
-    super.updateBitmap()
-    const name = this._actor.battlerName()
+    const name = this._actor!.battlerName()
     if (this._battlerName !== name) {
       this._battlerName = name
       this._mainSprite.bitmap = ImageManager.loadSvActor(name)
@@ -169,7 +161,6 @@ export class Sprite_Actor extends Sprite_Battler {
   }
 
   override updateFrame() {
-    super.updateFrame()
     const bitmap = this._mainSprite.bitmap
     if (bitmap) {
       const motionIndex = this._motion ? this._motion.index : 0
@@ -192,9 +183,9 @@ export class Sprite_Actor extends Sprite_Battler {
   updateMotion() {
     this.setupMotion()
     this.setupWeaponAnimation()
-    if (this._actor.isMotionRefreshRequested()) {
+    if (this._actor!.isMotionRefreshRequested()) {
       this.refreshMotion()
-      this._actor.clearMotion()
+      this._actor!.clearMotion()
     }
     this.updateMotionCount()
   }

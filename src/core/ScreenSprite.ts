@@ -2,9 +2,12 @@ import * as PIXI from 'pixi.js'
 import {Utils} from './Utils'
 import {Graphics} from './Graphics'
 
+/**
+ * The sprite which covers the entire game screen.
+ */
 export class ScreenSprite extends PIXI.Container {
 
-  private readonly _graphics: PIXI.Graphics | null = null
+  private readonly _graphics: PIXI.Graphics
   private _red = -1
   private _green = -1
   private _blue = -1
@@ -29,11 +32,6 @@ export class ScreenSprite extends PIXI.Container {
     this.scale.x = 1
     this.scale.y = 1
     return {x: 0, y: 0}
-  }
-
-  set anchor(value) {
-    // @ts-ignore
-    this.alpha = value.clamp(0, 255) / 255
   }
 
   /**

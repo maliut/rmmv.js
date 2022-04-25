@@ -3,10 +3,10 @@ import {Rectangle} from './Rectangle'
 import {Point} from './Point'
 import {Bitmap} from './Bitmap'
 import {Sprite} from './Sprite'
+import {assert, IUpdatable} from '../utils'
 
-export class Window extends PIXI.Container {
+export class Window extends PIXI.Container implements IUpdatable {
 
-  _isWindow = true // todo useless, can use instanceof instead
   private _windowskin: Bitmap | null = null
   private _width = 0
   private _height = 0
@@ -18,15 +18,15 @@ export class Window extends PIXI.Container {
   private _margin = 4
   private _colorTone = [0, 0, 0]
 
-  private _windowSpriteContainer: PIXI.Container | null = null
-  private _windowBackSprite: Sprite | null = null
-  private _windowCursorSprite: Sprite | null = null
-  private _windowFrameSprite: Sprite | null = null
-  private _windowContentsSprite: Sprite | null = null
+  private readonly _windowSpriteContainer: PIXI.Container
+  private readonly _windowBackSprite: Sprite
+  private readonly _windowCursorSprite: Sprite
+  private readonly _windowFrameSprite: Sprite
+  private readonly _windowContentsSprite: Sprite
   private _windowArrowSprites = []
-  private _windowPauseSignSprite: Sprite | null = null
-  private _upArrowSprite: Sprite | null = null
-  private _downArrowSprite: Sprite | null = null
+  private readonly _windowPauseSignSprite: Sprite
+  private readonly _upArrowSprite: Sprite
+  private readonly _downArrowSprite: Sprite
 
   /**
    * The origin point of the window for scrolling.
@@ -81,7 +81,7 @@ export class Window extends PIXI.Container {
   set windowskin(value) {
     if (this._windowskin !== value) {
       this._windowskin = value
-      this._windowskin.addLoadListener(this._onWindowskinLoad.bind(this))
+      this._windowskin?.addLoadListener(this._onWindowskinLoad.bind(this))
     }
   }
 
@@ -92,7 +92,9 @@ export class Window extends PIXI.Container {
    * @type Bitmap
    */
   get contents() {
-    return this._windowContentsSprite.bitmap
+    const bitmap = this._windowContentsSprite.bitmap
+    assert(bitmap !== null, 'called before window initialize')
+    return bitmap
   }
 
   set contents(value) {
@@ -229,7 +231,24 @@ export class Window extends PIXI.Container {
    */
   constructor() {
     super()
-    this._createAllParts()
+    this._windowSpriteContainer = new PIXI.Container()
+    this._windowBackSprite = new Sprite()
+    this._windowCursorSprite = new Sprite()
+    this._windowFrameSprite = new Sprite()
+    this._windowContentsSprite = new Sprite()
+    this._downArrowSprite = new Sprite()
+    this._upArrowSprite = new Sprite()
+    this._windowPauseSignSprite = new Sprite()
+    this._windowBackSprite.bitmap = new Bitmap(1, 1)
+    this._windowBackSprite.alpha = 192 / 255
+    this.addChild(this._windowSpriteContainer)
+    this._windowSpriteContainer.addChild(this._windowBackSprite)
+    this._windowSpriteContainer.addChild(this._windowFrameSprite)
+    this.addChild(this._windowCursorSprite)
+    this.addChild(this._windowContentsSprite)
+    this.addChild(this._downArrowSprite)
+    this.addChild(this._upArrowSprite)
+    this.addChild(this._windowPauseSignSprite)
   }
 
   /**
@@ -241,9 +260,8 @@ export class Window extends PIXI.Container {
     if (this.active) {
       this._animationCount++
     }
-    this.children.forEach(function (child) {
-      // @ts-ignore
-      child.update?.()
+    this.children.forEach((child) => {
+      (child as unknown as IUpdatable).update?.()
     })
   }
 
@@ -342,27 +360,6 @@ export class Window extends PIXI.Container {
     this._updatePauseSign()
     this._updateContents()
     super.updateTransform()
-  }
-
-  private _createAllParts() {
-    this._windowSpriteContainer = new PIXI.Container()
-    this._windowBackSprite = new Sprite()
-    this._windowCursorSprite = new Sprite()
-    this._windowFrameSprite = new Sprite()
-    this._windowContentsSprite = new Sprite()
-    this._downArrowSprite = new Sprite()
-    this._upArrowSprite = new Sprite()
-    this._windowPauseSignSprite = new Sprite()
-    this._windowBackSprite.bitmap = new Bitmap(1, 1)
-    this._windowBackSprite.alpha = 192 / 255
-    this.addChild(this._windowSpriteContainer)
-    this._windowSpriteContainer.addChild(this._windowBackSprite)
-    this._windowSpriteContainer.addChild(this._windowFrameSprite)
-    this.addChild(this._windowCursorSprite)
-    this.addChild(this._windowContentsSprite)
-    this.addChild(this._downArrowSprite)
-    this.addChild(this._upArrowSprite)
-    this.addChild(this._windowPauseSignSprite)
   }
 
   private _onWindowskinLoad() {

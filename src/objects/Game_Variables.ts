@@ -5,21 +5,13 @@ import {global} from '../managers/DataManager'
 // The game object class for variables.
 export class Game_Variables {
 
-  private _data = []
+  private _data: number[] = []
 
-  constructor() {
-    this.clear()
-  }
-
-  clear() {
-    this._data = []
-  }
-
-  value(variableId) {
+  value(variableId: number) {
     return this._data[variableId] || 0
   }
 
-  setValue(variableId, value) {
+  setValue(variableId: number, value: number) {
     if (variableId > 0 && variableId < global.$dataSystem.variables.length) {
       if (typeof value === 'number') {
         value = Math.floor(value)

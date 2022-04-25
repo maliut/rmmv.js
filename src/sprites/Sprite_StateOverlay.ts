@@ -1,29 +1,22 @@
 import {Sprite_Base} from './Sprite_Base'
 import {ImageManager} from '../managers/ImageManager'
+import {Game_Battler} from '../objects/Game_Battler'
 
 // Sprite_StateOverlay
 //
 // The sprite for displaying an overlay image for a state.
 export class Sprite_StateOverlay extends Sprite_Base {
 
-  private _battler = null
+  private _battler: Game_Battler | null = null
   private _overlayIndex = 0
   private _animationCount = 0
   private _pattern = 0
 
   constructor() {
     super()
-    this.initMembers()
-    this.loadBitmap()
-  }
-
-  initMembers() {
-    this._battler = null
-    this._overlayIndex = 0
-    this._animationCount = 0
-    this._pattern = 0
     this.anchor.x = 0.5
     this.anchor.y = 1
+    this.loadBitmap()
   }
 
   loadBitmap() {
@@ -31,7 +24,7 @@ export class Sprite_StateOverlay extends Sprite_Base {
     this.setFrame(0, 0, 0, 0)
   }
 
-  setup(battler) {
+  setup(battler: Game_Battler | null) {
     this._battler = battler
   }
 

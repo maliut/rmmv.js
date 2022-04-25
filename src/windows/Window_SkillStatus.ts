@@ -1,3 +1,4 @@
+import {Game_Actor} from '../objects/Game_Actor'
 import {Window_Base} from './Window_Base'
 
 // Window_SkillStatus
@@ -5,9 +6,9 @@ import {Window_Base} from './Window_Base'
 // The window for displaying the skill user's status on the skill screen.
 export class Window_SkillStatus extends Window_Base {
 
-  private _actor = null
+  private _actor: Game_Actor | null = null
 
-  setActor(actor) {
+  setActor(actor: Game_Actor | null) {
     if (this._actor !== actor) {
       this._actor = actor
       this.refresh()

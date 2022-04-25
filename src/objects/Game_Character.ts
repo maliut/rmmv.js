@@ -1,6 +1,9 @@
 import {Game_CharacterBase} from './Game_CharacterBase'
 import {global} from '../managers/DataManager'
 import {AudioManager} from '../managers/AudioManager'
+import {Data_MoveRoute} from '../types/global'
+import { Game_Player } from './Game_Player'
+import { Game_Event } from './Game_Event'
 
 // Game_Character
 //
@@ -55,21 +58,11 @@ export class Game_Character extends Game_CharacterBase {
   static ROUTE_SCRIPT = 45
 
   private _moveRouteForcing = false
-  private _moveRoute = null
+  private _moveRoute: Data_MoveRoute | null = null
   private _moveRouteIndex = 0
-  private _originalMoveRoute = null
+  private _originalMoveRoute: Data_MoveRoute | null = null
   private _originalMoveRouteIndex = 0
   private _waitCount = 0
-
-  override initMembers() {
-    super.initMembers()
-    this._moveRouteForcing = false
-    this._moveRoute = null
-    this._moveRouteIndex = 0
-    this._originalMoveRoute = null
-    this._originalMoveRouteIndex = 0
-    this._waitCount = 0
-  }
 
   memorizeMoveRoute() {
     this._originalMoveRoute = this._moveRoute
@@ -86,13 +79,13 @@ export class Game_Character extends Game_CharacterBase {
     return this._moveRouteForcing
   }
 
-  setMoveRoute(moveRoute) {
+  setMoveRoute(moveRoute: Data_MoveRoute) {
     this._moveRoute = moveRoute
     this._moveRouteIndex = 0
     this._moveRouteForcing = false
   }
 
-  forceMoveRoute(moveRoute) {
+  forceMoveRoute(moveRoute: Data_MoveRoute) {
     if (!this._originalMoveRoute) {
       this.memorizeMoveRoute()
     }
@@ -114,7 +107,7 @@ export class Game_Character extends Game_CharacterBase {
       this._waitCount--
     } else {
       this.setMovementSuccess(true)
-      const command = this._moveRoute.list[this._moveRouteIndex]
+      const command = this._moveRoute!.list[this._moveRouteIndex]
       if (command) {
         this.processMoveCommand(command)
         this.advanceMoveRouteIndex()
@@ -122,7 +115,7 @@ export class Game_Character extends Game_CharacterBase {
     }
   }
 
-  processMoveCommand(command) {
+  processMoveCommand(command: { code: number, parameters: any[] }) {
     const gc = Game_Character
     const params = command.parameters
     switch (command.code) {
@@ -267,11 +260,11 @@ export class Game_Character extends Game_CharacterBase {
     }
   }
 
-  deltaXFrom(x) {
+  deltaXFrom(x: number) {
     return global.$gameMap.deltaX(this.x, x)
   }
 
-  deltaYFrom(y) {
+  deltaYFrom(y: number) {
     return global.$gameMap.deltaY(this.y, y)
   }
 
@@ -282,7 +275,7 @@ export class Game_Character extends Game_CharacterBase {
     }
   }
 
-  moveTowardCharacter(character) {
+  moveTowardCharacter(character: Game_Player) {
     const sx = this.deltaXFrom(character.x)
     const sy = this.deltaYFrom(character.y)
     if (Math.abs(sx) > Math.abs(sy)) {
@@ -298,7 +291,7 @@ export class Game_Character extends Game_CharacterBase {
     }
   }
 
-  moveAwayFromCharacter(character) {
+  moveAwayFromCharacter(character: Game_Player) {
     const sx = this.deltaXFrom(character.x)
     const sy = this.deltaYFrom(character.y)
     if (Math.abs(sx) > Math.abs(sy)) {
@@ -314,7 +307,7 @@ export class Game_Character extends Game_CharacterBase {
     }
   }
 
-  turnTowardCharacter(character) {
+  turnTowardCharacter(character: Game_Player) {
     const sx = this.deltaXFrom(character.x)
     const sy = this.deltaYFrom(character.y)
     if (Math.abs(sx) > Math.abs(sy)) {
@@ -324,7 +317,7 @@ export class Game_Character extends Game_CharacterBase {
     }
   }
 
-  turnAwayFromCharacter(character) {
+  turnAwayFromCharacter(character: Game_Player) {
     const sx = this.deltaXFrom(character.x)
     const sy = this.deltaYFrom(character.y)
     if (Math.abs(sx) > Math.abs(sy)) {
@@ -362,7 +355,7 @@ export class Game_Character extends Game_CharacterBase {
   }
 
   processRouteEnd() {
-    if (this._moveRoute.repeat) {
+    if (this._moveRoute!.repeat) {
       this._moveRouteIndex = -1
     } else if (this._moveRouteForcing) {
       this._moveRouteForcing = false
@@ -434,27 +427,26 @@ export class Game_Character extends Game_CharacterBase {
     this.setDirection(2 + Math.randomInt(4) * 2)
   }
 
-  swap(character) {
+  swap(character: Game_Player | Game_Event) {
     const newX = character.x
     const newY = character.y
     character.locate(this.x, this.y)
     this.locate(newX, newY)
   }
 
-  findDirectionTo(goalX, goalY) {
+  findDirectionTo(goalX: number, goalY: number) {
     const searchLimit = this.searchLimit()
     const mapWidth = global.$gameMap.width()
-    const nodeList = []
-    const openList = []
-    const closedList = []
-    const start: any = {}
+    const nodeList: PathNode[] = []
+    const openList: number[] = []
+    const closedList: number[] = []
+    const start: PathNode = {}
     let best = start
 
     if (this.x === goalX && this.y === goalY) {
       return 0
     }
 
-    start.parent = null
     start.x = this.x
     start.y = this.y
     start.g = 0
@@ -465,16 +457,16 @@ export class Game_Character extends Game_CharacterBase {
     while (nodeList.length > 0) {
       let bestIndex = 0
       for (let i = 0; i < nodeList.length; i++) {
-        if (nodeList[i].f < nodeList[bestIndex].f) {
+        if (nodeList[i].f! < nodeList[bestIndex].f!) {
           bestIndex = i
         }
       }
 
       const current = nodeList[bestIndex]
-      const x1 = current.x
-      const y1 = current.y
+      const x1 = current.x!
+      const y1 = current.y!
       const pos1 = y1 * mapWidth + x1
-      const g1 = current.g
+      const g1 = current.g!
 
       nodeList.splice(bestIndex, 1)
       openList.splice(openList.indexOf(pos1), 1)
@@ -505,7 +497,7 @@ export class Game_Character extends Game_CharacterBase {
         const g2 = g1 + 1
         const index2 = openList.indexOf(pos2)
 
-        if (index2 < 0 || g2 < nodeList[index2].g) {
+        if (index2 < 0 || g2 < nodeList[index2].g!) {
           let neighbor
           if (index2 >= 0) {
             neighbor = nodeList[index2]
@@ -519,7 +511,7 @@ export class Game_Character extends Game_CharacterBase {
           neighbor.y = y2
           neighbor.g = g2
           neighbor.f = g2 + global.$gameMap.distance(x2, y2, goalX, goalY)
-          if (!best || neighbor.f - neighbor.g < best.f - best.g) {
+          if (!best || neighbor.f - neighbor.g < best.f! - best.g!) {
             best = neighbor
           }
         }
@@ -531,8 +523,8 @@ export class Game_Character extends Game_CharacterBase {
       node = node.parent
     }
 
-    const deltaX1 = global.$gameMap.deltaX(node.x, start.x)
-    const deltaY1 = global.$gameMap.deltaY(node.y, start.y)
+    const deltaX1 = global.$gameMap.deltaX(node.x!, start.x)
+    const deltaY1 = global.$gameMap.deltaY(node.y!, start.y)
     if (deltaY1 > 0) {
       return 2
     } else if (deltaX1 < 0) {
@@ -558,3 +550,5 @@ export class Game_Character extends Game_CharacterBase {
     return 12
   }
 }
+
+type PathNode = { parent?: PathNode, x?: number, y?: number, g?: number, f?: number }

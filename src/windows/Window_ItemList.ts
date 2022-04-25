@@ -1,16 +1,17 @@
 import {Window_Selectable} from './Window_Selectable'
 import {DataManager} from '../managers/DataManager'
 import {global} from '../managers/DataManager'
+import {Data_Armor, Data_Item, Data_ItemBase, Data_Weapon} from '../types/global'
 
 // Window_ItemList
 //
 // The window for selecting an item on the item screen.
 export class Window_ItemList extends Window_Selectable {
 
-  private _category = 'none'
-  private _data = []
+  private _category: string | null = 'none'
+  private _data: (Data_Item | Data_Weapon | Data_Armor | null)[] = []
 
-  setCategory(category) {
+  setCategory(category: string | null) {
     if (this._category !== category) {
       this._category = category
       this.refresh()
@@ -39,16 +40,16 @@ export class Window_ItemList extends Window_Selectable {
     return this.isEnabled(this.item())
   }
 
-  includes(item) {
+  includes(item: Data_Item | Data_Weapon | Data_Armor | null) {
     switch (this._category) {
     case 'item':
-      return DataManager.isItem(item) && item.itypeId === 1
+      return DataManager.isItem(item) && (item as Data_Item).itypeId === 1
     case 'weapon':
       return DataManager.isWeapon(item)
     case 'armor':
       return DataManager.isArmor(item)
     case 'keyItem':
-      return DataManager.isItem(item) && item.itypeId === 2
+      return DataManager.isItem(item) && (item as Data_Item).itypeId === 2
     default:
       return false
     }
@@ -58,25 +59,23 @@ export class Window_ItemList extends Window_Selectable {
     return true
   }
 
-  isEnabled(item) {
+  isEnabled(item: Data_ItemBase | null) {
     return global.$gameParty.canUse(item)
   }
 
   makeItemList() {
-    this._data = global.$gameParty.allItems().filter(function (item) {
-      return this.includes(item)
-    }, this)
+    this._data = global.$gameParty.allItems().filter((item) => this.includes(item))
     if (this.includes(null)) {
       this._data.push(null)
     }
   }
 
   selectLast() {
-    const index = this._data.indexOf(global.$gameParty.lastItem())
+    const index = this._data.indexOf(global.$gameParty.lastItem() as Data_Item | Data_Weapon | Data_Armor | null)
     this.select(index >= 0 ? index : 0)
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     const item = this._data[index]
     if (item) {
       const numberWidth = this.numberWidth()
@@ -85,7 +84,7 @@ export class Window_ItemList extends Window_Selectable {
       this.changePaintOpacity(this.isEnabled(item))
       this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth)
       this.drawItemNumber(item, rect.x, rect.y, rect.width)
-      this.changePaintOpacity(1)
+      this.changePaintOpacity(true)
     }
   }
 
@@ -93,10 +92,10 @@ export class Window_ItemList extends Window_Selectable {
     return this.textWidth('000')
   }
 
-  drawItemNumber(item, x, y, width) {
+  drawItemNumber(item: Data_ItemBase | null, x: number, y: number, width: number) {
     if (this.needsNumber()) {
       this.drawText(':', x, y, width - this.textWidth('00'), 'right')
-      this.drawText(global.$gameParty.numItems(item), x, y, width, 'right')
+      this.drawText(global.$gameParty.numItems(item).toString(), x, y, width, 'right')
     }
   }
 

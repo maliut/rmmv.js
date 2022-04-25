@@ -5,21 +5,13 @@ import {global} from '../managers/DataManager'
 // The game object class for switches.
 export class Game_Switches {
 
-  private _data = []
+  private _data: boolean[] = []
 
-  constructor() {
-    this.clear()
+  value(switchId: number) {
+    return this._data[switchId]
   }
 
-  clear() {
-    this._data = []
-  }
-
-  value(switchId) {
-    return !!this._data[switchId]
-  }
-
-  setValue(switchId, value) {
+  setValue(switchId: number, value: boolean) {
     if (switchId > 0 && switchId < global.$dataSystem.switches.length) {
       this._data[switchId] = value
       this.onChange()

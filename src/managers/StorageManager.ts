@@ -4,7 +4,7 @@ import {Utils} from '../core/Utils'
 //
 // The static class that manages storage for saving game data.
 export class StorageManager {
-  static save(savefileId, json) {
+  static save(savefileId: number, json: string) {
     if (this.isLocalMode()) {
       this.saveToLocalFile(savefileId, json)
     } else {
@@ -12,7 +12,7 @@ export class StorageManager {
     }
   }
 
-  static load(savefileId) {
+  static load(savefileId: number) {
     if (this.isLocalMode()) {
       return this.loadFromLocalFile(savefileId)
     } else {
@@ -20,7 +20,7 @@ export class StorageManager {
     }
   }
 
-  static exists(savefileId) {
+  static exists(savefileId: number) {
     if (this.isLocalMode()) {
       return this.localFileExists(savefileId)
     } else {
@@ -28,7 +28,7 @@ export class StorageManager {
     }
   }
 
-  static remove(savefileId) {
+  static remove(savefileId: number) {
     if (this.isLocalMode()) {
       this.removeLocalFile(savefileId)
     } else {
@@ -36,12 +36,11 @@ export class StorageManager {
     }
   }
 
-  static backup(savefileId) {
+  static backup(savefileId: number) {
     if (this.exists(savefileId)) {
       if (this.isLocalMode()) {
         const data = this.loadFromLocalFile(savefileId)
         const compressed = LZString.compressToBase64(data)
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const fs = globalThis.require('fs')
         const dirPath = this.localFileDirectoryPath()
         const filePath = this.localFilePath(savefileId) + '.bak'
@@ -58,7 +57,7 @@ export class StorageManager {
     }
   }
 
-  static backupExists(savefileId) {
+  static backupExists(savefileId: number) {
     if (this.isLocalMode()) {
       return this.localFileBackupExists(savefileId)
     } else {
@@ -66,10 +65,9 @@ export class StorageManager {
     }
   }
 
-  static cleanBackup(savefileId) {
+  static cleanBackup(savefileId: number) {
     if (this.backupExists(savefileId)) {
       if (this.isLocalMode()) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const fs = globalThis.require('fs')
         const dirPath = this.localFileDirectoryPath()
         const filePath = this.localFilePath(savefileId)
@@ -81,12 +79,11 @@ export class StorageManager {
     }
   }
 
-  static restoreBackup(savefileId) {
+  static restoreBackup(savefileId: number) {
     if (this.backupExists(savefileId)) {
       if (this.isLocalMode()) {
         const data = this.loadFromLocalBackupFile(savefileId)
         const compressed = LZString.compressToBase64(data)
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const fs = globalThis.require('fs')
         const dirPath = this.localFileDirectoryPath()
         const filePath = this.localFilePath(savefileId)
@@ -109,9 +106,8 @@ export class StorageManager {
     return Utils.isNwjs()
   }
 
-  static saveToLocalFile(savefileId, json) {
+  static saveToLocalFile(savefileId: number, json: string) {
     const data = LZString.compressToBase64(json)
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const fs = globalThis.require('fs')
     const dirPath = this.localFileDirectoryPath()
     const filePath = this.localFilePath(savefileId)
@@ -121,9 +117,8 @@ export class StorageManager {
     fs.writeFileSync(filePath, data)
   }
 
-  static loadFromLocalFile(savefileId) {
+  static loadFromLocalFile(savefileId: number) {
     let data = null
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const fs = globalThis.require('fs')
     const filePath = this.localFilePath(savefileId)
     if (fs.existsSync(filePath)) {
@@ -132,9 +127,8 @@ export class StorageManager {
     return LZString.decompressFromBase64(data)
   }
 
-  static loadFromLocalBackupFile(savefileId) {
+  static loadFromLocalBackupFile(savefileId: number) {
     let data = null
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const fs = globalThis.require('fs')
     const filePath = this.localFilePath(savefileId) + '.bak'
     if (fs.existsSync(filePath)) {
@@ -143,20 +137,17 @@ export class StorageManager {
     return LZString.decompressFromBase64(data)
   }
 
-  static localFileBackupExists(savefileId) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  static localFileBackupExists(savefileId: number) {
     const fs = globalThis.require('fs')
     return fs.existsSync(this.localFilePath(savefileId) + '.bak')
   }
 
-  static localFileExists(savefileId) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  static localFileExists(savefileId: number) {
     const fs = globalThis.require('fs')
     return fs.existsSync(this.localFilePath(savefileId))
   }
 
-  static removeLocalFile(savefileId) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  static removeLocalFile(savefileId: number) {
     const fs = globalThis.require('fs')
     const filePath = this.localFilePath(savefileId)
     if (fs.existsSync(filePath)) {
@@ -164,48 +155,47 @@ export class StorageManager {
     }
   }
 
-  static saveToWebStorage(savefileId, json) {
+  static saveToWebStorage(savefileId: number, json: string) {
     const key = this.webStorageKey(savefileId)
     const data = LZString.compressToBase64(json)
     localStorage.setItem(key, data)
   }
 
-  static loadFromWebStorage(savefileId) {
+  static loadFromWebStorage(savefileId: number) {
     const key = this.webStorageKey(savefileId)
     const data = localStorage.getItem(key)
     return LZString.decompressFromBase64(data)
   }
 
-  static loadFromWebStorageBackup(savefileId) {
+  static loadFromWebStorageBackup(savefileId: number) {
     const key = this.webStorageKey(savefileId) + 'bak'
     const data = localStorage.getItem(key)
     return LZString.decompressFromBase64(data)
   }
 
-  static webStorageBackupExists(savefileId) {
+  static webStorageBackupExists(savefileId: number) {
     const key = this.webStorageKey(savefileId) + 'bak'
     return !!localStorage.getItem(key)
   }
 
-  static webStorageExists(savefileId) {
+  static webStorageExists(savefileId: number) {
     const key = this.webStorageKey(savefileId)
     return !!localStorage.getItem(key)
   }
 
-  static removeWebStorage(savefileId) {
+  static removeWebStorage(savefileId: number) {
     const key = this.webStorageKey(savefileId)
     localStorage.removeItem(key)
   }
 
   static localFileDirectoryPath() {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const path = globalThis.require('path')
 
-    const base = path.dirname(process.mainModule.filename)
+    const base = path.dirname(process.mainModule!.filename)
     return path.join(base, 'save/')
   }
 
-  static localFilePath(savefileId) {
+  static localFilePath(savefileId: number) {
     let name
     if (savefileId < 0) {
       name = 'config.rpgsave'
@@ -217,7 +207,7 @@ export class StorageManager {
     return this.localFileDirectoryPath() + name
   }
 
-  static webStorageKey(savefileId) {
+  static webStorageKey(savefileId: number) {
     if (savefileId < 0) {
       return 'RPG Config'
     } else if (savefileId === 0) {

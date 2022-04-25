@@ -9,8 +9,8 @@ import {Decrypter} from './Decrypter'
 export class Html5Audio {
   private static _initialized = false
   private static _unlocked = false
-  private static _audioElement: HTMLAudioElement | null = null
-  private static _gainTweenInterval = null
+  private static _audioElement: HTMLAudioElement
+  private static _gainTweenInterval: number
   private static _tweenGain = 0
   private static _tweenTargetGain = 0
   private static _tweenGainStep = 0
@@ -83,7 +83,7 @@ export class Html5Audio {
         try {
           this._audioElement = new Audio()
         } catch (e) {
-          this._audioElement = null
+          // this._audioElement = null
         }
       }
       if (this._audioElement) this._setupEventHandlers()
@@ -103,7 +103,7 @@ export class Html5Audio {
   private static _onTouchStart() {
     if (this._audioElement && !this._unlocked) {
       if (this._isLoading) {
-        this._load(this._url)
+        this._load(this._url!)
         this._unlocked = true
       } else {
         if (this._staticSePath) {
@@ -171,7 +171,7 @@ export class Html5Audio {
    * @static
    * @param {String} url
    */
-  static setStaticSe(url: string) {
+  static setStaticSe(url: string | null) {
     if (!this._initialized) {
       this.initialize()
       this.clear()
@@ -225,16 +225,16 @@ export class Html5Audio {
       this._startPlaying(loop, offset)
     } else if (Html5Audio._audioElement) {
       this._autoPlay = true
-      this.addLoadListener(function () {
+      this.addLoadListener(() => {
         if (this._autoPlay) {
           this.play(loop, offset)
           if (this._gainTweenInterval) {
             clearInterval(this._gainTweenInterval)
-            this._gainTweenInterval = null
+            this._gainTweenInterval = 0
           }
         }
-      }.bind(this))
-      if (!this._isLoading) this._load(this._url)
+      })
+      if (!this._isLoading) this._load(this._url!)
     }
   }
 
@@ -269,9 +269,9 @@ export class Html5Audio {
         this._startGainTween(duration)
       }
     } else if (this._autoPlay) {
-      this.addLoadListener(function () {
+      this.addLoadListener(() => {
         this.fadeIn(duration)
-      }.bind(this))
+      })
     }
   }
 
@@ -327,7 +327,7 @@ export class Html5Audio {
     this._audioElement.loop = loop
     if (this._gainTweenInterval) {
       clearInterval(this._gainTweenInterval)
-      this._gainTweenInterval = null
+      this._gainTweenInterval = 0
     }
     if (this._audioElement) {
       this._audioElement.volume = this._volume
@@ -339,7 +339,7 @@ export class Html5Audio {
   private static _onLoad() {
     this._isLoading = false
     while (this._loadListeners.length > 0) {
-      const listener = this._loadListeners.shift()
+      const listener = this._loadListeners.shift()!
       listener()
     }
   }
@@ -348,9 +348,10 @@ export class Html5Audio {
     this._audioElement.volume = this._tweenGain
     if (this._gainTweenInterval) {
       clearInterval(this._gainTweenInterval)
-      this._gainTweenInterval = null
+      this._gainTweenInterval = 0
     }
     this._tweenGainStep = (this._tweenTargetGain - this._tweenGain) / (60 * duration)
+    // @ts-ignore window.setInterval
     this._gainTweenInterval = setInterval(function () {
       Html5Audio._applyTweenValue(Html5Audio._tweenTargetGain)
     }, 1000 / 60)
@@ -367,7 +368,7 @@ export class Html5Audio {
     if (Math.abs(Html5Audio._tweenTargetGain - Html5Audio._tweenGain) < 0.01) {
       Html5Audio._tweenGain = Html5Audio._tweenTargetGain
       clearInterval(Html5Audio._gainTweenInterval)
-      Html5Audio._gainTweenInterval = null
+      Html5Audio._gainTweenInterval = 0
     }
 
     Html5Audio._audioElement.volume = Html5Audio._tweenGain

@@ -1,15 +1,16 @@
 import {Window_Base} from './Window_Base'
 import {TextManager} from '../managers/TextManager'
+import {Game_Actor} from '../objects/Game_Actor'
 
 // Window_EquipStatus
 //
 // The window for displaying parameter changes on the equipment screen.
 export class Window_EquipStatus extends Window_Base {
 
-  private _actor = null
-  private _tempActor = null
+  private _actor: Game_Actor | null = null
+  private _tempActor: Game_Actor | null = null
 
-  override initialize(x, y) {
+  override initialize(x: number, y: number) {
     const width = this.windowWidth()
     const height = this.windowHeight()
     super.initialize(x, y, width, height)
@@ -29,7 +30,7 @@ export class Window_EquipStatus extends Window_Base {
     return 7
   }
 
-  setActor(actor) {
+  setActor(actor: Game_Actor | null) {
     if (this._actor !== actor) {
       this._actor = actor
       this.refresh()
@@ -46,14 +47,14 @@ export class Window_EquipStatus extends Window_Base {
     }
   }
 
-  setTempActor(tempActor) {
+  setTempActor(tempActor: Game_Actor | null) {
     if (this._tempActor !== tempActor) {
       this._tempActor = tempActor
       this.refresh()
     }
   }
 
-  drawItem(x, y, paramId) {
+  drawItem(x: number, y: number, paramId: number) {
     this.drawParamName(x + this.textPadding(), y, paramId)
     if (this._actor) {
       this.drawCurrentParam(x + 140, y, paramId)
@@ -64,25 +65,25 @@ export class Window_EquipStatus extends Window_Base {
     }
   }
 
-  drawParamName(x, y, paramId) {
+  drawParamName(x: number, y: number, paramId: number) {
     this.changeTextColor(this.systemColor())
     this.drawText(TextManager.param(paramId), x, y, 120)
   }
 
-  drawCurrentParam(x, y, paramId) {
+  drawCurrentParam(x: number, y: number, paramId: number) {
     this.resetTextColor()
-    this.drawText(this._actor.param(paramId), x, y, 48, 'right')
+    this.drawText(this._actor!.param(paramId).toString(), x, y, 48, 'right')
   }
 
-  drawRightArrow(x, y) {
+  drawRightArrow(x: number, y: number) {
     this.changeTextColor(this.systemColor())
     this.drawText('\u2192', x, y, 32, 'center')
   }
 
-  drawNewParam(x, y, paramId) {
-    const newValue = this._tempActor.param(paramId)
-    const diffvalue = newValue - this._actor.param(paramId)
+  drawNewParam(x: number, y: number, paramId: number) {
+    const newValue = this._tempActor!.param(paramId)
+    const diffvalue = newValue - this._actor!.param(paramId)
     this.changeTextColor(this.paramchangeTextColor(diffvalue))
-    this.drawText(newValue, x, y, 48, 'right')
+    this.drawText(newValue.toString(), x, y, 48, 'right')
   }
 }

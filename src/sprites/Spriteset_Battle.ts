@@ -15,12 +15,12 @@ import {Sprite_Actor} from './Sprite_Actor'
 export class Spriteset_Battle extends Spriteset_Base {
 
   private _battlebackLocated = false
-  private _backgroundSprite
-  private _battleField
-  private _back1Sprite
-  private _back2Sprite
-  private _enemySprites
-  private _actorSprites
+  private _backgroundSprite!: Sprite
+  private _battleField!: Sprite
+  private _back1Sprite!: TilingSprite
+  private _back2Sprite!: TilingSprite
+  private _enemySprites!: Sprite_Enemy[]
+  private _actorSprites!: Sprite_Actor[]
 
   override createLowerLayer() {
     super.createLowerLayer()
@@ -83,11 +83,11 @@ export class Spriteset_Battle extends Spriteset_Base {
     const height = this._battleField.height
     const sprite1 = this._back1Sprite
     const sprite2 = this._back2Sprite
-    sprite1.origin.x = sprite1.x + (sprite1.bitmap.width - width) / 2
-    sprite2.origin.x = sprite1.y + (sprite2.bitmap.width - width) / 2
+    sprite1.origin.x = sprite1.x + (sprite1.bitmap!.width - width) / 2
+    sprite2.origin.x = sprite1.y + (sprite2.bitmap!.width - width) / 2
     if (global.$gameSystem.isSideView()) {
-      sprite1.origin.y = sprite1.x + sprite1.bitmap.height - height
-      sprite2.origin.y = sprite1.y + sprite2.bitmap.height - height
+      sprite1.origin.y = sprite1.x + sprite1.bitmap!.height - height
+      sprite2.origin.y = sprite1.y + sprite2.bitmap!.height - height
     }
   }
 
@@ -153,7 +153,7 @@ export class Spriteset_Battle extends Spriteset_Base {
       this.defaultBattleback2Name())
   }
 
-  terrainBattleback1Name(type) {
+  terrainBattleback1Name(type: number) {
     switch (type) {
     case 24:
     case 25:
@@ -181,7 +181,7 @@ export class Spriteset_Battle extends Spriteset_Base {
     }
   }
 
-  terrainBattleback2Name(type) {
+  terrainBattleback2Name(type: number) {
     switch (type) {
     case 20:
     case 21:
@@ -228,13 +228,13 @@ export class Spriteset_Battle extends Spriteset_Base {
     return 'Ship'
   }
 
-  autotileType(z) {
+  autotileType(z: number) {
     return global.$gameMap.autotileType(global.$gamePlayer.x, global.$gamePlayer.y, z)
   }
 
   createEnemies() {
     const enemies = global.$gameTroop.members()
-    const sprites = []
+    const sprites: Sprite_Enemy[] = []
     for (let i = 0; i < enemies.length; i++) {
       sprites[i] = new Sprite_Enemy(enemies[i])
     }
@@ -245,7 +245,7 @@ export class Spriteset_Battle extends Spriteset_Base {
     this._enemySprites = sprites
   }
 
-  compareEnemySprite(a, b) {
+  compareEnemySprite(a: Sprite_Enemy, b: Sprite_Enemy) {
     if (a.y !== b.y) {
       return a.y - b.y
     } else {
@@ -269,7 +269,7 @@ export class Spriteset_Battle extends Spriteset_Base {
   }
 
   battlerSprites() {
-    return this._enemySprites.concat(this._actorSprites)
+    return [...this._enemySprites, ...this._actorSprites]
   }
 
   isAnimationPlaying() {

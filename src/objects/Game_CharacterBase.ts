@@ -1,6 +1,7 @@
 import {global} from '../managers/DataManager'
 import {Graphics} from '../core/Graphics'
 import {ImageManager} from '../managers/ImageManager'
+import { Game_Player } from './Game_Player'
 
 // Game_CharacterBase
 //
@@ -47,48 +48,11 @@ export class Game_CharacterBase {
     return this._y
   }
 
-  constructor() {
-    this.initMembers()
-  }
-
-  initMembers() {
-    this._x = 0
-    this._y = 0
-    this._realX = 0
-    this._realY = 0
-    this._moveSpeed = 4
-    this._moveFrequency = 6
-    this._opacity = 255
-    this._blendMode = 0
-    this._direction = 2
-    this._pattern = 1
-    this._priorityType = 1
-    this._tileId = 0
-    this._characterName = ''
-    this._characterIndex = 0
-    this._isObjectCharacter = false
-    this._walkAnime = true
-    this._stepAnime = false
-    this._directionFix = false
-    this._through = false
-    this._transparent = false
-    this._bushDepth = 0
-    this._animationId = 0
-    this._balloonId = 0
-    this._animationPlaying = false
-    this._balloonPlaying = false
-    this._animationCount = 0
-    this._stopCount = 0
-    this._jumpCount = 0
-    this._jumpPeak = 0
-    this._movementSuccess = true
-  }
-
-  pos(x, y) {
+  pos(x: number, y: number) {
     return this._x === x && this._y === y
   }
 
-  posNt(x, y) {
+  posNt(x: number, y: number) {
     // No through
     return this.pos(x, y) && !this.isThrough()
   }
@@ -97,7 +61,7 @@ export class Game_CharacterBase {
     return this._moveSpeed
   }
 
-  setMoveSpeed(moveSpeed) {
+  setMoveSpeed(moveSpeed: number) {
     this._moveSpeed = moveSpeed
   }
 
@@ -105,7 +69,7 @@ export class Game_CharacterBase {
     return this._moveFrequency
   }
 
-  setMoveFrequency(moveFrequency) {
+  setMoveFrequency(moveFrequency: number) {
     this._moveFrequency = moveFrequency
   }
 
@@ -113,7 +77,7 @@ export class Game_CharacterBase {
     return this._opacity
   }
 
-  setOpacity(opacity) {
+  setOpacity(opacity: number) {
     this._opacity = opacity
   }
 
@@ -121,7 +85,7 @@ export class Game_CharacterBase {
     return this._blendMode
   }
 
-  setBlendMode(blendMode) {
+  setBlendMode(blendMode: number) {
     this._blendMode = blendMode
   }
 
@@ -129,7 +93,7 @@ export class Game_CharacterBase {
     return this._priorityType === 1
   }
 
-  setPriorityType(priorityType) {
+  setPriorityType(priorityType: number) {
     this._priorityType = priorityType
   }
 
@@ -150,7 +114,7 @@ export class Game_CharacterBase {
     return !this.isMoving() && !this.isJumping()
   }
 
-  checkStop(threshold) {
+  checkStop(threshold: number) {
     return this._stopCount > threshold
   }
 
@@ -181,11 +145,11 @@ export class Game_CharacterBase {
     this._animationCount = 0
   }
 
-  reverseDir(d) {
+  reverseDir(d: number) {
     return 10 - d
   }
 
-  canPass(x, y, d) {
+  canPass(x: number, y: number, d: number) {
     const x2 = global.$gameMap.roundXWithDirection(x, d)
     const y2 = global.$gameMap.roundYWithDirection(y, d)
     if (!global.$gameMap.isValid(x2, y2)) {
@@ -203,7 +167,7 @@ export class Game_CharacterBase {
     return true
   }
 
-  canPassDiagonally(x, y, horz, vert) {
+  canPassDiagonally(x: number, y: number, horz: number, vert: number) {
     const x2 = global.$gameMap.roundXWithDirection(x, horz)
     const y2 = global.$gameMap.roundYWithDirection(y, vert)
     if (this.canPass(x, y, vert) && this.canPass(x, y2, horz)) {
@@ -215,36 +179,34 @@ export class Game_CharacterBase {
     return false
   }
 
-  isMapPassable(x, y, d) {
+  isMapPassable(x: number, y: number, d: number) {
     const x2 = global.$gameMap.roundXWithDirection(x, d)
     const y2 = global.$gameMap.roundYWithDirection(y, d)
     const d2 = this.reverseDir(d)
     return global.$gameMap.isPassable(x, y, d) && global.$gameMap.isPassable(x2, y2, d2)
   }
 
-  isCollidedWithCharacters(x, y) {
+  isCollidedWithCharacters(x: number, y: number) {
     return this.isCollidedWithEvents(x, y) || this.isCollidedWithVehicles(x, y)
   }
 
-  isCollidedWithEvents(x, y) {
+  isCollidedWithEvents(x: number, y: number) {
     const events = global.$gameMap.eventsXyNt(x, y)
-    return events.some(function (event) {
-      return event.isNormalPriority()
-    })
+    return events.some((event) => event.isNormalPriority())
   }
 
-  isCollidedWithVehicles(x, y) {
+  isCollidedWithVehicles(x: number, y: number) {
     return global.$gameMap.boat().posNt(x, y) || global.$gameMap.ship().posNt(x, y)
   }
 
-  setPosition(x, y) {
+  setPosition(x: number, y: number) {
     this._x = Math.round(x)
     this._y = Math.round(y)
     this._realX = x
     this._realY = y
   }
 
-  copyPosition(character) {
+  copyPosition(character: Game_Player) {
     this._x = character._x
     this._y = character._y
     this._realX = character._realX
@@ -262,7 +224,7 @@ export class Game_CharacterBase {
     return this._direction
   }
 
-  setDirection(d) {
+  setDirection(d: number) {
     if (!this.isDirectionFixed() && d) {
       this._direction = d
     }
@@ -314,7 +276,7 @@ export class Game_CharacterBase {
     return px >= -gw && px <= gw && py >= -gh && py <= gh
   }
 
-  update(sceneActive?) {
+  update(sceneActive = false) {
     if (this.isStopping()) {
       this.updateStop()
     }
@@ -454,27 +416,27 @@ export class Game_CharacterBase {
     return this._characterIndex
   }
 
-  setImage(characterName, characterIndex) {
+  setImage(characterName: string, characterIndex: number) {
     this._tileId = 0
     this._characterName = characterName
     this._characterIndex = characterIndex
     this._isObjectCharacter = ImageManager.isObjectCharacter(characterName)
   }
 
-  setTileImage(tileId) {
+  setTileImage(tileId: number) {
     this._tileId = tileId
     this._characterName = ''
     this._characterIndex = 0
     this._isObjectCharacter = true
   }
 
-  checkEventTriggerTouchFront(d) {
+  checkEventTriggerTouchFront(d: number) {
     const x2 = global.$gameMap.roundXWithDirection(this._x, d)
     const y2 = global.$gameMap.roundYWithDirection(this._y, d)
     this.checkEventTriggerTouch(x2, y2)
   }
 
-  checkEventTriggerTouch(x, y) {
+  checkEventTriggerTouch(x: number, y: number) {
     return false
   }
 
@@ -482,11 +444,11 @@ export class Game_CharacterBase {
     return this._movementSuccess
   }
 
-  setMovementSuccess(success) {
+  setMovementSuccess(success: boolean) {
     this._movementSuccess = success
   }
 
-  moveStraight(d) {
+  moveStraight(d: number) {
     this.setMovementSuccess(this.canPass(this._x, this._y, d))
     if (this.isMovementSucceeded()) {
       this.setDirection(d)
@@ -501,7 +463,7 @@ export class Game_CharacterBase {
     }
   }
 
-  moveDiagonally(horz, vert) {
+  moveDiagonally(horz: number, vert: number) {
     this.setMovementSuccess(this.canPassDiagonally(this._x, this._y, horz, vert))
     if (this.isMovementSucceeded()) {
       this._x = global.$gameMap.roundXWithDirection(this._x, horz)
@@ -518,7 +480,7 @@ export class Game_CharacterBase {
     }
   }
 
-  jump(xPlus, yPlus) {
+  jump(xPlus: number, yPlus: number) {
     if (Math.abs(xPlus) > Math.abs(yPlus)) {
       if (xPlus !== 0) {
         this.setDirection(xPlus < 0 ? 4 : 6)
@@ -541,7 +503,7 @@ export class Game_CharacterBase {
     return this._walkAnime
   }
 
-  setWalkAnime(walkAnime) {
+  setWalkAnime(walkAnime: boolean) {
     this._walkAnime = walkAnime
   }
 
@@ -549,7 +511,7 @@ export class Game_CharacterBase {
     return this._stepAnime
   }
 
-  setStepAnime(stepAnime) {
+  setStepAnime(stepAnime: boolean) {
     this._stepAnime = stepAnime
   }
 
@@ -557,7 +519,7 @@ export class Game_CharacterBase {
     return this._directionFix
   }
 
-  setDirectionFix(directionFix) {
+  setDirectionFix(directionFix: boolean) {
     this._directionFix = directionFix
   }
 
@@ -565,7 +527,7 @@ export class Game_CharacterBase {
     return this._through
   }
 
-  setThrough(through) {
+  setThrough(through: boolean) {
     this._through = through
   }
 
@@ -577,15 +539,15 @@ export class Game_CharacterBase {
     return this._bushDepth
   }
 
-  setTransparent(transparent) {
+  setTransparent(transparent: boolean) {
     this._transparent = transparent
   }
 
-  requestAnimation(animationId) {
+  requestAnimation(animationId: number) {
     this._animationId = animationId
   }
 
-  requestBalloon(balloonId) {
+  requestBalloon(balloonId: number) {
     this._balloonId = balloonId
   }
 

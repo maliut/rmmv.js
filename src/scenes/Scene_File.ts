@@ -9,7 +9,7 @@ import {Window_SavefileList} from '../windows/Window_SavefileList'
 // The superclass of Scene_Save and Scene_Load.
 export abstract class Scene_File extends Scene_MenuBase {
 
-  private _listWindow
+  private _listWindow!: Window_SavefileList
 
   override create() {
     super.create()
@@ -48,23 +48,15 @@ export abstract class Scene_File extends Scene_MenuBase {
     this.addWindow(this._listWindow)
   }
 
-  mode() {
-    return null
-  }
+  abstract mode(): string
 
   activateListWindow() {
     this._listWindow.activate()
   }
 
-  helpWindowText() {
-    return ''
-  }
+  abstract helpWindowText(): string
 
-  firstSavefileIndex() {
-    return 0
-  }
+  abstract firstSavefileIndex(): number
 
-  onSavefileOk() {
-    // empty
-  }
+  abstract onSavefileOk()
 }

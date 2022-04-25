@@ -18,9 +18,9 @@ import {Window_MenuStatus} from '../windows/Window_MenuStatus'
 // The scene class of the menu screen.
 export class Scene_Menu extends Scene_MenuBase {
 
-  private _statusWindow
-  private _commandWindow
-  private _goldWindow
+  private _statusWindow!: Window_MenuStatus
+  private _commandWindow!: Window_MenuCommand
+  private _goldWindow!: Window_Gold
 
   override create() {
     super.create()

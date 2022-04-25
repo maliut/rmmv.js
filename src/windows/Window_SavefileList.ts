@@ -1,21 +1,23 @@
 import {Window_Selectable} from './Window_Selectable'
 import {DataManager} from '../managers/DataManager'
 import {TextManager} from '../managers/TextManager'
+import { Rectangle } from '../core/Rectangle'
+import {GlobalInfo} from '../types/index'
 
 // Window_SavefileList
 //
 // The window for selecting a save file on the save and load screens.
 export class Window_SavefileList extends Window_Selectable {
 
-  private _mode = null
+  private _mode: string | null = null
 
-  override initialize(x, y, width, height) {
+  override initialize(x: number, y: number, width: number, height: number) {
     super.initialize(x, y, width, height)
     this.activate()
     return this
   }
 
-  setMode(mode) {
+  setMode(mode: string) {
     this._mode = mode
   }
 
@@ -32,7 +34,7 @@ export class Window_SavefileList extends Window_Selectable {
     return Math.floor(innerHeight / this.maxVisibleItems())
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     const id = index + 1
     const valid = DataManager.isThisGameFile(id)
     const info = DataManager.loadSavefileInfo(id)
@@ -49,11 +51,11 @@ export class Window_SavefileList extends Window_Selectable {
     }
   }
 
-  drawFileId(id, x, y) {
+  drawFileId(id: number, x: number, y: number) {
     this.drawText(TextManager.file + ' ' + id, x, y, 180)
   }
 
-  drawContents(info, rect, valid) {
+  drawContents(info: GlobalInfo, rect: Rectangle, valid: boolean) {
     const bottom = rect.y + rect.height
     if (rect.width >= 420) {
       this.drawGameTitle(info, rect.x + 192, rect.y, rect.width - 192)
@@ -68,13 +70,13 @@ export class Window_SavefileList extends Window_Selectable {
     }
   }
 
-  drawGameTitle(info, x, y, width) {
+  drawGameTitle(info: GlobalInfo, x: number, y: number, width: number) {
     if (info.title) {
       this.drawText(info.title, x, y, width)
     }
   }
 
-  drawPartyCharacters(info, x, y) {
+  drawPartyCharacters(info: GlobalInfo, x: number, y: number) {
     if (info.characters) {
       for (let i = 0; i < info.characters.length; i++) {
         const data = info.characters[i]
@@ -83,7 +85,7 @@ export class Window_SavefileList extends Window_Selectable {
     }
   }
 
-  drawPlaytime(info, x, y, width) {
+  drawPlaytime(info: GlobalInfo, x: number, y: number, width: number) {
     if (info.playtime) {
       this.drawText(info.playtime, x, y, width, 'right')
     }

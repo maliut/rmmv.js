@@ -33,7 +33,6 @@ export class Scene_Load extends Scene_File {
   }
 
   override onSavefileOk() {
-    super.onSavefileOk()
     if (DataManager.loadGame(this.savefileId())) {
       this.onLoadSuccess()
     } else {

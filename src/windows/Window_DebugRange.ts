@@ -2,6 +2,7 @@ import {Window_Selectable} from './Window_Selectable'
 import {global} from '../managers/DataManager'
 import {Input} from '../core/Input'
 import {Graphics} from '../core/Graphics'
+import {Window_DebugEdit} from './Window_DebugEdit'
 
 // Window_DebugRange
 //
@@ -11,11 +12,11 @@ export class Window_DebugRange extends Window_Selectable {
   static lastTopRow = 0
   static lastIndex = 0
 
-  private _maxSwitches
-  private _maxVariables
-  private _editWindow
+  private _maxSwitches = 0
+  private _maxVariables = 0
+  private _editWindow: Window_DebugEdit | null = null
 
-  override initialize(x, y) {
+  override initialize(x: number, y: number) {
     this._maxSwitches = Math.ceil((global.$dataSystem.switches.length - 1) / 10)
     this._maxVariables = Math.ceil((global.$dataSystem.variables.length - 1) / 10)
     const width = this.windowWidth()
@@ -66,7 +67,7 @@ export class Window_DebugRange extends Window_Selectable {
     this.drawAllItems()
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     const rect = this.itemRectForText(index)
     let start
     let text
@@ -92,7 +93,7 @@ export class Window_DebugRange extends Window_Selectable {
     Window_DebugRange.lastIndex = this.index()
   }
 
-  setEditWindow(editWindow) {
+  setEditWindow(editWindow: Window_DebugEdit) {
     this._editWindow = editWindow
   }
 }

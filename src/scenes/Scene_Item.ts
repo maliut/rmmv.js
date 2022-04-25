@@ -10,7 +10,8 @@ import {Window_ItemCategory} from '../windows/Window_ItemCategory'
 // The scene class of the item screen.
 export class Scene_Item extends Scene_ItemBase {
 
-  private _categoryWindow
+  private _categoryWindow!: Window_ItemCategory
+  protected override _itemWindow!: Window_ItemList
 
   override create() {
     super.create()

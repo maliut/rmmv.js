@@ -1,6 +1,7 @@
 import {AudioManager} from '../managers/AudioManager'
 import {Graphics} from '../core/Graphics'
 import {global} from '../managers/DataManager'
+import {Data_Audio} from '../types/global'
 
 // Game_System
 //
@@ -16,14 +17,14 @@ export class Game_System {
   private _saveCount = 0
   private _versionId = 0
   private _framesOnSave = 0
-  private _bgmOnSave = null
-  private _bgsOnSave = null
-  private _windowTone = null
-  private _battleBgm = null
-  private _victoryMe = null
-  private _defeatMe = null
-  private _savedBgm = null
-  private _walkingBgm = null
+  private _bgmOnSave: Data_Audio | null = null
+  private _bgsOnSave: Data_Audio | null = null
+  private _windowTone: number[] | null = null
+  private _battleBgm: Data_Audio | null = null
+  private _victoryMe: Data_Audio | null = null
+  private _defeatMe: Data_Audio | null = null
+  private _savedBgm: Data_Audio | null = null
+  private _walkingBgm: Data_Audio | null = null
 
   isJapanese() {
     return global.$dataSystem.locale.match(/^ja/)
@@ -121,7 +122,7 @@ export class Game_System {
     return this._windowTone || global.$dataSystem.windowTone
   }
 
-  setWindowTone(value) {
+  setWindowTone(value: number[] | null) {
     this._windowTone = value
   }
 
@@ -129,7 +130,7 @@ export class Game_System {
     return this._battleBgm || global.$dataSystem.battleBgm
   }
 
-  setBattleBgm(value) {
+  setBattleBgm(value: Data_Audio | null) {
     this._battleBgm = value
   }
 
@@ -137,7 +138,7 @@ export class Game_System {
     return this._victoryMe || global.$dataSystem.victoryMe
   }
 
-  setVictoryMe(value) {
+  setVictoryMe(value: Data_Audio | null) {
     this._victoryMe = value
   }
 
@@ -145,7 +146,7 @@ export class Game_System {
     return this._defeatMe || global.$dataSystem.defeatMe
   }
 
-  setDefeatMe(value) {
+  setDefeatMe(value: Data_Audio | null) {
     this._defeatMe = value
   }
 
@@ -171,8 +172,8 @@ export class Game_System {
 
   onAfterLoad() {
     Graphics.frameCount = this._framesOnSave
-    AudioManager.playBgm(this._bgmOnSave)
-    AudioManager.playBgs(this._bgsOnSave)
+    AudioManager.playBgm(this._bgmOnSave!)
+    AudioManager.playBgs(this._bgsOnSave!)
   }
 
   playtime() {

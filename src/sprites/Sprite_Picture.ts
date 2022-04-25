@@ -7,11 +7,11 @@ import {global} from '../managers/DataManager'
 // The sprite for displaying a picture.
 export class Sprite_Picture extends Sprite {
 
-  private readonly _pictureId
+  private readonly _pictureId: number
   protected _isPicture = true
   private _pictureName = ''
 
-  constructor(pictureId) {
+  constructor(pictureId: number) {
     super()
     this._pictureId = pictureId
     this.update()
@@ -51,7 +51,7 @@ export class Sprite_Picture extends Sprite {
 
   updateOrigin() {
     const picture = this.picture()
-    if (picture.origin() === 0) {
+    if (picture?.origin() === 0) {
       this.anchor.x = 0
       this.anchor.y = 0
     } else {
@@ -62,20 +62,24 @@ export class Sprite_Picture extends Sprite {
 
   updatePosition() {
     const picture = this.picture()
-    this.x = Math.floor(picture.x())
-    this.y = Math.floor(picture.y())
+    if (picture) {
+      this.x = Math.floor(picture.x())
+      this.y = Math.floor(picture.y())
+    }
   }
 
   updateScale() {
     const picture = this.picture()
-    this.scale.x = picture.scaleX() / 100
-    this.scale.y = picture.scaleY() / 100
+    if (picture) {
+      this.scale.x = picture.scaleX() / 100
+      this.scale.y = picture.scaleY() / 100
+    }
   }
 
   updateTone() {
     const picture = this.picture()
-    if (picture.tone()) {
-      this.setColorTone(picture.tone())
+    if (picture && picture.tone()) {
+      this.setColorTone(picture.tone()!)
     } else {
       this.setColorTone([0, 0, 0, 0])
     }
@@ -83,9 +87,11 @@ export class Sprite_Picture extends Sprite {
 
   updateOther() {
     const picture = this.picture()
-    this.opacity = picture.opacity()
-    this.blendMode = picture.blendMode()
-    this.rotation = picture.angle() * Math.PI / 180
+    if (picture) {
+      this.opacity = picture.opacity()
+      this.blendMode = picture.blendMode()
+      this.rotation = picture.angle() * Math.PI / 180
+    }
   }
 
   loadBitmap() {

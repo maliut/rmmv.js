@@ -6,14 +6,17 @@ import {SoundManager} from '../managers/SoundManager'
 import {SceneManager} from '../managers/SceneManager'
 import {Scene_Map} from './Scene_Map'
 import {Window_MenuActor} from '../windows/Window_MenuActor'
+import {Game_Battler} from '../objects/Game_Battler'
+import {Window_ItemList} from '../windows/Window_ItemList'
+import {Window_SkillList} from '../windows/Window_SkillList'
 
 // Scene_ItemBase
 //
 // The superclass of Scene_Item and Scene_Skill.
 export abstract class Scene_ItemBase extends Scene_MenuBase {
 
-  private _actorWindow
-  protected _itemWindow
+  private _actorWindow!: Window_MenuActor
+  protected abstract _itemWindow: Window_ItemList | Window_SkillList
 
   createActorWindow() {
     this._actorWindow = new Window_MenuActor().initialize()
@@ -26,21 +29,19 @@ export abstract class Scene_ItemBase extends Scene_MenuBase {
     return this._itemWindow.item()
   }
 
-  user() {
-    return null
-  }
+  abstract user(): Game_Battler
 
   isCursorLeft() {
     return this._itemWindow.index() % 2 === 0
   }
 
-  showSubWindow(window) {
+  showSubWindow(window: Window_MenuActor) {
     window.x = this.isCursorLeft() ? Graphics.boxWidth - window.width : 0
     window.show()
     window.activate()
   }
 
-  hideSubWindow(window) {
+  hideSubWindow(window: Window_MenuActor) {
     window.hide()
     window.deactivate()
     this.activateItemWindow()
@@ -126,7 +127,5 @@ export abstract class Scene_ItemBase extends Scene_MenuBase {
     }
   }
 
-  playSeForItem() {
-    // 源码里没有，应该是给子类继承的？
-  }
+  abstract playSeForItem()
 }

@@ -19,24 +19,25 @@ import {Window_BattleItem} from '../windows/Window_BattleItem'
 import {Window_Message} from '../windows/Window_Message'
 import {Window_BattleActor} from '../windows/Window_BattleActor'
 import {Window_BattleSkill} from '../windows/Window_BattleSkill'
+import {Game_Actor} from '../objects/Game_Actor'
 
 // Scene_Battle
 //
 // The scene class of the battle screen.
 export class Scene_Battle extends Scene_Base {
 
-  private _spriteset
-  private _statusWindow
-  private _partyCommandWindow
-  private _actorCommandWindow
-  private _skillWindow
-  private _itemWindow
-  private _actorWindow
-  private _enemyWindow
-  private _messageWindow
-  private _logWindow
-  private _helpWindow
-  private _scrollTextWindow
+  private _spriteset!: Spriteset_Battle
+  private _statusWindow!: Window_BattleStatus
+  private _partyCommandWindow!: Window_PartyCommand
+  private _actorCommandWindow!: Window_ActorCommand
+  private _skillWindow!: Window_BattleSkill
+  private _itemWindow!: Window_BattleItem
+  private _actorWindow!: Window_BattleActor
+  private _enemyWindow!: Window_BattleEnemy
+  private _messageWindow!: Window_Message
+  private _logWindow!: Window_BattleLog
+  private _helpWindow!: Window_Help
+  private _scrollTextWindow!: Window_ScrollText
 
   override create() {
     super.create()
@@ -81,8 +82,9 @@ export class Scene_Battle extends Scene_Base {
 
   changeInputWindow() {
     if (BattleManager.isInputting()) {
-      if (BattleManager.actor()) {
-        this.startActorCommandSelection()
+      const actor = BattleManager.actor()
+      if (actor) {
+        this.startActorCommandSelection(actor)
       } else {
         this.startPartyCommandSelection()
       }
@@ -232,7 +234,7 @@ export class Scene_Battle extends Scene_Base {
   }
 
   createActorWindow() {
-    this._actorWindow = new Window_BattleActor(0, this._statusWindow.y).initialize()
+    this._actorWindow = new Window_BattleActor().initialize(0, this._statusWindow.y)
     this._actorWindow.setHandler('ok', this.onActorOk.bind(this))
     this._actorWindow.setHandler('cancel', this.onActorCancel.bind(this))
     this.addWindow(this._actorWindow)
@@ -249,9 +251,9 @@ export class Scene_Battle extends Scene_Base {
   createMessageWindow() {
     this._messageWindow = new Window_Message().initialize()
     this.addWindow(this._messageWindow)
-    this._messageWindow.subWindows().forEach(function (window) {
+    this._messageWindow.subWindows().forEach((window) => {
       this.addWindow(window)
-    }, this)
+    })
   }
 
   createScrollTextWindow() {
@@ -280,27 +282,27 @@ export class Scene_Battle extends Scene_Base {
     this.changeInputWindow()
   }
 
-  startActorCommandSelection() {
-    this._statusWindow.select(BattleManager.actor().index())
+  startActorCommandSelection(actor: Game_Actor) {
+    this._statusWindow.select(actor.index())
     this._partyCommandWindow.close()
-    this._actorCommandWindow.setup(BattleManager.actor())
+    this._actorCommandWindow.setup(actor)
   }
 
   commandAttack() {
-    BattleManager.inputtingAction().setAttack()
+    BattleManager.inputtingAction()!.setAttack()
     this.selectEnemySelection()
   }
 
   commandSkill() {
     this._skillWindow.setActor(BattleManager.actor())
-    this._skillWindow.setStypeId(this._actorCommandWindow.currentExt())
+    this._skillWindow.setStypeId(this._actorCommandWindow.currentExt()!)
     this._skillWindow.refresh()
     this._skillWindow.show()
     this._skillWindow.activate()
   }
 
   commandGuard() {
-    BattleManager.inputtingAction().setGuard()
+    BattleManager.inputtingAction()!.setGuard()
     this.selectNextCommand()
   }
 
@@ -327,7 +329,7 @@ export class Scene_Battle extends Scene_Base {
   }
 
   onActorOk() {
-    const action = BattleManager.inputtingAction()
+    const action = BattleManager.inputtingAction()!
     action.setTarget(this._actorWindow.index())
     this._actorWindow.hide()
     this._skillWindow.hide()
@@ -357,7 +359,7 @@ export class Scene_Battle extends Scene_Base {
   }
 
   onEnemyOk() {
-    const action = BattleManager.inputtingAction()
+    const action = BattleManager.inputtingAction()!
     action.setTarget(this._enemyWindow.enemyIndex())
     this._enemyWindow.hide()
     this._skillWindow.hide()
@@ -383,10 +385,10 @@ export class Scene_Battle extends Scene_Base {
   }
 
   onSkillOk() {
-    const skill = this._skillWindow.item()
-    const action = BattleManager.inputtingAction()
+    const skill = this._skillWindow.item()!
+    const action = BattleManager.inputtingAction()!
     action.setSkill(skill.id)
-    BattleManager.actor().setLastBattleSkill(skill)
+    BattleManager.actor()!.setLastBattleSkill(skill)
     this.onSelectAction()
   }
 
@@ -396,8 +398,8 @@ export class Scene_Battle extends Scene_Base {
   }
 
   onItemOk() {
-    const item = this._itemWindow.item()
-    const action = BattleManager.inputtingAction()
+    const item = this._itemWindow.item()!
+    const action = BattleManager.inputtingAction()!
     action.setItem(item.id)
     global.$gameParty.setLastItem(item)
     this.onSelectAction()
@@ -409,7 +411,7 @@ export class Scene_Battle extends Scene_Base {
   }
 
   onSelectAction() {
-    const action = BattleManager.inputtingAction()
+    const action = BattleManager.inputtingAction()!
     this._skillWindow.hide()
     this._itemWindow.hide()
     if (!action.needsSelection()) {

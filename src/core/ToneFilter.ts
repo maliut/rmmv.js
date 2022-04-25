@@ -25,8 +25,8 @@ export class ToneFilter extends PIXI.filters.ColorMatrixFilter {
    * @method adjustSaturation
    * @param {Number} value The saturation value in the range (-255, 255)
    */
-  adjustSaturation(value) {
-    value = (value || 0).clamp(-255, 255) / 255
+  adjustSaturation(value = 0) {
+    value = value.clamp(-255, 255) / 255
     this.saturate(value, true)
   }
 

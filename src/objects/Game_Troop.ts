@@ -3,6 +3,7 @@ import {global} from '../managers/DataManager'
 import {Game_Enemy} from './Game_Enemy'
 import {BattleManager} from '../managers/BattleManager'
 import {Game_Interpreter} from './Game_Interpreter'
+import {Data_ItemBase, Data_TroopPage} from '../types/global'
 
 // Game_Troop
 //
@@ -18,19 +19,12 @@ export class Game_Troop extends Game_Unit {
     'Ｎ', 'Ｏ', 'Ｐ', 'Ｑ', 'Ｒ', 'Ｓ', 'Ｔ', 'Ｕ', 'Ｖ', 'Ｗ', 'Ｘ', 'Ｙ', 'Ｚ'
   ]
 
-  private readonly _interpreter
+  private readonly _interpreter = new Game_Interpreter()
   private _troopId = 0
   private _eventFlags = {}
-  private _enemies = []
+  private _enemies: Game_Enemy[] = []
   private _turnCount = 0
   private _namesCount = {}
-
-
-  constructor() {
-    super()
-    this._interpreter = new Game_Interpreter()
-    this.clear()
-  }
 
   isEventRunning() {
     return this._interpreter.isRunning()
@@ -61,11 +55,11 @@ export class Game_Troop extends Game_Unit {
     return global.$dataTroops[this._troopId]
   }
 
-  setup(troopId) {
+  setup(troopId: number) {
     this.clear()
     this._troopId = troopId
     this._enemies = []
-    this.troop().members.forEach(function (member) {
+    this.troop().members.forEach((member) => {
       if (global.$dataEnemies[member.enemyId]) {
         const enemyId = member.enemyId
         const x = member.x
@@ -76,36 +70,35 @@ export class Game_Troop extends Game_Unit {
         }
         this._enemies.push(enemy)
       }
-    }, this)
+    })
     this.makeUniqueNames()
   }
 
   makeUniqueNames() {
     const table = this.letterTable()
-    this.members().forEach(function (enemy) {
+    this.members().forEach((enemy) => {
       if (enemy.isAlive() && enemy.isLetterEmpty()) {
         const name = enemy.originalName()
         const n = this._namesCount[name] || 0
         enemy.setLetter(table[n % table.length])
         this._namesCount[name] = n + 1
       }
-    }, this)
-    this.members().forEach(function (enemy) {
+    })
+    this.members().forEach((enemy) => {
       const name = enemy.originalName()
       if (this._namesCount[name] >= 2) {
         enemy.setPlural(true)
       }
-    }, this)
+    })
   }
 
   letterTable() {
-    return global.$gameSystem.isCJK() ? Game_Troop.LETTER_TABLE_FULL :
-      Game_Troop.LETTER_TABLE_HALF
+    return global.$gameSystem.isCJK() ? Game_Troop.LETTER_TABLE_FULL : Game_Troop.LETTER_TABLE_HALF
   }
 
   enemyNames() {
-    const names = []
-    this.members().forEach(function (enemy) {
+    const names: string[] = []
+    this.members().forEach((enemy) => {
       const name = enemy.originalName()
       if (enemy.isAlive() && !names.contains(name)) {
         names.push(name)
@@ -114,7 +107,7 @@ export class Game_Troop extends Game_Unit {
     return names
   }
 
-  meetsConditions(page) {
+  meetsConditions(page: Data_TroopPage) {
     const c = page.conditions
     if (!c.turnEnding && !c.turnValid && !c.enemyValid &&
       !c.actorValid && !c.switchValid) {
@@ -187,15 +180,11 @@ export class Game_Troop extends Game_Unit {
   }
 
   expTotal() {
-    return this.deadMembers().reduce(function (r, enemy) {
-      return r + enemy.exp()
-    }, 0)
+    return this.deadMembers().reduce((r, enemy) => r + (enemy as Game_Enemy).exp(), 0)
   }
 
   goldTotal() {
-    return this.deadMembers().reduce(function (r, enemy) {
-      return r + enemy.gold()
-    }, 0) * this.goldRate()
+    return this.deadMembers().reduce((r, enemy) => r + (enemy as Game_Enemy).gold(), 0) * this.goldRate()
   }
 
   goldRate() {
@@ -203,8 +192,6 @@ export class Game_Troop extends Game_Unit {
   }
 
   makeDropItems() {
-    return this.deadMembers().reduce(function (r, enemy) {
-      return r.concat(enemy.makeDropItems())
-    }, [])
+    return this.deadMembers().reduce((r, enemy) => r.concat((enemy as Game_Enemy).makeDropItems()), [] as Data_ItemBase[])
   }
 }

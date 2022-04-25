@@ -7,6 +7,12 @@ import {Bitmap} from '../core/Bitmap'
 import {Sprite} from '../core/Sprite'
 import {Input} from '../core/Input'
 import {TouchInput} from '../core/TouchInput'
+import {Spriteset_Battle} from '../sprites/Spriteset_Battle'
+import {Game_Battler} from '../objects/Game_Battler'
+import {Game_Action} from '../objects/Game_Action'
+import {Game_Actor} from '../objects/Game_Actor'
+import {assert} from '../utils'
+import {Data_Item, Data_ItemBase, Data_Skill, Data_Weapon} from '../types/global'
 
 // Window_BattleLog
 //
@@ -14,14 +20,14 @@ import {TouchInput} from '../core/TouchInput'
 // handled as a window for convenience.
 export class Window_BattleLog extends Window_Selectable {
 
-  private _lines = []
-  private _methods = []
+  private _lines: string[] = []
+  private _methods: { name: string, params: any[] }[] = []
   private _waitCount = 0
   private _waitMode = ''
-  private _baseLineStack = []
-  private _spriteset = null
-  private _backBitmap
-  private _backSprite
+  private _baseLineStack: number[] = []
+  private _spriteset: Spriteset_Battle | null = null
+  private _backBitmap!: Bitmap
+  private _backSprite!: Sprite
 
   override initialize() {
     const width = this.windowWidth()
@@ -34,7 +40,7 @@ export class Window_BattleLog extends Window_Selectable {
     return this
   }
 
-  setSpriteset(spriteset) {
+  setSpriteset(spriteset: Spriteset_Battle) {
     this._spriteset = spriteset
   }
 
@@ -98,10 +104,10 @@ export class Window_BattleLog extends Window_Selectable {
     let waiting = false
     switch (this._waitMode) {
     case 'effect':
-      waiting = this._spriteset.isEffecting()
+      waiting = this._spriteset!.isEffecting()
       break
     case 'movement':
-      waiting = this._spriteset.isAnyoneMoving()
+      waiting = this._spriteset!.isAnyoneMoving()
       break
     }
     if (!waiting) {
@@ -110,13 +116,13 @@ export class Window_BattleLog extends Window_Selectable {
     return waiting
   }
 
-  setWaitMode(waitMode) {
+  setWaitMode(waitMode: string) {
     this._waitMode = waitMode
   }
 
   callNextMethod() {
     if (this._methods.length > 0) {
-      const method = this._methods.shift()
+      const method = this._methods.shift()!
       if (method.name && this[method.name]) {
         this[method.name](...method.params)
       } else {
@@ -130,7 +136,7 @@ export class Window_BattleLog extends Window_Selectable {
       TouchInput.isLongPressed())
   }
 
-  push(methodName, ...methodArgs) {
+  push(methodName: string, ...methodArgs: any[]) {
     this._methods.push({name: methodName, params: methodArgs})
   }
 
@@ -152,7 +158,7 @@ export class Window_BattleLog extends Window_Selectable {
     this.setWaitMode('movement')
   }
 
-  addText(text) {
+  addText(text: string) {
     this._lines.push(text)
     this.refresh()
     this.wait()
@@ -163,7 +169,7 @@ export class Window_BattleLog extends Window_Selectable {
   }
 
   popBaseLine() {
-    const baseLine = this._baseLineStack.pop()
+    const baseLine = this._baseLineStack.pop() || 0
     while (this._lines.length > baseLine) {
       this._lines.pop()
     }
@@ -179,90 +185,89 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  popupDamage(target) {
+  popupDamage(target: Game_Battler) {
     target.startDamagePopup()
   }
 
-  performActionStart(subject, action) {
+  performActionStart(subject: Game_Battler, action: Game_Action) {
     subject.performActionStart(action)
   }
 
-  performAction(subject, action) {
+  performAction(subject: Game_Battler, action: Game_Action) {
     subject.performAction(action)
   }
 
-  performActionEnd(subject) {
+  performActionEnd(subject: Game_Battler) {
     subject.performActionEnd()
   }
 
-  performDamage(target) {
+  performDamage(target: Game_Battler) {
     target.performDamage()
   }
 
-  performMiss(target) {
+  performMiss(target: Game_Battler) {
     target.performMiss()
   }
 
-  performRecovery(target) {
+  performRecovery(target: Game_Battler) {
     target.performRecovery()
   }
 
-  performEvasion(target) {
+  performEvasion(target: Game_Battler) {
     target.performEvasion()
   }
 
-  performMagicEvasion(target) {
+  performMagicEvasion(target: Game_Battler) {
     target.performMagicEvasion()
   }
 
-  performCounter(target) {
+  performCounter(target: Game_Battler) {
     target.performCounter()
   }
 
-  performReflection(target) {
+  performReflection(target: Game_Battler) {
     target.performReflection()
   }
 
-  performSubstitute(substitute, target) {
+  performSubstitute(substitute: Game_Battler, target: Game_Battler) {
     substitute.performSubstitute(target)
   }
 
-  performCollapse(target) {
+  performCollapse(target: Game_Battler) {
     target.performCollapse()
   }
 
-  showAnimation(subject, targets, animationId) {
+  showAnimation(subject: Game_Battler, targets: Game_Battler[], animationId: number) {
     if (animationId < 0) {
       this.showAttackAnimation(subject, targets)
     } else {
-      // @ts-ignore
       this.showNormalAnimation(targets, animationId)
     }
   }
 
-  showAttackAnimation(subject, targets) {
-    if (subject.isActor()) {
+  showAttackAnimation(subject: Game_Battler, targets: Game_Battler[]) {
+    if (subject instanceof Game_Actor) {
       this.showActorAttackAnimation(subject, targets)
     } else {
       this.showEnemyAttackAnimation(subject, targets)
     }
   }
 
-  showActorAttackAnimation(subject, targets) {
+  showActorAttackAnimation(subject: Game_Actor, targets: Game_Battler[]) {
     this.showNormalAnimation(targets, subject.attackAnimationId1(), false)
     this.showNormalAnimation(targets, subject.attackAnimationId2(), true)
   }
 
-  showEnemyAttackAnimation(subject, targets) {
+  showEnemyAttackAnimation(subject: Game_Battler, targets: Game_Battler[]) {
     SoundManager.playEnemyAttack()
   }
 
-  showNormalAnimation(targets, animationId, mirror) {
+  showNormalAnimation(targets: Game_Battler[], animationId: number, mirror = false) {
     const animation = global.$dataAnimations[animationId]
     if (animation) {
       let delay = this.animationBaseDelay()
       const nextDelay = this.animationNextDelay()
-      targets.forEach(function (target) {
+      targets.forEach((target) => {
         target.startAnimation(animationId, mirror, delay)
         delay += nextDelay
       })
@@ -311,33 +316,33 @@ export class Window_BattleLog extends Window_Selectable {
     return 64
   }
 
-  drawLineText(index) {
+  drawLineText(index: number) {
     const rect = this.itemRectForText(index)
     this.contents.clearRect(rect.x, rect.y, rect.width, rect.height)
-    // @ts-ignore
-    this.drawTextEx(this._lines[index], rect.x, rect.y, rect.width)
+    this.drawTextEx(this._lines[index], rect.x, rect.y)
   }
 
   startTurn() {
     this.push('wait')
   }
 
-  startAction(subject, action, targets) {
+  startAction(subject: Game_Battler, action: Game_Action, targets: Game_Battler[]) {
     const item = action.item()
+    assert(item !== null)
     this.push('performActionStart', subject, action)
     this.push('waitForMovement')
     this.push('performAction', subject, action)
-    this.push('showAnimation', subject, targets.clone(), item.animationId)
+    this.push('showAnimation', subject, targets.clone(), (item as Data_Skill | Data_Item | Data_Weapon).animationId)
     this.displayAction(subject, item)
   }
 
-  endAction(subject) {
+  endAction(subject: Game_Battler | null) {
     this.push('waitForNewLine')
     this.push('clear')
     this.push('performActionEnd', subject)
   }
 
-  displayCurrentState(subject) {
+  displayCurrentState(subject: Game_Battler) {
     const stateText = subject.mostImportantStateText()
     if (stateText) {
       this.push('addText', subject.name() + stateText)
@@ -346,18 +351,19 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayRegeneration(subject) {
+  displayRegeneration(subject: Game_Battler) {
     this.push('popupDamage', subject)
   }
 
-  displayAction(subject, item) {
+  displayAction(subject: Game_Battler, item: Data_ItemBase) {
     const numMethods = this._methods.length
     if (DataManager.isSkill(item)) {
-      if (item.message1) {
-        this.push('addText', subject.name() + item.message1.format(item.name))
+      const _item = item as Data_Skill
+      if (_item.message1) {
+        this.push('addText', subject.name() + _item.message1.format(item.name))
       }
-      if (item.message2) {
-        this.push('addText', item.message2.format(item.name))
+      if (_item.message2) {
+        this.push('addText', _item.message2.format(item.name))
       }
     } else {
       this.push('addText', TextManager.useItem.format(subject.name(), item.name))
@@ -367,23 +373,23 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayCounter(target) {
+  displayCounter(target: Game_Battler) {
     this.push('performCounter', target)
     this.push('addText', TextManager.counterAttack.format(target.name()))
   }
 
-  displayReflection(target) {
+  displayReflection(target: Game_Battler) {
     this.push('performReflection', target)
     this.push('addText', TextManager.magicReflection.format(target.name()))
   }
 
-  displaySubstitute(substitute, target) {
+  displaySubstitute(substitute: Game_Battler, target: Game_Battler) {
     const substName = substitute.name()
     this.push('performSubstitute', substitute, target)
     this.push('addText', TextManager.substitute.format(substName, target.name()))
   }
 
-  displayActionResults(subject, target) {
+  displayActionResults(subject: Game_Battler, target: Game_Battler) {
     if (target.result().used) {
       this.push('pushBaseLine')
       this.displayCritical(target)
@@ -397,13 +403,13 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayFailure(target) {
+  displayFailure(target: Game_Battler) {
     if (target.result().isHit() && !target.result().success) {
       this.push('addText', TextManager.actionFailure.format(target.name()))
     }
   }
 
-  displayCritical(target) {
+  displayCritical(target: Game_Battler) {
     if (target.result().critical) {
       if (target.isActor()) {
         this.push('addText', TextManager.criticalToActor)
@@ -413,7 +419,7 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayDamage(target) {
+  displayDamage(target: Game_Battler) {
     if (target.result().missed) {
       this.displayMiss(target)
     } else if (target.result().evaded) {
@@ -425,7 +431,7 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayMiss(target) {
+  displayMiss(target: Game_Battler) {
     let fmt
     if (target.result().physical) {
       fmt = target.isActor() ? TextManager.actorNoHit : TextManager.enemyNoHit
@@ -436,7 +442,7 @@ export class Window_BattleLog extends Window_Selectable {
     this.push('addText', fmt.format(target.name()))
   }
 
-  displayEvasion(target) {
+  displayEvasion(target: Game_Battler) {
     let fmt
     if (target.result().physical) {
       fmt = TextManager.evasion
@@ -448,7 +454,7 @@ export class Window_BattleLog extends Window_Selectable {
     this.push('addText', fmt.format(target.name()))
   }
 
-  displayHpDamage(target) {
+  displayHpDamage(target: Game_Battler) {
     if (target.result().hpAffected) {
       if (target.result().hpDamage > 0 && !target.result().drain) {
         this.push('performDamage', target)
@@ -460,7 +466,7 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayMpDamage(target) {
+  displayMpDamage(target: Game_Battler) {
     if (target.isAlive() && target.result().mpDamage !== 0) {
       if (target.result().mpDamage < 0) {
         this.push('performRecovery', target)
@@ -469,7 +475,7 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayTpDamage(target) {
+  displayTpDamage(target: Game_Battler) {
     if (target.isAlive() && target.result().tpDamage !== 0) {
       if (target.result().tpDamage < 0) {
         this.push('performRecovery', target)
@@ -478,7 +484,7 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayAffectedStatus(target) {
+  displayAffectedStatus(target: Game_Battler) {
     if (target.result().isStatusAffected()) {
       this.push('pushBaseLine')
       this.displayChangedStates(target)
@@ -488,20 +494,20 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  displayAutoAffectedStatus(target) {
+  displayAutoAffectedStatus(target: Game_Battler) {
     if (target.result().isStatusAffected()) {
       this.displayAffectedStatus(target)
       this.push('clear')
     }
   }
 
-  displayChangedStates(target) {
+  displayChangedStates(target: Game_Battler) {
     this.displayAddedStates(target)
     this.displayRemovedStates(target)
   }
 
-  displayAddedStates(target) {
-    target.result().addedStateObjects().forEach(function (state) {
+  displayAddedStates(target: Game_Battler) {
+    target.result().addedStateObjects().forEach((state) => {
       const stateMsg = target.isActor() ? state.message1 : state.message2
       if (state.id === target.deathStateId()) {
         this.push('performCollapse', target)
@@ -512,35 +518,35 @@ export class Window_BattleLog extends Window_Selectable {
         this.push('addText', target.name() + stateMsg)
         this.push('waitForEffect')
       }
-    }, this)
+    })
   }
 
-  displayRemovedStates(target) {
-    target.result().removedStateObjects().forEach(function (state) {
+  displayRemovedStates(target: Game_Battler) {
+    target.result().removedStateObjects().forEach((state) => {
       if (state.message4) {
         this.push('popBaseLine')
         this.push('pushBaseLine')
         this.push('addText', target.name() + state.message4)
       }
-    }, this)
+    })
   }
 
-  displayChangedBuffs(target) {
+  displayChangedBuffs(target: Game_Battler) {
     const result = target.result()
     this.displayBuffs(target, result.addedBuffs, TextManager.buffAdd)
     this.displayBuffs(target, result.addedDebuffs, TextManager.debuffAdd)
     this.displayBuffs(target, result.removedBuffs, TextManager.buffRemove)
   }
 
-  displayBuffs(target, buffs, fmt) {
-    buffs.forEach(function (paramId) {
+  displayBuffs(target: Game_Battler, buffs: number[], fmt: string) {
+    buffs.forEach((paramId) => {
       this.push('popBaseLine')
       this.push('pushBaseLine')
       this.push('addText', fmt.format(target.name(), TextManager.param(paramId)))
-    }, this)
+    })
   }
 
-  makeHpDamageText(target) {
+  makeHpDamageText(target: Game_Battler) {
     const result = target.result()
     const damage = result.hpDamage
     const isActor = target.isActor()
@@ -560,7 +566,7 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  makeMpDamageText(target) {
+  makeMpDamageText(target: Game_Battler) {
     const result = target.result()
     const damage = result.mpDamage
     const isActor = target.isActor()
@@ -579,7 +585,7 @@ export class Window_BattleLog extends Window_Selectable {
     }
   }
 
-  makeTpDamageText(target) {
+  makeTpDamageText(target: Game_Battler) {
     const result = target.result()
     const damage = result.tpDamage
     const isActor = target.isActor()

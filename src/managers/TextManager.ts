@@ -4,27 +4,21 @@ import {global} from './DataManager'
 //
 // The static class that handles terms and messages.
 export class TextManager {
-  static basic(basicId) {
+  static basic(basicId: number) {
     return global.$dataSystem.terms.basic[basicId] || ''
   }
 
-  static param(paramId) {
+  static param(paramId: number) {
     return global.$dataSystem.terms.params[paramId] || ''
   }
 
-  static command(commandId) {
+  static command(commandId: number) {
     return global.$dataSystem.terms.commands[commandId] || ''
   }
 
-  static message(messageId) {
+  static message(messageId: string) {
     return global.$dataSystem.terms.messages[messageId] || ''
   }
-
-  // static getter(method, param) {
-  //   return function () {
-  //     return this[method](param)
-  //   }
-  // }
 
   static get currencyUnit() {
     return global.$dataSystem.currencyUnit

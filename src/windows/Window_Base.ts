@@ -5,6 +5,10 @@ import {global} from '../managers/DataManager'
 import {Bitmap} from '../core/Bitmap'
 import {Sprite} from '../core/Sprite'
 import * as PIXI from 'pixi.js'
+import {Game_Battler} from '../objects/Game_Battler'
+import {Game_Actor} from '../objects/Game_Actor'
+import { Data_ItemBase } from '../types/global'
+import {TextState} from '../types/index'
 
 // Window_Base
 //
@@ -18,14 +22,9 @@ export class Window_Base extends Window {
 
   private _opening = false
   private _closing = false
-  private _dimmerSprite = null
+  private _dimmerSprite: Sprite | null = null
 
-  constructor() {
-    super()
-    // 注：这里单独提取出 initialize 方法来做初始化，是因为子类中有需要在 super 前调用 this 的逻辑
-    // this.initialize(x, y, width, height)
-  }
-
+  // 注：这里单独提取出 initialize 方法来做初始化，是因为子类中有需要在 super 前调用 this 的逻辑
   initialize(x = 0, y = 0, width = 0, height = 0) {
     this.loadWindowskin()
     this.move(x, y, width, height)
@@ -86,7 +85,7 @@ export class Window_Base extends Window {
     return this.height - this.standardPadding() * 2
   }
 
-  fittingHeight(numLines) {
+  fittingHeight(numLines: number) {
     return numLines * this.lineHeight() + this.standardPadding() * 2
   }
 
@@ -174,10 +173,10 @@ export class Window_Base extends Window {
     this.active = false
   }
 
-  textColor(n) {
+  textColor(n: number) {
     const px = 96 + (n % 8) * 12 + 6
     const py = 144 + Math.floor(n / 8) * 12 + 6
-    return this.windowskin.getPixel(px, py)
+    return this.windowskin!.getPixel(px, py)
   }
 
   normalColor() {
@@ -241,33 +240,39 @@ export class Window_Base extends Window {
   }
 
   pendingColor() {
-    return this.windowskin.getPixel(120, 120)
+    return this.windowskin!.getPixel(120, 120)
   }
 
   translucentOpacity() {
     return 160
   }
 
-  changeTextColor(color) {
+  changeTextColor(color: string) {
     this.contents.textColor = color
   }
 
-  changePaintOpacity(enabled) {
+  changePaintOpacity(enabled: boolean) {
     this.contents.paintOpacity = enabled ? 255 : this.translucentOpacity()
   }
 
-  drawText(text, x, y, maxWidth?, align?) {
+  drawText(text: string, x: number, y: number, maxWidth?: number, align?: CanvasTextAlign) {
     this.contents.drawText(text, x, y, maxWidth, this.lineHeight(), align)
   }
 
-  textWidth(text) {
+  textWidth(text: string) {
     return this.contents.measureTextWidth(text)
   }
 
-  drawTextEx(text, x, y) {
+  drawTextEx(text: string, x: number, y: number) {
     if (text) {
-      const textState: any = {index: 0, x: x, y: y, left: x}
-      textState.text = this.convertEscapeCharacters(text)
+      const textState: TextState = {
+        index: 0,
+        x: x,
+        y: y,
+        left: x,
+        text: this.convertEscapeCharacters(text),
+        height: 0
+      }
       textState.height = this.calcTextHeight(textState, false)
       this.resetFontSettings()
       while (textState.index < textState.text.length) {
@@ -279,46 +284,34 @@ export class Window_Base extends Window {
     }
   }
 
-  convertEscapeCharacters(text) {
+  convertEscapeCharacters(text: string, arg1 = '') {
     text = text.replace(/\\/g, '\x1b')
     // eslint-disable-next-line no-control-regex
     text = text.replace(/\x1b\x1b/g, '\\')
     // eslint-disable-next-line no-control-regex
-    text = text.replace(/\x1bV\[(\d+)\]/gi, function () {
-      // eslint-disable-next-line prefer-rest-params
-      return global.$gameVariables.value(parseInt(arguments[1]))
-    }.bind(this))
+    text = text.replace(/\x1bV\[(\d+)\]/gi, () => global.$gameVariables.value(parseInt(arg1)).toString())
     // eslint-disable-next-line no-control-regex
-    text = text.replace(/\x1bV\[(\d+)\]/gi, function () {
-      // eslint-disable-next-line prefer-rest-params
-      return global.$gameVariables.value(parseInt(arguments[1]))
-    }.bind(this))
+    text = text.replace(/\x1bV\[(\d+)\]/gi, () => global.$gameVariables.value(parseInt(arg1)).toString())
     // eslint-disable-next-line no-control-regex
-    text = text.replace(/\x1bN\[(\d+)\]/gi, function () {
-      // eslint-disable-next-line prefer-rest-params
-      return this.actorName(parseInt(arguments[1]))
-    }.bind(this))
+    text = text.replace(/\x1bN\[(\d+)\]/gi, () => this.actorName(parseInt(arg1)))
     // eslint-disable-next-line no-control-regex
-    text = text.replace(/\x1bP\[(\d+)\]/gi, function () {
-      // eslint-disable-next-line prefer-rest-params
-      return this.partyMemberName(parseInt(arguments[1]))
-    }.bind(this))
+    text = text.replace(/\x1bP\[(\d+)\]/gi, () => this.partyMemberName(parseInt(arg1)))
     // eslint-disable-next-line no-control-regex
     text = text.replace(/\x1bG/gi, TextManager.currencyUnit)
     return text
   }
 
-  actorName(n) {
+  actorName(n: number) {
     const actor = n >= 1 ? global.$gameActors.actor(n) : null
     return actor ? actor.name() : ''
   }
 
-  partyMemberName(n) {
+  partyMemberName(n: number) {
     const actor = n >= 1 ? global.$gameParty.members()[n - 1] : null
     return actor ? actor.name() : ''
   }
 
-  processCharacter(textState) {
+  processCharacter(textState: TextState) {
     switch (textState.text[textState.index]) {
     case '\n':
       this.processNewLine(textState)
@@ -335,25 +328,25 @@ export class Window_Base extends Window {
     }
   }
 
-  processNormalCharacter(textState) {
+  processNormalCharacter(textState: TextState) {
     const c = textState.text[textState.index++]
     const w = this.textWidth(c)
     this.contents.drawText(c, textState.x, textState.y, w * 2, textState.height)
     textState.x += w
   }
 
-  processNewLine(textState) {
+  processNewLine(textState: TextState) {
     textState.x = textState.left
     textState.y += textState.height
     textState.height = this.calcTextHeight(textState, false)
     textState.index++
   }
 
-  processNewPage(textState) {
+  processNewPage(textState: TextState) {
     textState.index++
   }
 
-  obtainEscapeCode(textState) {
+  obtainEscapeCode(textState: TextState) {
     textState.index++
     const regExp = /^[$.|^!><{}\\]|^[A-Z]+/i
     const arr = regExp.exec(textState.text.slice(textState.index))
@@ -365,17 +358,17 @@ export class Window_Base extends Window {
     }
   }
 
-  obtainEscapeParam(textState) {
+  obtainEscapeParam(textState: TextState) {
     const arr = /^\[\d+\]/.exec(textState.text.slice(textState.index))
     if (arr) {
       textState.index += arr[0].length
       return parseInt(arr[0].slice(1))
     } else {
-      return ''
+      return 0
     }
   }
 
-  processEscapeCharacter(code, textState) {
+  processEscapeCharacter(code: string, textState: TextState) {
     switch (code) {
     case 'C':
       this.changeTextColor(this.textColor(this.obtainEscapeParam(textState)))
@@ -392,7 +385,7 @@ export class Window_Base extends Window {
     }
   }
 
-  processDrawIcon(iconIndex, textState) {
+  processDrawIcon(iconIndex: number, textState: TextState) {
     this.drawIcon(iconIndex, textState.x + 2, textState.y + 2)
     textState.x += Window_Base._iconWidth + 4
   }
@@ -409,7 +402,7 @@ export class Window_Base extends Window {
     }
   }
 
-  calcTextHeight(textState, all) {
+  calcTextHeight(textState: TextState, all: boolean) {
     const lastFontSize = this.contents.fontSize
     let textHeight = 0
     const lines = textState.text.slice(textState.index).split('\n')
@@ -442,7 +435,7 @@ export class Window_Base extends Window {
     return textHeight
   }
 
-  drawIcon(iconIndex, x, y) {
+  drawIcon(iconIndex: number, x: number, y: number) {
     const bitmap = ImageManager.loadSystem('IconSet')
     const pw = Window_Base._iconWidth
     const ph = Window_Base._iconHeight
@@ -451,7 +444,7 @@ export class Window_Base extends Window {
     this.contents.blt(bitmap, sx, sy, pw, ph, x, y)
   }
 
-  drawFace(faceName, faceIndex, x, y, width = Window_Base._faceWidth, height = Window_Base._faceHeight) {
+  drawFace(faceName: string, faceIndex: number, x: number, y: number, width = Window_Base._faceWidth, height = Window_Base._faceHeight) {
     const bitmap = ImageManager.loadFace(faceName)
     const pw = Window_Base._faceWidth
     const ph = Window_Base._faceHeight
@@ -464,7 +457,7 @@ export class Window_Base extends Window {
     this.contents.blt(bitmap, sx, sy, sw, sh, dx, dy)
   }
 
-  drawCharacter(characterName, characterIndex, x, y) {
+  drawCharacter(characterName: string, characterIndex: number, x: number, y: number) {
     const bitmap = ImageManager.loadCharacter(characterName)
     const big = ImageManager.isBigCharacter(characterName)
     const pw = bitmap.width / (big ? 3 : 12)
@@ -475,14 +468,14 @@ export class Window_Base extends Window {
     this.contents.blt(bitmap, sx, sy, pw, ph, x - pw / 2, y - ph)
   }
 
-  drawGauge(x, y, width, rate, color1, color2) {
+  drawGauge(x: number, y: number, width: number, rate: number, color1: string, color2: string) {
     const fillW = Math.floor(width * rate)
     const gaugeY = y + this.lineHeight() - 8
     this.contents.fillRect(x, gaugeY, width, 6, this.gaugeBackColor())
     this.contents.gradientFillRect(x, gaugeY, fillW, 6, color1, color2)
   }
 
-  hpColor(actor) {
+  hpColor(actor: Game_Battler) {
     if (actor.isDead()) {
       return this.deathColor()
     } else if (actor.isDying()) {
@@ -492,53 +485,53 @@ export class Window_Base extends Window {
     }
   }
 
-  mpColor(actor) {
+  mpColor(actor: Game_Battler) {
     return this.normalColor()
   }
 
-  tpColor(actor) {
+  tpColor(actor: Game_Battler) {
     return this.normalColor()
   }
 
-  drawActorCharacter(actor, x, y) {
+  drawActorCharacter(actor: Game_Actor, x: number, y: number) {
     this.drawCharacter(actor.characterName(), actor.characterIndex(), x, y)
   }
 
-  drawActorFace(actor, x, y, width?, height?) {
+  drawActorFace(actor: Game_Actor, x: number, y: number, width?: number, height?: number) {
     this.drawFace(actor.faceName(), actor.faceIndex(), x, y, width, height)
   }
 
-  drawActorName(actor, x, y, width = 168) {
+  drawActorName(actor: Game_Actor, x: number, y: number, width = 168) {
     this.changeTextColor(this.hpColor(actor))
     this.drawText(actor.name(), x, y, width)
   }
 
-  drawActorClass(actor, x, y, width = 168) {
+  drawActorClass(actor: Game_Actor, x: number, y: number, width = 168) {
     this.resetTextColor()
     this.drawText(actor.currentClass().name, x, y, width)
   }
 
-  drawActorNickname(actor, x, y, width = 270) {
+  drawActorNickname(actor: Game_Actor, x: number, y: number, width = 270) {
     this.resetTextColor()
     this.drawText(actor.nickname(), x, y, width)
   }
 
-  drawActorLevel(actor, x, y) {
+  drawActorLevel(actor: Game_Actor, x: number, y: number) {
     this.changeTextColor(this.systemColor())
     this.drawText(TextManager.levelA, x, y, 48)
     this.resetTextColor()
-    this.drawText(actor.level, x + 84, y, 36, 'right')
+    this.drawText(actor.level.toString(), x + 84, y, 36, 'right')
   }
 
-  drawActorIcons(actor, x, y, width = 144) {
+  drawActorIcons(actor: Game_Actor, x: number, y: number, width = 144) {
     const icons = actor.allIcons().slice(0, Math.floor(width / Window_Base._iconWidth))
     for (let i = 0; i < icons.length; i++) {
       this.drawIcon(icons[i], x + Window_Base._iconWidth * i, y + 2)
     }
   }
 
-  drawCurrentAndMax(current, max, x, y,
-    width, color1, color2) {
+  drawCurrentAndMax(current: string, max: string, x: number, y: number,
+    width: number, color1: string, color2: string) {
     const labelWidth = this.textWidth('HP')
     const valueWidth = this.textWidth('0000')
     const slashWidth = this.textWidth('/')
@@ -557,37 +550,37 @@ export class Window_Base extends Window {
     }
   }
 
-  drawActorHp(actor, x, y, width = 186) {
+  drawActorHp(actor: Game_Actor, x: number, y: number, width = 186) {
     const color1 = this.hpGaugeColor1()
     const color2 = this.hpGaugeColor2()
     this.drawGauge(x, y, width, actor.hpRate(), color1, color2)
     this.changeTextColor(this.systemColor())
     this.drawText(TextManager.hpA, x, y, 44)
-    this.drawCurrentAndMax(actor.hp, actor.mhp, x, y, width,
+    this.drawCurrentAndMax(actor.hp.toString(), actor.mhp.toString(), x, y, width,
       this.hpColor(actor), this.normalColor())
   }
 
-  drawActorMp(actor, x, y, width = 186) {
+  drawActorMp(actor: Game_Actor, x: number, y: number, width = 186) {
     const color1 = this.mpGaugeColor1()
     const color2 = this.mpGaugeColor2()
     this.drawGauge(x, y, width, actor.mpRate(), color1, color2)
     this.changeTextColor(this.systemColor())
     this.drawText(TextManager.mpA, x, y, 44)
-    this.drawCurrentAndMax(actor.mp, actor.mmp, x, y, width,
+    this.drawCurrentAndMax(actor.mp.toString(), actor.mmp.toString(), x, y, width,
       this.mpColor(actor), this.normalColor())
   }
 
-  drawActorTp(actor, x, y, width = 96) {
+  drawActorTp(actor: Game_Actor, x: number, y: number, width = 96) {
     const color1 = this.tpGaugeColor1()
     const color2 = this.tpGaugeColor2()
     this.drawGauge(x, y, width, actor.tpRate(), color1, color2)
     this.changeTextColor(this.systemColor())
     this.drawText(TextManager.tpA, x, y, 44)
     this.changeTextColor(this.tpColor(actor))
-    this.drawText(actor.tp, x + width - 64, y, 64, 'right')
+    this.drawText(actor.tp.toString(), x + width - 64, y, 64, 'right')
   }
 
-  drawActorSimpleStatus(actor, x, y, width) {
+  drawActorSimpleStatus(actor: Game_Actor, x: number, y: number, width: number) {
     const lineHeight = this.lineHeight()
     const x2 = x + 180
     const width2 = Math.min(200, width - 180 - this.textPadding())
@@ -599,7 +592,7 @@ export class Window_Base extends Window {
     this.drawActorMp(actor, x2, y + lineHeight * 2, width2)
   }
 
-  drawItemName(item, x, y, width = 312) {
+  drawItemName(item: Data_ItemBase | null, x: number, y: number, width = 312) {
     if (item) {
       const iconBoxWidth = Window_Base._iconWidth + 4
       this.resetTextColor()
@@ -608,7 +601,7 @@ export class Window_Base extends Window {
     }
   }
 
-  drawCurrencyValue(value, unit, x, y, width) {
+  drawCurrencyValue(value: string, unit: string, x: number, y: number, width: number) {
     const unitWidth = Math.min(80, this.textWidth(unit))
     this.resetTextColor()
     this.drawText(value, x, y, width - unitWidth - 6, 'right')
@@ -616,7 +609,7 @@ export class Window_Base extends Window {
     this.drawText(unit, x + width - unitWidth, y, unitWidth, 'right')
   }
 
-  paramchangeTextColor(change) {
+  paramchangeTextColor(change: number) {
     if (change > 0) {
       return this.powerUpColor()
     } else if (change < 0) {
@@ -626,7 +619,7 @@ export class Window_Base extends Window {
     }
   }
 
-  setBackgroundType(type) {
+  setBackgroundType(type: number) {
     if (type === 0) {
       this.opacity = 255
     } else {
@@ -645,7 +638,7 @@ export class Window_Base extends Window {
       this._dimmerSprite.bitmap = new Bitmap(0, 0)
       this.addChildToBack(this._dimmerSprite)
     }
-    const bitmap = this._dimmerSprite.bitmap
+    const bitmap = this._dimmerSprite.bitmap!
     if (bitmap.width !== this.width || bitmap.height !== this.height) {
       this.refreshDimmerBitmap()
     }
@@ -667,7 +660,7 @@ export class Window_Base extends Window {
 
   refreshDimmerBitmap() {
     if (this._dimmerSprite) {
-      const bitmap = this._dimmerSprite.bitmap
+      const bitmap = this._dimmerSprite.bitmap!
       const w = this.width
       const h = this.height
       const m = this.padding
@@ -689,7 +682,7 @@ export class Window_Base extends Window {
     return 'rgba(0, 0, 0, 0)'
   }
 
-  canvasToLocalX(x) {
+  canvasToLocalX(x: number) {
     let node = this as PIXI.Container
     while (node) {
       x -= node.x
@@ -698,7 +691,7 @@ export class Window_Base extends Window {
     return x
   }
 
-  canvasToLocalY(y) {
+  canvasToLocalY(y: number) {
     let node = this as PIXI.Container
     while (node) {
       y -= node.y
@@ -708,8 +701,8 @@ export class Window_Base extends Window {
   }
 
   reserveFaceImages() {
-    global.$gameParty.members().forEach(function (actor) {
+    global.$gameParty.members().forEach((actor) => {
       ImageManager.reserveFace(actor.faceName())
-    }, this)
+    })
   }
 }

@@ -1,19 +1,11 @@
 import {Bitmap} from './Bitmap'
 
-type CacheItem = { bitmap: Bitmap, touch: number, key: string, reservationId?: any }
+type CacheItem = { bitmap: Bitmap, touch: number, key: string, reservationId?: number }
 
 export class ImageCache {
   static limit = 10 * 1000 * 1000
 
-  private _items: Record<string, CacheItem>
-
-  constructor() {
-    this.initialize()
-  }
-
-  initialize() {
-    this._items = {}
-  }
+  private _items: Record<string, CacheItem> = {}
 
   add(key: string, value: Bitmap) {
     this._items[key] = {
@@ -35,7 +27,7 @@ export class ImageCache {
     return null
   }
 
-  reserve(key: string, value: Bitmap, reservationId: any) {
+  reserve(key: string, value: Bitmap, reservationId?: number) {
     if (!this._items[key]) {
       this._items[key] = {
         bitmap: value,
@@ -50,11 +42,7 @@ export class ImageCache {
   releaseReservation(reservationId) {
     const items = this._items
 
-    // todo values
-    Object.keys(items)
-      .map(function (key) {
-        return items[key]
-      })
+    Object.values(items)
       .forEach((item) => {
         if (item.reservationId === reservationId) {
           delete item.reservationId
@@ -66,21 +54,19 @@ export class ImageCache {
     const items = this._items
     let sizeLeft = ImageCache.limit
 
-    Object.keys(items).map(function (key) {
-      return items[key]
-    }).sort(function (a, b) {
+    Object.values(items).sort((a, b) => {
       return b.touch - a.touch
-    }).forEach(function (item) {
-      if (sizeLeft > 0 || this._mustBeHeld(item)) {
+    }).forEach((item) => {
+      if (sizeLeft > 0 || ImageCache._mustBeHeld(item)) {
         const bitmap = item.bitmap
         sizeLeft -= bitmap.width * bitmap.height
       } else {
         delete items[item.key]
       }
-    }.bind(this))
+    })
   }
 
-  private _mustBeHeld(item: CacheItem) {
+  private static _mustBeHeld(item: CacheItem) {
     // request only is weak so It's purgeable
     if (item.bitmap.isRequestOnly()) return false
     // reserved item must be held
@@ -93,15 +79,15 @@ export class ImageCache {
 
   isReady() {
     const items = this._items
-    return !Object.keys(items).some(function (key) {
+    return !Object.keys(items).some((key) => {
       return !items[key].bitmap.isRequestOnly() && !items[key].bitmap.isReady()
     })
   }
 
   getErrorBitmap() {
     const items = this._items
-    let bitmap = null
-    if (Object.keys(items).some(function (key) {
+    let bitmap: Bitmap | null = null
+    if (Object.keys(items).some((key) => {
       if (items[key].bitmap.isError()) {
         bitmap = items[key].bitmap
         return true

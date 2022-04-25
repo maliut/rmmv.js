@@ -1,6 +1,8 @@
 // Game_Picture
 //
 // The game object class for a picture.
+import {assert} from '../utils'
+
 export class Game_Picture {
 
   private _name = ''
@@ -17,18 +19,11 @@ export class Game_Picture {
   private _targetScaleY = 100
   private _targetOpacity = 255
   private _duration = 0
-  private _tone = null
-  private _toneTarget = null
+  private _tone: number[] | null = null
+  private _toneTarget: number[] | null = null
   private _toneDuration = 0
   private _angle = 0
   private _rotationSpeed = 0
-
-  constructor() {
-    this.initBasic()
-    this.initTarget()
-    this.initTone()
-    this.initRotation()
-  }
 
   name() {
     return this._name
@@ -70,17 +65,6 @@ export class Game_Picture {
     return this._angle
   }
 
-  initBasic() {
-    this._name = ''
-    this._origin = 0
-    this._x = 0
-    this._y = 0
-    this._scaleX = 100
-    this._scaleY = 100
-    this._opacity = 255
-    this._blendMode = 0
-  }
-
   initTarget() {
     this._targetX = this._x
     this._targetY = this._y
@@ -101,8 +85,7 @@ export class Game_Picture {
     this._rotationSpeed = 0
   }
 
-  show(name, origin, x, y, scaleX,
-    scaleY, opacity, blendMode) {
+  show(name: string, origin: number, x: number, y: number, scaleX: number, scaleY: number, opacity: number, blendMode: number) {
     this._name = name
     this._origin = origin
     this._x = x
@@ -116,8 +99,7 @@ export class Game_Picture {
     this.initRotation()
   }
 
-  move(origin, x, y, scaleX, scaleY,
-    opacity, blendMode, duration) {
+  move(origin: number, x: number, y: number, scaleX: number, scaleY: number, opacity: number, blendMode: number, duration: number) {
     this._origin = origin
     this._targetX = x
     this._targetY = y
@@ -128,18 +110,18 @@ export class Game_Picture {
     this._duration = duration
   }
 
-  rotate(speed) {
+  rotate(speed: number) {
     this._rotationSpeed = speed
   }
 
-  tint(tone, duration) {
+  tint(tone: number[], duration: number) {
     if (!this._tone) {
       this._tone = [0, 0, 0, 0]
     }
     this._toneTarget = tone.clone()
     this._toneDuration = duration
     if (this._toneDuration === 0) {
-      this._tone = this._toneTarget.clone()
+      this._tone = this._toneTarget!.clone()
     }
   }
 
@@ -171,6 +153,7 @@ export class Game_Picture {
 
   updateTone() {
     if (this._toneDuration > 0) {
+      assert(this._tone !== null && this._toneTarget !== null)
       const d = this._toneDuration
       for (let i = 0; i < 4; i++) {
         this._tone[i] = (this._tone[i] * (d - 1) + this._toneTarget[i]) / d

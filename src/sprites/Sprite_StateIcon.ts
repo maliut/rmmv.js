@@ -1,5 +1,6 @@
 import {Sprite} from '../core/Sprite'
 import {ImageManager} from '../managers/ImageManager'
+import {Game_Battler} from '../objects/Game_Battler'
 
 // Sprite_StateIcon
 //
@@ -9,24 +10,16 @@ export class Sprite_StateIcon extends Sprite {
   private static _iconWidth = 32
   private static _iconHeight = 32
 
-  private _battler = null
+  private _battler!: Game_Battler
   private _iconIndex = 0
   private _animationCount = 0
   private _animationIndex = 0
 
   constructor() {
     super()
-    this.initMembers()
-    this.loadBitmap()
-  }
-
-  initMembers() {
-    this._battler = null
-    this._iconIndex = 0
-    this._animationCount = 0
-    this._animationIndex = 0
     this.anchor.x = 0.5
     this.anchor.y = 0.5
+    this.loadBitmap()
   }
 
   loadBitmap() {
@@ -34,7 +27,7 @@ export class Sprite_StateIcon extends Sprite {
     this.setFrame(0, 0, 0, 0)
   }
 
-  setup(battler) {
+  setup(battler: Game_Battler) {
     this._battler = battler
   }
 
@@ -53,7 +46,7 @@ export class Sprite_StateIcon extends Sprite {
   }
 
   updateIcon() {
-    let icons = []
+    let icons: number[] = []
     if (this._battler && this._battler.isAlive()) {
       icons = this._battler.allIcons()
     }

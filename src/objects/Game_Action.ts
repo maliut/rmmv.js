@@ -1,10 +1,14 @@
 import {Game_Item} from './Game_Item'
 import {global} from '../managers/DataManager'
+import {Game_Battler} from './Game_Battler'
+import {Game_Actor} from './Game_Actor'
+import {assert} from '../utils'
+import {Game_Enemy} from './Game_Enemy'
+import {Data_Effect, Data_Item, Data_ItemBase, Data_Skill} from '../types/global'
 
 // Game_Action
 //
 // The game object class for a battle action.
-
 export class Game_Action {
 
   static EFFECT_RECOVER_HP = 11
@@ -25,19 +29,23 @@ export class Game_Action {
   static HITTYPE_PHYSICAL = 1
   static HITTYPE_MAGICAL = 2
 
-  private _subjectActorId = 0
-  private _subjectEnemyIndex = -1
+  private readonly _subjectActorId
+  private readonly _subjectEnemyIndex
   private readonly _forcing
-  private _item = null
+  private _item = new Game_Item()
   private _targetIndex = -1
-  private _reflectionTarget?
+  _reflectionTarget?
 
-  constructor(subject, forcing = false) {
-    this._subjectActorId = 0
-    this._subjectEnemyIndex = -1
+  constructor(subject: Game_Battler, forcing = false) {
     this._forcing = forcing
-    this.setSubject(subject)
-    this.clear()
+    if (subject instanceof Game_Actor) {
+      this._subjectActorId = subject.actorId()
+      this._subjectEnemyIndex = -1
+    } else {
+      assert(subject instanceof Game_Enemy)
+      this._subjectEnemyIndex = subject.index()
+      this._subjectActorId = 0
+    }
   }
 
   clear() {
@@ -45,21 +53,11 @@ export class Game_Action {
     this._targetIndex = -1
   }
 
-  setSubject(subject) {
-    if (subject.isActor()) {
-      this._subjectActorId = subject.actorId()
-      this._subjectEnemyIndex = -1
-    } else {
-      this._subjectEnemyIndex = subject.index()
-      this._subjectActorId = 0
-    }
-  }
-
   subject() {
     if (this._subjectActorId > 0) {
-      return global.$gameActors.actor(this._subjectActorId)
+      return global.$gameActors.actor(this._subjectActorId)!
     } else {
-      return global.$gameTroop.members()[this._subjectEnemyIndex]
+      return global.$gameTroop.members()[this._subjectEnemyIndex]!
     }
   }
 
@@ -87,19 +85,19 @@ export class Game_Action {
     this.setSkill(this.subject().guardSkillId())
   }
 
-  setSkill(skillId) {
+  setSkill(skillId: number) {
     this._item.setObject(global.$dataSkills[skillId])
   }
 
-  setItem(itemId) {
+  setItem(itemId: number) {
     this._item.setObject(global.$dataItems[itemId])
   }
 
-  setItemObject(object) {
+  setItemObject(object: Data_ItemBase | null) {
     this._item.setObject(object)
   }
 
-  setTarget(targetIndex) {
+  setTarget(targetIndex: number) {
     this._targetIndex = targetIndex
   }
 
@@ -116,7 +114,7 @@ export class Game_Action {
   }
 
   numRepeats() {
-    let repeats = this.item().repeats
+    let repeats = (this.item() as Data_Skill).repeats
     if (this.isAttack()) {
       repeats += this.subject().attackTimesAdd()
     }
@@ -124,7 +122,7 @@ export class Game_Action {
   }
 
   checkItemScope(list) {
-    return list.contains(this.item().scope)
+    return list.contains((this.item() as Data_Item).scope)
   }
 
   isForOpponent() {
@@ -160,11 +158,11 @@ export class Game_Action {
   }
 
   numTargets() {
-    return this.isForRandom() ? this.item().scope - 2 : 0
+    return this.isForRandom() ? (this.item() as Data_Skill).scope - 2 : 0
   }
 
   checkDamageType(list) {
-    return list.contains(this.item().damage.type)
+    return list.contains((this.item() as Data_Skill).damage.type)
   }
 
   isHpEffect() {
@@ -196,15 +194,15 @@ export class Game_Action {
   }
 
   isCertainHit() {
-    return this.item().hitType === Game_Action.HITTYPE_CERTAIN
+    return (this.item() as Data_Skill).hitType === Game_Action.HITTYPE_CERTAIN
   }
 
   isPhysical() {
-    return this.item().hitType === Game_Action.HITTYPE_PHYSICAL
+    return (this.item() as Data_Skill).hitType === Game_Action.HITTYPE_PHYSICAL
   }
 
   isMagical() {
-    return this.item().hitType === Game_Action.HITTYPE_MAGICAL
+    return (this.item() as Data_Skill).hitType === Game_Action.HITTYPE_MAGICAL
   }
 
   isAttack() {
@@ -217,7 +215,7 @@ export class Game_Action {
 
   isMagicSkill() {
     if (this.isSkill()) {
-      return global.$dataSystem.magicSkills.contains(this.item().stypeId)
+      return global.$dataSystem.magicSkills.contains((this.item() as Data_Skill).stypeId)
     } else {
       return false
     }
@@ -257,7 +255,7 @@ export class Game_Action {
     const agi = this.subject().agi
     let speed = agi + Math.randomInt(Math.floor(5 + agi / 4))
     if (this.item()) {
-      speed += this.item().speed
+      speed += (this.item() as Data_Skill).speed
     }
     if (this.isAttack()) {
       speed += this.subject().attackSpeed()
@@ -266,7 +264,7 @@ export class Game_Action {
   }
 
   makeTargets() {
-    let targets = []
+    let targets: Game_Battler[] = []
     if (!this._forcing && this.subject().isConfused()) {
       targets = [this.confusionTarget()]
     } else if (this.isForOpponent()) {
@@ -277,8 +275,8 @@ export class Game_Action {
     return this.repeatTargets(targets)
   }
 
-  repeatTargets(targets) {
-    const repeatedTargets = []
+  repeatTargets(targets: Game_Battler[]) {
+    const repeatedTargets: Game_Battler[] = []
     const repeats = this.numRepeats()
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i]
@@ -306,7 +304,7 @@ export class Game_Action {
   }
 
   targetsForOpponents() {
-    let targets = []
+    let targets: Game_Battler[] = []
     const unit = this.opponentsUnit()
     if (this.isForRandom()) {
       for (let i = 0; i < this.numTargets(); i++) {
@@ -325,7 +323,7 @@ export class Game_Action {
   }
 
   targetsForFriends() {
-    let targets = []
+    let targets: Game_Battler[] = []
     const unit = this.friendsUnit()
     if (this.isForUser()) {
       return [this.subject()]
@@ -349,7 +347,7 @@ export class Game_Action {
 
   evaluate() {
     let value = 0
-    this.itemTargetCandidates().forEach(function (target) {
+    this.itemTargetCandidates().forEach((target) => {
       const targetValue = this.evaluateWithTarget(target)
       if (this.isForAll()) {
         value += targetValue
@@ -357,7 +355,7 @@ export class Game_Action {
         value = targetValue
         this._targetIndex = target.index()
       }
-    }, this)
+    })
     value *= this.numRepeats()
     if (value > 0) {
       value += Math.random()
@@ -379,7 +377,7 @@ export class Game_Action {
     }
   }
 
-  evaluateWithTarget(target) {
+  evaluateWithTarget(target: Game_Battler) {
     if (this.isHpEffect()) {
       const value = this.makeDamageValue(target, false)
       if (this.isForOpponent()) {
@@ -389,9 +387,10 @@ export class Game_Action {
         return recovery / target.mhp
       }
     }
+    return 0
   }
 
-  testApply(target) {
+  testApply(target: Game_Battler) {
     return (this.isForDeadFriend() === target.isDead() &&
       (global.$gameParty.inBattle() || this.isForOpponent() ||
         (this.isHpRecover() && target.hp < target.mhp) ||
@@ -399,13 +398,13 @@ export class Game_Action {
         (this.hasItemAnyValidEffects(target))))
   }
 
-  hasItemAnyValidEffects(target) {
-    return this.item().effects.some(function (effect) {
+  hasItemAnyValidEffects(target: Game_Battler) {
+    return (this.item() as Data_Skill | Data_Item).effects.some((effect) => {
       return this.testItemEffect(target, effect)
-    }, this)
+    })
   }
 
-  testItemEffect(target, effect) {
+  testItemEffect(target: Game_Battler, effect: Data_Effect) {
     switch (effect.code) {
     case Game_Action.EFFECT_RECOVER_HP:
       return target.hp < target.mhp || effect.value1 < 0 || effect.value2 < 0
@@ -424,13 +423,13 @@ export class Game_Action {
     case Game_Action.EFFECT_REMOVE_DEBUFF:
       return target.isDebuffAffected(effect.dataId)
     case Game_Action.EFFECT_LEARN_SKILL:
-      return target.isActor() && !target.isLearnedSkill(effect.dataId)
+      return (target instanceof Game_Actor) && !target.isLearnedSkill(effect.dataId)
     default:
       return true
     }
   }
 
-  itemCnt(target) {
+  itemCnt(target: Game_Battler) {
     if (this.isPhysical() && target.canMove()) {
       return target.cnt
     } else {
@@ -438,7 +437,7 @@ export class Game_Action {
     }
   }
 
-  itemMrf(target) {
+  itemMrf(target: Game_Battler) {
     if (this.isMagical()) {
       return target.mrf
     } else {
@@ -446,15 +445,15 @@ export class Game_Action {
     }
   }
 
-  itemHit(target) {
+  itemHit(target: Game_Battler) {
     if (this.isPhysical()) {
-      return this.item().successRate * 0.01 * this.subject().hit
+      return (this.item() as Data_Skill | Data_Item).successRate * 0.01 * this.subject().hit
     } else {
-      return this.item().successRate * 0.01
+      return (this.item() as Data_Skill | Data_Item).successRate * 0.01
     }
   }
 
-  itemEva(target) {
+  itemEva(target: Game_Battler) {
     if (this.isPhysical()) {
       return target.eva
     } else if (this.isMagical()) {
@@ -464,11 +463,11 @@ export class Game_Action {
     }
   }
 
-  itemCri(target) {
-    return this.item().damage.critical ? this.subject().cri * (1 - target.cev) : 0
+  itemCri(target: Game_Battler) {
+    return (this.item() as Data_Skill | Data_Item).damage.critical ? this.subject().cri * (1 - target.cev) : 0
   }
 
-  apply(target) {
+  apply(target: Game_Battler) {
     const result = target.result()
     this.subject().clearResult()
     result.clear()
@@ -478,20 +477,20 @@ export class Game_Action {
     result.physical = this.isPhysical()
     result.drain = this.isDrain()
     if (result.isHit()) {
-      if (this.item().damage.type > 0) {
+      if ((this.item() as Data_Skill | Data_Item).damage.type > 0) {
         result.critical = (Math.random() < this.itemCri(target))
         const value = this.makeDamageValue(target, result.critical)
         this.executeDamage(target, value)
       }
-      this.item().effects.forEach(function (effect) {
+      (this.item() as Data_Skill | Data_Item).effects.forEach((effect) => {
         this.applyItemEffect(target, effect)
-      }, this)
+      })
       this.applyItemUserEffect(target)
     }
   }
 
-  makeDamageValue(target, critical) {
-    const item = this.item()
+  makeDamageValue(target: Game_Battler, critical = false) {
+    const item = this.item() as Data_Skill | Data_Item
     const baseValue = this.evalDamageFormula(target)
     let value = baseValue * this.calcElementRate(target)
     if (this.isPhysical()) {
@@ -512,12 +511,12 @@ export class Game_Action {
     return value
   }
 
-  evalDamageFormula(target) {
+  evalDamageFormula(target: Game_Battler) {
     try {
-      const item = this.item()
-      const a = this.subject()
-      const b = target
-      const v = global.$gameVariables._data
+      const item = this.item() as Data_Skill | Data_Item
+      // const a = this.subject()
+      // const b = target
+      // const v = global.$gameVariables._data
       const sign = ([3, 4].contains(item.damage.type) ? -1 : 1)
       let value = Math.max(eval(item.damage.formula), 0) * sign
       if (isNaN(value)) value = 0
@@ -527,39 +526,40 @@ export class Game_Action {
     }
   }
 
-  calcElementRate(target) {
-    if (this.item().damage.elementId < 0) {
+  calcElementRate(target: Game_Battler) {
+    const item = this.item() as Data_Skill | Data_Item
+    if (item.damage.elementId < 0) {
       return this.elementsMaxRate(target, this.subject().attackElements())
     } else {
-      return target.elementRate(this.item().damage.elementId)
+      return target.elementRate(item.damage.elementId)
     }
   }
 
-  elementsMaxRate(target, elements) {
+  elementsMaxRate(target: Game_Battler, elements: number[]) {
     if (elements.length > 0) {
-      return Math.max.apply(null, elements.map(function (elementId) {
+      return Math.max.apply(null, elements.map((elementId) => {
         return target.elementRate(elementId)
-      }, this))
+      }))
     } else {
       return 1
     }
   }
 
-  applyCritical(damage) {
+  applyCritical(damage: number) {
     return damage * 3
   }
 
-  applyVariance(damage, variance) {
+  applyVariance(damage: number, variance: number) {
     const amp = Math.floor(Math.max(Math.abs(damage) * variance / 100, 0))
     const v = Math.randomInt(amp + 1) + Math.randomInt(amp + 1) - amp
     return damage >= 0 ? damage + v : damage - v
   }
 
-  applyGuard(damage, target) {
+  applyGuard(damage: number, target: Game_Battler) {
     return damage / (damage > 0 && target.isGuard() ? 2 * target.grd : 1)
   }
 
-  executeDamage(target, value) {
+  executeDamage(target: Game_Battler, value: number) {
     const result = target.result()
     if (value === 0) {
       result.critical = false
@@ -572,7 +572,7 @@ export class Game_Action {
     }
   }
 
-  executeHpDamage(target, value) {
+  executeHpDamage(target: Game_Battler, value: number) {
     if (this.isDrain()) {
       value = Math.min(target.hp, value)
     }
@@ -584,7 +584,7 @@ export class Game_Action {
     this.gainDrainedHp(value)
   }
 
-  executeMpDamage(target, value) {
+  executeMpDamage(target: Game_Battler, value: number) {
     if (!this.isMpRecover()) {
       value = Math.min(target.mp, value)
     }
@@ -595,7 +595,7 @@ export class Game_Action {
     this.gainDrainedMp(value)
   }
 
-  gainDrainedHp(value) {
+  gainDrainedHp(value: number) {
     if (this.isDrain()) {
       let gainTarget = this.subject()
       if (this._reflectionTarget !== undefined) {
@@ -605,7 +605,7 @@ export class Game_Action {
     }
   }
 
-  gainDrainedMp(value) {
+  gainDrainedMp(value: number) {
     if (this.isDrain()) {
       let gainTarget = this.subject()
       if (this._reflectionTarget !== undefined) {
@@ -615,7 +615,7 @@ export class Game_Action {
     }
   }
 
-  applyItemEffect(target, effect) {
+  applyItemEffect(target: Game_Battler, effect: Data_Effect) {
     switch (effect.code) {
     case Game_Action.EFFECT_RECOVER_HP:
       this.itemEffectRecoverHp(target, effect)
@@ -659,7 +659,7 @@ export class Game_Action {
     }
   }
 
-  itemEffectRecoverHp(target, effect) {
+  itemEffectRecoverHp(target: Game_Battler, effect: Data_Effect) {
     let value = (target.mhp * effect.value1 + effect.value2) * target.rec
     if (this.isItem()) {
       value *= this.subject().pha
@@ -671,7 +671,7 @@ export class Game_Action {
     }
   }
 
-  itemEffectRecoverMp(target, effect) {
+  itemEffectRecoverMp(target: Game_Battler, effect: Data_Effect) {
     let value = (target.mmp * effect.value1 + effect.value2) * target.rec
     if (this.isItem()) {
       value *= this.subject().pha
@@ -683,7 +683,7 @@ export class Game_Action {
     }
   }
 
-  itemEffectGainTp(target, effect) {
+  itemEffectGainTp(target: Game_Battler, effect: Data_Effect) {
     const value = Math.floor(effect.value1)
     if (value !== 0) {
       target.gainTp(value)
@@ -691,7 +691,7 @@ export class Game_Action {
     }
   }
 
-  itemEffectAddState(target, effect) {
+  itemEffectAddState(target: Game_Battler, effect: Data_Effect) {
     if (effect.dataId === 0) {
       this.itemEffectAddAttackState(target, effect)
     } else {
@@ -699,8 +699,8 @@ export class Game_Action {
     }
   }
 
-  itemEffectAddAttackState(target, effect) {
-    this.subject().attackStates().forEach(function (stateId) {
+  itemEffectAddAttackState(target: Game_Battler, effect: Data_Effect) {
+    this.subject().attackStates().forEach((stateId) => {
       let chance = effect.value1
       chance *= target.stateRate(stateId)
       chance *= this.subject().attackStatesRate(stateId)
@@ -709,10 +709,10 @@ export class Game_Action {
         target.addState(stateId)
         this.makeSuccess(target)
       }
-    }.bind(this), target)
+    }, target)
   }
 
-  itemEffectAddNormalState(target, effect) {
+  itemEffectAddNormalState(target: Game_Battler, effect: Data_Effect) {
     let chance = effect.value1
     if (!this.isCertainHit()) {
       chance *= target.stateRate(effect.dataId)
@@ -724,7 +724,7 @@ export class Game_Action {
     }
   }
 
-  itemEffectRemoveState(target, effect) {
+  itemEffectRemoveState(target: Game_Battler, effect: Data_Effect) {
     const chance = effect.value1
     if (Math.random() < chance) {
       target.removeState(effect.dataId)
@@ -732,12 +732,12 @@ export class Game_Action {
     }
   }
 
-  itemEffectAddBuff(target, effect) {
+  itemEffectAddBuff(target: Game_Battler, effect: Data_Effect) {
     target.addBuff(effect.dataId, effect.value1)
     this.makeSuccess(target)
   }
 
-  itemEffectAddDebuff(target, effect) {
+  itemEffectAddDebuff(target: Game_Battler, effect: Data_Effect) {
     const chance = target.debuffRate(effect.dataId) * this.lukEffectRate(target)
     if (Math.random() < chance) {
       target.addDebuff(effect.dataId, effect.value1)
@@ -745,61 +745,61 @@ export class Game_Action {
     }
   }
 
-  itemEffectRemoveBuff(target, effect) {
+  itemEffectRemoveBuff(target: Game_Battler, effect: Data_Effect) {
     if (target.isBuffAffected(effect.dataId)) {
       target.removeBuff(effect.dataId)
       this.makeSuccess(target)
     }
   }
 
-  itemEffectRemoveDebuff(target, effect) {
+  itemEffectRemoveDebuff(target: Game_Battler, effect: Data_Effect) {
     if (target.isDebuffAffected(effect.dataId)) {
       target.removeBuff(effect.dataId)
       this.makeSuccess(target)
     }
   }
 
-  itemEffectSpecial(target, effect) {
+  itemEffectSpecial(target: Game_Battler, effect: Data_Effect) {
     if (effect.dataId === Game_Action.SPECIAL_EFFECT_ESCAPE) {
       target.escape()
       this.makeSuccess(target)
     }
   }
 
-  itemEffectGrow(target, effect) {
+  itemEffectGrow(target: Game_Battler, effect: Data_Effect) {
     target.addParam(effect.dataId, Math.floor(effect.value1))
     this.makeSuccess(target)
   }
 
-  itemEffectLearnSkill(target, effect) {
-    if (target.isActor()) {
+  itemEffectLearnSkill(target: Game_Battler, effect: Data_Effect) {
+    if (target instanceof Game_Actor) {
       target.learnSkill(effect.dataId)
       this.makeSuccess(target)
     }
   }
 
-  itemEffectCommonEvent(target, effect) {
+  itemEffectCommonEvent(target: Game_Battler, effect: Data_Effect) {
     // empty
   }
 
-  makeSuccess(target) {
+  makeSuccess(target: Game_Battler) {
     target.result().success = true
   }
 
-  applyItemUserEffect(target) {
-    const value = Math.floor(this.item().tpGain * this.subject().tcr)
+  applyItemUserEffect(target: Game_Battler) {
+    const value = Math.floor((this.item() as Data_Item).tpGain * this.subject().tcr)
     this.subject().gainSilentTp(value)
   }
 
-  lukEffectRate(target) {
+  lukEffectRate(target: Game_Battler) {
     return Math.max(1.0 + (this.subject().luk - target.luk) * 0.001, 0.0)
   }
 
   applyGlobal() {
-    this.item().effects.forEach(function (effect) {
+    (this.item() as Data_Item).effects.forEach((effect) => {
       if (effect.code === Game_Action.EFFECT_COMMON_EVENT) {
         global.$gameTemp.reserveCommonEvent(effect.dataId)
       }
-    }, this)
+    })
   }
 }

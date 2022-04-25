@@ -4,41 +4,30 @@ import {SoundManager} from '../managers/SoundManager'
 import {DataManager, global} from '../managers/DataManager'
 import {Game_Action} from './Game_Action'
 import {BattleManager} from '../managers/BattleManager'
+import {Data_Item, Data_ItemBase, Data_Skill} from '../types/global'
+
+type Animation = { animationId: number, mirror: boolean, delay: number }
 
 // Game_Battler
 //
 // The superclass of Game_Actor and Game_Enemy. It contains methods for sprites
 // and actions.
-export class Game_Battler extends Game_BattlerBase {
+export abstract class Game_Battler extends Game_BattlerBase {
 
-  private _actions = []
+  private _actions: Game_Action[] = []
   private _speed = 0
   private _result = new Game_ActionResult()
   private _actionState = ''
   private _lastTargetIndex = 0
-  private _animations = []
+  private _animations: Animation[] = []
   private _damagePopup = false
-  private _effectType = null
-  private _motionType = null
+  private _effectType: string | null = null
+  private _motionType: string | null = null
   private _weaponImageId = 0
   private _motionRefresh = false
   private _selected = false
 
-  override initMembers() {
-    super.initMembers()
-    this._actions = []
-    this._speed = 0
-    this._result = new Game_ActionResult()
-    this._actionState = ''
-    this._lastTargetIndex = 0
-    this._animations = []
-    this._damagePopup = false
-    this._effectType = null
-    this._motionType = null
-    this._weaponImageId = 0
-    this._motionRefresh = false
-    this._selected = false
-  }
+  abstract name(): string
 
   clearAnimations() {
     this._animations = []
@@ -61,11 +50,11 @@ export class Game_Battler extends Game_BattlerBase {
     this._motionRefresh = false
   }
 
-  requestEffect(effectType) {
+  requestEffect(effectType: string) {
     this._effectType = effectType
   }
 
-  requestMotion(motionType) {
+  requestMotion(motionType: string) {
     this._motionType = motionType
   }
 
@@ -125,24 +114,25 @@ export class Game_Battler extends Game_BattlerBase {
     return this._animations.shift()
   }
 
-  startAnimation(animationId, mirror, delay) {
-    const data = {animationId: animationId, mirror: mirror, delay: delay}
-    this._animations.push(data)
+  abstract isSpriteVisible(): boolean
+
+  startAnimation(animationId: number, mirror: boolean, delay: number) {
+    this._animations.push({animationId, mirror, delay})
   }
 
   startDamagePopup() {
     this._damagePopup = true
   }
 
-  startWeaponAnimation(weaponImageId) {
+  startWeaponAnimation(weaponImageId: number) {
     this._weaponImageId = weaponImageId
   }
 
-  action(index) {
+  action(index: number) {
     return this._actions[index]
   }
 
-  setAction(index, action) {
+  setAction(index: number, action: Game_Action) {
     this._actions[index] = action
   }
 
@@ -171,7 +161,7 @@ export class Game_Battler extends Game_BattlerBase {
     }
   }
 
-  addState(stateId) {
+  addState(stateId: number) {
     if (this.isStateAddable(stateId)) {
       if (!this.isStateAffected(stateId)) {
         this.addNewState(stateId)
@@ -182,28 +172,28 @@ export class Game_Battler extends Game_BattlerBase {
     }
   }
 
-  isStateAddable(stateId) {
+  isStateAddable(stateId: number) {
     return (this.isAlive() && global.$dataStates[stateId] &&
       !this.isStateResist(stateId) &&
       !this._result.isStateRemoved(stateId) &&
       !this.isStateRestrict(stateId))
   }
 
-  isStateRestrict(stateId) {
+  isStateRestrict(stateId: number) {
     return global.$dataStates[stateId].removeByRestriction && this.isRestricted()
   }
 
   override onRestrict() {
     super.onRestrict()
     this.clearActions()
-    this.states().forEach(function (state) {
+    this.states().forEach((state) => {
       if (state.removeByRestriction) {
         this.removeState(state.id)
       }
-    }, this)
+    })
   }
 
-  removeState(stateId) {
+  removeState(stateId: number) {
     if (this.isStateAffected(stateId)) {
       if (stateId === this.deathStateId()) {
         this.revive()
@@ -223,7 +213,7 @@ export class Game_Battler extends Game_BattlerBase {
     SoundManager.playEscape()
   }
 
-  addBuff(paramId, turns) {
+  addBuff(paramId: number, turns: number) {
     if (this.isAlive()) {
       this.increaseBuff(paramId)
       if (this.isBuffAffected(paramId)) {
@@ -234,7 +224,7 @@ export class Game_Battler extends Game_BattlerBase {
     }
   }
 
-  addDebuff(paramId, turns) {
+  addDebuff(paramId: number, turns: number) {
     if (this.isAlive()) {
       this.decreaseBuff(paramId)
       if (this.isDebuffAffected(paramId)) {
@@ -245,7 +235,7 @@ export class Game_Battler extends Game_BattlerBase {
     }
   }
 
-  removeBuff(paramId) {
+  removeBuff(paramId: number) {
     if (this.isAlive() && this.isBuffOrDebuffAffected(paramId)) {
       this.eraseBuff(paramId)
       this._result.pushRemovedBuff(paramId)
@@ -254,11 +244,11 @@ export class Game_Battler extends Game_BattlerBase {
   }
 
   removeBattleStates() {
-    this.states().forEach(function (state) {
+    this.states().forEach((state) => {
       if (state.removeAtBattleEnd) {
         this.removeState(state.id)
       }
-    }, this)
+    })
   }
 
   removeAllBuffs() {
@@ -267,12 +257,12 @@ export class Game_Battler extends Game_BattlerBase {
     }
   }
 
-  removeStatesAuto(timing) {
-    this.states().forEach(function (state) {
+  removeStatesAuto(timing: number) {
+    this.states().forEach((state) => {
       if (this.isStateExpired(state.id) && state.autoRemovalTiming === timing) {
         this.removeState(state.id)
       }
-    }, this)
+    })
   }
 
   removeBuffsAuto() {
@@ -284,15 +274,15 @@ export class Game_Battler extends Game_BattlerBase {
   }
 
   removeStatesByDamage() {
-    this.states().forEach(function (state) {
+    this.states().forEach((state) => {
       if (state.removeByDamage && Math.randomInt(100) < state.chanceByDamage) {
         this.removeState(state.id)
       }
-    }, this)
+    })
   }
 
   makeActionTimes() {
-    return this.actionPlusSet().reduce(function (r, p) {
+    return this.actionPlusSet().reduce((r, p) => {
       return Math.random() < p ? r + 1 : r
     }, 1)
   }
@@ -313,9 +303,7 @@ export class Game_Battler extends Game_BattlerBase {
   }
 
   makeSpeed() {
-    this._speed = Math.min.apply(null, this._actions.map(function (action) {
-      return action.speed()
-    })) || 0
+    this._speed = Math.min(...this._actions.map((action) => action.speed())) || 0
   }
 
   currentAction() {
@@ -326,7 +314,7 @@ export class Game_Battler extends Game_BattlerBase {
     this._actions.shift()
   }
 
-  setLastTarget(target) {
+  setLastTarget(target: Game_Battler) {
     if (target) {
       this._lastTargetIndex = target.index()
     } else {
@@ -334,7 +322,7 @@ export class Game_Battler extends Game_BattlerBase {
     }
   }
 
-  forceAction(skillId, targetIndex) {
+  forceAction(skillId: number, targetIndex: number) {
     this.clearActions()
     const action = new Game_Action(this, true)
     action.setSkill(skillId)
@@ -348,35 +336,35 @@ export class Game_Battler extends Game_BattlerBase {
     this._actions.push(action)
   }
 
-  useItem(item) {
+  useItem(item: Data_ItemBase | null) {
     if (DataManager.isSkill(item)) {
-      this.paySkillCost(item)
+      this.paySkillCost(item as Data_Skill)
     } else if (DataManager.isItem(item)) {
-      this.consumeItem(item)
+      this.consumeItem(item as Data_Item)
     }
   }
 
-  consumeItem(item) {
+  consumeItem(item: Data_Item) {
     global.$gameParty.consumeItem(item)
   }
 
-  gainHp(value) {
+  gainHp(value: number) {
     this._result.hpDamage = -value
     this._result.hpAffected = true
     this.setHp(this.hp + value)
   }
 
-  gainMp(value) {
+  gainMp(value: number) {
     this._result.mpDamage = -value
     this.setMp(this.mp + value)
   }
 
-  gainTp(value) {
+  gainTp(value: number) {
     this._result.tpDamage = -value
     this.setTp(this.tp + value)
   }
 
-  gainSilentTp(value) {
+  gainSilentTp(value: number) {
     this.setTp(this.tp + value)
   }
 
@@ -388,7 +376,7 @@ export class Game_Battler extends Game_BattlerBase {
     this.setTp(0)
   }
 
-  chargeTpByDamage(damageRate) {
+  chargeTpByDamage(damageRate: number) {
     const value = Math.floor(50 * damageRate * this.tcr)
     this.gainSilentTp(value)
   }
@@ -460,12 +448,12 @@ export class Game_Battler extends Game_BattlerBase {
     this.appear()
   }
 
-  onDamage(value) {
+  onDamage(value: number) {
     this.removeStatesByDamage()
     this.chargeTpByDamage(value / this.mhp)
   }
 
-  setActionState(actionState) {
+  setActionState(actionState: string) {
     this._actionState = actionState
     this.requestMotionRefresh()
   }
@@ -488,29 +476,25 @@ export class Game_Battler extends Game_BattlerBase {
 
   isChanting() {
     if (this.isWaiting()) {
-      return this._actions.some(function (action) {
-        return action.isMagicSkill()
-      })
+      return this._actions.some((action) => action.isMagicSkill())
     }
     return false
   }
 
   isGuardWaiting() {
     if (this.isWaiting()) {
-      return this._actions.some(function (action) {
-        return action.isGuard()
-      })
+      return this._actions.some((action) => action.isGuard())
     }
     return false
   }
 
-  performActionStart(action) {
+  performActionStart(action: Game_Action) {
     if (!action.isGuard()) {
       this.setActionState('acting')
     }
   }
 
-  performAction(action) {
+  performAction(action: Game_Action) {
     // empty
   }
 
@@ -518,9 +502,7 @@ export class Game_Battler extends Game_BattlerBase {
     this.setActionState('done')
   }
 
-  performDamage() {
-    // empty
-  }
+  abstract performDamage()
 
   performMiss() {
     SoundManager.playMiss()
@@ -546,11 +528,9 @@ export class Game_Battler extends Game_BattlerBase {
     SoundManager.playReflection()
   }
 
-  performSubstitute(target) {
+  performSubstitute(target: Game_Battler) {
     // empty
   }
 
-  performCollapse() {
-    // empty
-  }
+  abstract performCollapse()
 }

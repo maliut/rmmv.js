@@ -1,8 +1,10 @@
 import * as PIXI from 'pixi.js'
 import {Graphics} from './Graphics'
 import {Window} from './Window'
+import {assert, IUpdatable} from '../utils'
+import {Rectangle} from './Rectangle'
 
-export class WindowLayer extends PIXI.Container {
+export class WindowLayer extends PIXI.Container implements IUpdatable {
 
   static voidFilter = new PIXI.filters.VoidFilter()
 
@@ -10,9 +12,9 @@ export class WindowLayer extends PIXI.Container {
   private _height = 0
   private _tempCanvas: HTMLCanvasElement | null = null
   private _translationMatrix = [1, 0, 0, 0, 1, 0, 0, 0, 1]
-  private readonly _windowMask: PIXI.Graphics | null = null
-  private readonly _windowRect: PIXI.Rectangle | null = null
-  private _renderSprite = null // todo
+  private readonly _windowMask: PIXI.Graphics
+  private readonly _windowRect: PIXI.Rectangle
+  private _renderSprite = null
 
   /**
    * The width of the window layer in pixels.
@@ -20,7 +22,7 @@ export class WindowLayer extends PIXI.Container {
    * @property width
    * @type Number
    */
-  // @ts-ignore todo 似乎没用
+  // @ts-ignore
   get width() {
     return this._width
   }
@@ -35,7 +37,7 @@ export class WindowLayer extends PIXI.Container {
    * @property height
    * @type Number
    */
-  // @ts-ignore todo 似乎没用
+  // @ts-ignore
   get height() {
     return this._height
   }
@@ -56,7 +58,7 @@ export class WindowLayer extends PIXI.Container {
     this._windowMask.beginFill(0xffffff, 1)
     this._windowMask.drawRect(0, 0, 0, 0)
     this._windowMask.endFill()
-    // @ts-ignore
+    // @ts-ignore graphicsData is protected
     this._windowRect = this._windowMask.graphicsData[0].shape
 
     this.filterArea = new PIXI.Rectangle()
@@ -92,9 +94,8 @@ export class WindowLayer extends PIXI.Container {
    * @method update
    */
   update() {
-    this.children.forEach(function(child) {
-      // @ts-ignore
-      child.update?.()
+    this.children.forEach((child) => {
+      (child as unknown as IUpdatable).update?.()
     })
   }
 
@@ -113,6 +114,7 @@ export class WindowLayer extends PIXI.Container {
     const realCanvasContext = renderer.context
     const context = this._tempCanvas.getContext('2d')
 
+    assert(context !== null && realCanvasContext !== null)
     context.save()
     context.clearRect(0, 0, Graphics.width, Graphics.height)
     context.beginPath()
@@ -152,7 +154,7 @@ export class WindowLayer extends PIXI.Container {
     const ry = this.y + window.y + window.height / 2 * (1 - window.openness / 255)
     const rw = window.width
     const rh = window.height * window.openness / 255
-    renderSession.context.clearRect(rx, ry, rw, rh)
+    renderSession.context!.clearRect(rx, ry, rw, rh)
   }
 
   override renderWebGL(renderer: PIXI.WebGLRenderer) {
@@ -160,28 +162,27 @@ export class WindowLayer extends PIXI.Container {
       return
     }
 
-    if (this.children.length==0) {
+    if (this.children.length == 0) {
       return
     }
 
     renderer.flush()
-    // @ts-ignore
-    this.filterArea.copy(this)
-    // @ts-ignore
+    this.filterArea.copy(new Rectangle(this.x, this.y, this.width, this.height))
+    // @ts-ignore 这里源码里写的是 PIXI.DisplayObject 因此没问题
     renderer.filterManager.pushFilter(this, this.filters)
     renderer.currentRenderer.start()
 
     const shift = new PIXI.Point()
     const rt = renderer._activeRenderTarget
     const projectionMatrix = rt.projectionMatrix
-    shift.x = Math.round((projectionMatrix.tx + 1) / 2 * rt.sourceFrame.width)
-    shift.y = Math.round((projectionMatrix.ty + 1) / 2 * rt.sourceFrame.height)
+    shift.x = Math.round((projectionMatrix.tx + 1) / 2 * rt.sourceFrame!.width)
+    shift.y = Math.round((projectionMatrix.ty + 1) / 2 * rt.sourceFrame!.height)
 
     for (let i = 0; i < this.children.length; i++) {
       const child = this.children[i]
       if (child instanceof Window && child.visible && child.openness > 0) {
         this._maskWindow(child, shift)
-        // @ts-ignore
+        // @ts-ignore 这里源码里写的是 PIXI.DisplayObject 因此没问题
         renderer.maskManager.pushScissorMask(this, this._windowMask)
         renderer.clear()
         renderer.maskManager.popScissorMask()
@@ -203,9 +204,8 @@ export class WindowLayer extends PIXI.Container {
   }
 
   private _maskWindow(window: Window, shift: PIXI.Point) {
-    // @ts-ignore
-    this._windowMask._currentBounds = null
-    // @ts-ignore
+    // this._windowMask._currentBounds = null
+    // @ts-ignore 有点迷惑，先不改
     this._windowMask.boundsDirty = true
     const rect = this._windowRect
     rect.x = this.x + shift.x + window.x

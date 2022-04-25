@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js'
 import {Tilemap} from './Tilemap'
-import {PluginManager} from '../managers/PluginManager'
 
 // we need this constant for some platforms (Samsung S4, S5, Tab4, HTC One H8)
 PIXI.glCore.VertexArrayObject.FORCE_NATIVE = true
@@ -18,10 +17,11 @@ export class ShaderTilemap extends Tilemap {
 
   roundPixels = true
 
-  lowerZLayer: any
-  upperZLayer: any
-  lowerLayer: any
-  upperLayer: any
+  // 这几个会在父类构造函数中调用子类方法初始化，这里无需额外初始化，否则执行顺序上还会冲掉前面的值
+  lowerZLayer!: PIXI.tilemap.ZLayer
+  upperZLayer!: PIXI.tilemap.ZLayer
+  lowerLayer!: PIXI.tilemap.CompositeRectTileLayer
+  upperLayer!: PIXI.tilemap.CompositeRectTileLayer
 
   private _lastBitmapLength?: number
 
@@ -79,10 +79,8 @@ export class ShaderTilemap extends Tilemap {
    *
    * @method updateBitmaps
    */
-  refreshTileset() {
-    const bitmaps = this.bitmaps.map(function (x) {
-      return x.baseTexture ? new PIXI.Texture(x.baseTexture) : x
-    })
+  override refreshTileset() {
+    const bitmaps = this.bitmaps.map((x) => new PIXI.Texture(x.baseTexture))
     this.lowerLayer.setBitmaps(bitmaps)
     this.upperLayer.setBitmaps(bitmaps)
   }
@@ -107,7 +105,7 @@ export class ShaderTilemap extends Tilemap {
       this._needsRepaint = false
     }
     this._sortChildren()
-    PIXI.Container.prototype.updateTransform.call(this) // todo 注意这里调的不是父类的，而是 pixi 的方法
+    PIXI.Container.prototype.updateTransform.call(this) // 注意这里调的不是父类的，而是 pixi 的方法
   }
 
   protected override _createLayers() {
@@ -125,9 +123,8 @@ export class ShaderTilemap extends Tilemap {
       this.addChild(this.lowerZLayer = new PIXI.tilemap.ZLayer(this, 0))
       this.addChild(this.upperZLayer = new PIXI.tilemap.ZLayer(this, 4))
 
-      const parameters = PluginManager.parameters('ShaderTilemap')
-      // eslint-disable-next-line no-prototype-builtins
-      const useSquareShader = Number(parameters.hasOwnProperty('squareShader') ? parameters['squareShader'] : 0)
+      // const parameters = PluginManager.parameters('ShaderTilemap')
+      const useSquareShader = Number(/*parameters.hasOwnProperty('squareShader') ? parameters['squareShader'] :*/ 0)
 
       this.lowerZLayer.addChild(this.lowerLayer = new PIXI.tilemap.CompositeRectTileLayer(0, [], useSquareShader))
       this.lowerLayer.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5])
@@ -153,14 +150,7 @@ export class ShaderTilemap extends Tilemap {
   protected override _paintAllTiles(startX: number, startY: number) {
     this.lowerZLayer.clear()
     this.upperZLayer.clear()
-    // todo can call super
-    const tileCols = Math.ceil(this._width / this._tileWidth) + 1
-    const tileRows = Math.ceil(this._height / this._tileHeight) + 1
-    for (let y = 0; y < tileRows; y++) {
-      for (let x = 0; x < tileCols; x++) {
-        this._paintTiles(startX, startY, x, y)
-      }
-    }
+    super._paintAllTiles(startX, startY)
   }
 
   protected override _paintTiles(startX: number, startY: number, x: number, y: number) {
@@ -187,7 +177,7 @@ export class ShaderTilemap extends Tilemap {
       this._drawTile(lowerLayer, tileId1, dx, dy)
     }
 
-    this._drawShadow(lowerLayer, shadowBits, dx, dy)
+    this._drawShadowChild(lowerLayer as PIXI.tilemap.RectTileLayer, shadowBits, dx, dy)
     if (this._isTableTile(upperTileId1) && !this._isTableTile(tileId1)) {
       if (!Tilemap.isShadowingTile(tileId0)) {
         this._drawTableEdge(lowerLayer, upperTileId1, dx, dy)
@@ -269,8 +259,7 @@ export class ShaderTilemap extends Tilemap {
         by = ty * 6 + Math.floor(tx / 2) % 2 * 3
         if (kind % 2 === 0) {
           animX = 2
-        }
-        else {
+        } else {
           bx += 6
           autotileTable = Tilemap.WATERFALL_AUTOTILE_TABLE
           animY = 1
@@ -311,12 +300,12 @@ export class ShaderTilemap extends Tilemap {
         const qsy2 = 3
         if (qsy === 1) {
           //qsx2 = [0, 3, 2, 1][qsx];
-          qsx2 = (4-qsx)%4
+          qsx2 = (4 - qsx) % 4
         }
         const sx2 = (bx * 2 + qsx2) * w1
         const sy2 = (by * 2 + qsy2) * h1
         layer.addRect(setNumber, sx2, sy2, dx1, dy1, w1, h1, animX, animY)
-        layer.addRect(setNumber, sx1, sy1, dx1, dy1+h1/2, w1, h1/2, animX, animY)
+        layer.addRect(setNumber, sx1, sy1, dx1, dy1 + h1 / 2, w1, h1 / 2, animX, animY)
       } else {
         layer.addRect(setNumber, sx1, sy1, dx1, dy1, w1, h1, animX, animY)
       }
@@ -343,12 +332,12 @@ export class ShaderTilemap extends Tilemap {
         const sy1 = (by * 2 + qsy) * h1 + h1 / 2
         const dx1 = dx + (i % 2) * w1
         const dy1 = dy + Math.floor(i / 2) * h1
-        layer.addRect(setNumber, sx1, sy1, dx1, dy1, w1, h1/2)
+        layer.addRect(setNumber, sx1, sy1, dx1, dy1, w1, h1 / 2)
       }
     }
   }
 
-  protected override _drawShadow(layer, shadowBits, dx, dy) {
+  protected _drawShadowChild(layer: PIXI.tilemap.RectTileLayer, shadowBits: number, dx: number, dy: number) {
     if (shadowBits & 0x0f) {
       const w1 = this._tileWidth / 2
       const h1 = this._tileHeight / 2

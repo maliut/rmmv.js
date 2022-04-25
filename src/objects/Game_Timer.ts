@@ -7,7 +7,7 @@ export class Game_Timer {
   private _frames = 0
   private _working = false
 
-  update(sceneActive) {
+  update(sceneActive: boolean) {
     if (sceneActive && this._working && this._frames > 0) {
       this._frames--
       if (this._frames === 0) {
@@ -16,7 +16,7 @@ export class Game_Timer {
     }
   }
 
-  start(count) {
+  start(count: number) {
     this._frames = count
     this._working = true
   }

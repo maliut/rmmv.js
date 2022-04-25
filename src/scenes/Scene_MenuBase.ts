@@ -3,15 +3,16 @@ import {Sprite} from '../core/Sprite'
 import {SceneManager} from '../managers/SceneManager'
 import {global} from '../managers/DataManager'
 import {Window_Help} from '../windows/Window_Help'
+import {Game_Actor} from '../objects/Game_Actor'
 
 // Scene_MenuBase
 //
 // The superclass of all the menu-type scenes.
 export abstract class Scene_MenuBase extends Scene_Base {
 
-  protected _actor
-  private _backgroundSprite: Sprite | null = null
-  protected _helpWindow
+  protected _actor!: Game_Actor
+  private _backgroundSprite!: Sprite
+  protected _helpWindow!: Window_Help
 
   override create() {
     super.create()

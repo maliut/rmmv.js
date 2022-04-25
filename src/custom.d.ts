@@ -1,10 +1,31 @@
 declare let nw: any
 declare let FPSMeter: any
-declare let LZString: any
 
-// todo 完善插件定义
+declare class LZString {
+  static compressToBase64(data: string | null): string
+  static decompressFromBase64(data: string | null): string
+}
+
 declare namespace PIXI {
-  const tilemap: any
+  namespace tilemap {
+    namespace TileRenderer {
+      let SCALE_MODE: number
+      let DO_CLEAR: boolean
+    }
+    class RectTileLayer extends PIXI.Container {
+      addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX?, animY?)
+    }
+    class ZLayer extends PIXI.Container {
+      constructor(tilemap: PIXI.Container, zIndex: number)
+      clear()
+      z: number
+    }
+    class CompositeRectTileLayer extends PIXI.Container {
+      shadowColor: Float32Array
+      constructor(zIndex: number, bitmaps: PIXI.Texture[], useSquare: number, texPerChild?: number)
+      setBitmaps(bitmaps: PIXI.Texture[])
+    }
+  }
 
   namespace extras {
     const PictureTilingSprite: typeof PIXI.extras.TilingSprite

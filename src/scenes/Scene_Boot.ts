@@ -59,6 +59,7 @@ export class Scene_Boot extends Scene_Base {
         throw new Error('Failed to load GameFont')
       }
     }
+    return false
   }
 
   override start() {

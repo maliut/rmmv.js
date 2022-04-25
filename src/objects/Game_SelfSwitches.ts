@@ -5,21 +5,13 @@ import {global} from '../managers/DataManager'
 // The game object class for self switches.
 export class Game_SelfSwitches {
 
-  private _data = {}
+  private _data: Record<string, boolean> = {}
 
-  constructor() {
-    this.clear()
+  value(key: string) {
+    return this._data[key]
   }
 
-  clear() {
-    this._data = {}
-  }
-
-  value(key) {
-    return !!this._data[key]
-  }
-
-  setValue(key, value) {
+  setValue(key: string, value: boolean) {
     if (value) {
       this._data[key] = true
     } else {

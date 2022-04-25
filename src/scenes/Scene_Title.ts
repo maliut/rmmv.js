@@ -17,10 +17,10 @@ import {Window_TitleCommand} from '../windows/Window_TitleCommand'
 // The scene class of the title screen.
 export class Scene_Title extends Scene_Base {
 
-  private _backSprite1
-  private _backSprite2
-  private _commandWindow
-  private _gameTitleSprite
+  private _backSprite1!: Sprite
+  private _backSprite2!: Sprite
+  private _commandWindow!: Window_TitleCommand
+  private _gameTitleSprite!: Sprite
 
   override create() {
     super.create()
@@ -71,14 +71,17 @@ export class Scene_Title extends Scene_Base {
   }
 
   drawGameTitle() {
-    const x = 20
-    const y = Graphics.height / 4
-    const maxWidth = Graphics.width - x * 2
-    const text = global.$dataSystem.gameTitle
-    this._gameTitleSprite.bitmap.outlineColor = 'black'
-    this._gameTitleSprite.bitmap.outlineWidth = 8
-    this._gameTitleSprite.bitmap.fontSize = 72
-    this._gameTitleSprite.bitmap.drawText(text, x, y, maxWidth, 48, 'center')
+    const bitmap = this._gameTitleSprite.bitmap
+    if (bitmap !== null) {
+      const x = 20
+      const y = Graphics.height / 4
+      const maxWidth = Graphics.width - x * 2
+      const text = global.$dataSystem.gameTitle
+      bitmap.outlineColor = 'black'
+      bitmap.outlineWidth = 8
+      bitmap.fontSize = 72
+      bitmap.drawText(text, x, y, maxWidth, 48, 'center')
+    }
   }
 
   centerSprite(sprite) {

@@ -9,9 +9,9 @@ import {Window_DebugEdit} from '../windows/Window_DebugEdit'
 // The scene class of the debug screen.
 export class Scene_Debug extends Scene_MenuBase {
 
-  private _rangeWindow
-  private _editWindow
-  private _debugHelpWindow
+  private _rangeWindow!: Window_DebugRange
+  private _editWindow!: Window_DebugEdit
+  private _debugHelpWindow!: Window_Base
 
   override create() {
     super.create()

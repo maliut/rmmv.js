@@ -8,13 +8,13 @@ import {global} from '../managers/DataManager'
 // The window for selecting a command on the menu screen.
 export class Window_MenuCommand extends Window_Command {
 
-  static _lastCommandSymbol = null
+  static _lastCommandSymbol: string | null = null
 
   static initCommandPosition() {
     this._lastCommandSymbol = null
   }
 
-  override initialize(x, y) {
+  override initialize(x: number, y: number) {
     super.initialize(x, y)
     this.selectLast()
     return this
@@ -61,6 +61,7 @@ export class Window_MenuCommand extends Window_Command {
   }
 
   addOriginalCommands() {
+    // empty
   }
 
   addOptionsCommand() {
@@ -82,7 +83,7 @@ export class Window_MenuCommand extends Window_Command {
     this.addCommand(TextManager.gameEnd, 'gameEnd', enabled)
   }
 
-  needsCommand(name) {
+  needsCommand(name: string) {
     const flags = global.$dataSystem.menuCommands
     if (flags) {
       switch (name) {

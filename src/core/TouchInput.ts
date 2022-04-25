@@ -1,11 +1,11 @@
+import {Utils} from './Utils'
+import {Graphics} from './Graphics'
+
 /**
  * The static class that handles input data from the mouse and touchscreen.
  *
  * @class TouchInput
  */
-import {Utils} from './Utils'
-import {Graphics} from './Graphics'
-
 export class TouchInput {
   /**
    * The wait time of the pseudo key repeat in frames.
@@ -278,8 +278,8 @@ export class TouchInput {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private static _onMiddleButtonDown(event: MouseEvent) {
+    // empty
   }
 
   private static _onRightButtonDown(event: MouseEvent) {

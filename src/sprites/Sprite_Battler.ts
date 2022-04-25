@@ -1,13 +1,14 @@
 import {Sprite_Base} from './Sprite_Base'
 import {Sprite_Damage} from './Sprite_Damage'
+import {Game_Battler} from '../objects/Game_Battler'
 
 // Sprite_Battler
 //
 // The superclass of Sprite_Actor and Sprite_Enemy.
 export abstract class Sprite_Battler extends Sprite_Base {
 
-  private _battler = null
-  private _damages = []
+  private _battler!: Game_Battler | null
+  private _damages: Sprite_Damage[] = []
   private _homeX = 0
   private _homeY = 0
   private _offsetX = 0
@@ -17,32 +18,18 @@ export abstract class Sprite_Battler extends Sprite_Base {
   private _movementDuration = 0
   private _selectionEffectCount = 0
 
-  constructor(battler) {
+  protected constructor(battler?: Game_Battler) {
     super()
-    this.initMembers()
-    this.setBattler(battler)
-  }
-
-  initMembers() {
     this.anchor.x = 0.5
     this.anchor.y = 1
-    this._battler = null
-    this._damages = []
-    this._homeX = 0
-    this._homeY = 0
-    this._offsetX = 0
-    this._offsetY = 0
-    this._targetOffsetX = NaN
-    this._targetOffsetY = NaN
-    this._movementDuration = 0
-    this._selectionEffectCount = 0
+    this.setBattler(battler || null)
   }
 
-  setBattler(battler) {
+  setBattler(battler: Game_Battler | null) {
     this._battler = battler
   }
 
-  setHome(x, y) {
+  setHome(x: number, y: number) {
     this._homeX = x
     this._homeY = y
     this.updatePosition()
@@ -68,7 +55,7 @@ export abstract class Sprite_Battler extends Sprite_Base {
   }
 
   updateMain() {
-    if (this._battler.isSpriteVisible()) {
+    if (this._battler?.isSpriteVisible()) {
       this.updateBitmap()
       this.updateFrame()
     }
@@ -76,13 +63,9 @@ export abstract class Sprite_Battler extends Sprite_Base {
     this.updatePosition()
   }
 
-  updateBitmap() {
-    // empty
-  }
+  abstract updateBitmap()
 
-  updateFrame() {
-    // empty
-  }
+  abstract updateFrame()
 
   updateMove() {
     if (this._movementDuration > 0) {
@@ -120,7 +103,7 @@ export abstract class Sprite_Battler extends Sprite_Base {
 
   updateSelectionEffect() {
     const target = this._effectTarget
-    if (this._battler.isSelected()) {
+    if (this._battler?.isSelected()) {
       this._selectionEffectCount++
       if (this._selectionEffectCount % 30 < 15) {
         target.setBlendColor([255, 255, 255, 64])
@@ -134,8 +117,8 @@ export abstract class Sprite_Battler extends Sprite_Base {
   }
 
   setupAnimation() {
-    while (this._battler.isAnimationRequested()) {
-      const data = this._battler.shiftAnimation()
+    while (this._battler?.isAnimationRequested()) {
+      const data = this._battler.shiftAnimation()!
       const animation = global.$dataAnimations[data.animationId]
       const mirror = data.mirror
       const delay = animation.position === 3 ? 0 : data.delay
@@ -148,7 +131,7 @@ export abstract class Sprite_Battler extends Sprite_Base {
   }
 
   setupDamagePopup() {
-    if (this._battler.isDamagePopupRequested()) {
+    if (this._battler?.isDamagePopupRequested()) {
       if (this._battler.isSpriteVisible()) {
         const sprite = new Sprite_Damage()
         sprite.x = this.x + this.damageOffsetX()
@@ -170,7 +153,7 @@ export abstract class Sprite_Battler extends Sprite_Base {
     return 0
   }
 
-  startMove(x, y, duration) {
+  startMove(x: number, y: number, duration: number) {
     if (this._targetOffsetX !== x || this._targetOffsetY !== y) {
       this._targetOffsetX = x
       this._targetOffsetY = y

@@ -1,5 +1,6 @@
 import {DataManager} from '../managers/DataManager'
 import {global} from '../managers/DataManager'
+import {Data_ItemBase} from '../types/global'
 
 // Game_Item
 //
@@ -10,7 +11,7 @@ export class Game_Item {
   private _dataClass = ''
   private _itemId = 0
 
-  constructor(item?) {
+  constructor(item?: Data_ItemBase) {
     if (item) {
       this.setObject(item)
     }
@@ -48,7 +49,7 @@ export class Game_Item {
     return this._itemId
   }
 
-  object() {
+  object(): Data_ItemBase | null {
     if (this.isSkill()) {
       return global.$dataSkills[this._itemId]
     } else if (this.isItem()) {
@@ -62,7 +63,7 @@ export class Game_Item {
     }
   }
 
-  setObject(item) {
+  setObject(item: Data_ItemBase | null) {
     if (DataManager.isSkill(item)) {
       this._dataClass = 'skill'
     } else if (DataManager.isItem(item)) {
@@ -77,7 +78,7 @@ export class Game_Item {
     this._itemId = item ? item.id : 0
   }
 
-  setEquip(isWeapon, itemId) {
+  setEquip(isWeapon: boolean, itemId: number) {
     this._dataClass = isWeapon ? 'weapon' : 'armor'
     this._itemId = itemId
   }

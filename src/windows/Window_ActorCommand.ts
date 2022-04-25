@@ -3,13 +3,14 @@ import {Graphics} from '../core/Graphics'
 import {ConfigManager} from '../managers/ConfigManager'
 import {TextManager} from '../managers/TextManager'
 import {global} from '../managers/DataManager'
+import {Game_Actor} from '../objects/Game_Actor'
 
 // Window_ActorCommand
 //
 // The window for selecting an actor's action on the battle screen.
 export class Window_ActorCommand extends Window_Command {
 
-  private _actor = null
+  private _actor: Game_Actor | null = null
 
   override initialize() {
     const y = Graphics.boxHeight - this.windowHeight()
@@ -37,29 +38,27 @@ export class Window_ActorCommand extends Window_Command {
   }
 
   addAttackCommand() {
-    this.addCommand(TextManager.attack, 'attack', this._actor.canAttack())
+    this.addCommand(TextManager.attack, 'attack', this._actor!.canAttack())
   }
 
   addSkillCommands() {
-    const skillTypes = this._actor.addedSkillTypes()
-    skillTypes.sort(function (a, b) {
-      return a - b
-    })
-    skillTypes.forEach(function (stypeId) {
+    const skillTypes = this._actor!.addedSkillTypes()
+    skillTypes.sort((a, b) => a - b)
+    skillTypes.forEach((stypeId) => {
       const name = global.$dataSystem.skillTypes[stypeId]
       this.addCommand(name, 'skill', true, stypeId)
-    }, this)
+    })
   }
 
   addGuardCommand() {
-    this.addCommand(TextManager.guard, 'guard', this._actor.canGuard())
+    this.addCommand(TextManager.guard, 'guard', this._actor!.canGuard())
   }
 
   addItemCommand() {
     this.addCommand(TextManager.item, 'item')
   }
 
-  setup(actor) {
+  setup(actor: Game_Actor | null) {
     this._actor = actor
     this.clearCommandList()
     this.makeCommandList()

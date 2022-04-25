@@ -3,6 +3,7 @@ import {SoundManager} from '../managers/SoundManager'
 import {Input} from '../core/Input'
 import {global} from '../managers/DataManager'
 import {Rectangle} from '../core/Rectangle'
+import {Window_NameEdit} from './Window_NameEdit'
 
 // Window_NameInput
 //
@@ -75,11 +76,11 @@ export class Window_NameInput extends Window_Selectable {
       '５', '６', '７', '８', '９', '（', '）', '＊', '＋', '－',
       '／', '＝', '＠', '＜', '＞', '：', '；', '　', 'かな', '決定']
 
-  private readonly _editWindow
+  private readonly _editWindow: Window_NameEdit
   private _page = 0
   protected _index = 0
 
-  constructor(editWindow) {
+  constructor(editWindow: Window_NameEdit) {
     super()
     this._editWindow = editWindow
   }
@@ -103,14 +104,11 @@ export class Window_NameInput extends Window_Selectable {
 
   table() {
     if (global.$gameSystem.isJapanese()) {
-      return [Window_NameInput.JAPAN1,
-        Window_NameInput.JAPAN2,
-        Window_NameInput.JAPAN3]
+      return [Window_NameInput.JAPAN1, Window_NameInput.JAPAN2, Window_NameInput.JAPAN3]
     } else if (global.$gameSystem.isRussian()) {
       return [Window_NameInput.RUSSIA]
     } else {
-      return [Window_NameInput.LATIN1,
-        Window_NameInput.LATIN2]
+      return [Window_NameInput.LATIN1, Window_NameInput.LATIN2]
     }
   }
 
@@ -134,7 +132,7 @@ export class Window_NameInput extends Window_Selectable {
     return this._index === 89
   }
 
-  override itemRect(index) {
+  override itemRect(index: number) {
     return new Rectangle(
       index % 10 * 42 + Math.floor(index % 10 / 5) * 24,
       Math.floor(index / 10) * this.lineHeight(),
@@ -164,19 +162,19 @@ export class Window_NameInput extends Window_Selectable {
     return this.active
   }
 
-  override cursorDown(wrap) {
+  override cursorDown(wrap = false) {
     if (this._index < 80 || wrap) {
       this._index = (this._index + 10) % 90
     }
   }
 
-  override cursorUp(wrap) {
+  override cursorUp(wrap = false) {
     if (this._index >= 10 || wrap) {
       this._index = (this._index + 80) % 90
     }
   }
 
-  override cursorRight(wrap) {
+  override cursorRight(wrap = false) {
     if (this._index % 10 < 9) {
       this._index++
     } else if (wrap) {
@@ -184,7 +182,7 @@ export class Window_NameInput extends Window_Selectable {
     }
   }
 
-  override cursorLeft(wrap) {
+  override cursorLeft(wrap = false) {
     if (this._index % 10 > 0) {
       this._index--
     } else if (wrap) {

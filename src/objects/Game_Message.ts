@@ -4,8 +4,8 @@
 // or selections, etc.
 export class Game_Message {
 
-  private _texts = []
-  private _choices = []
+  private _texts: string[] = []
+  private _choices: string[] = []
   private _faceName = ''
   private _faceIndex = 0
   private _background = 0
@@ -21,11 +21,7 @@ export class Game_Message {
   private _scrollMode = false
   private _scrollSpeed = 2
   private _scrollNoFast = false
-  private _choiceCallback = null
-
-  constructor() {
-    this.clear()
-  }
+  private _choiceCallback: ((i: number) => void) | null = null
 
   clear() {
     this._texts = []
@@ -112,58 +108,58 @@ export class Game_Message {
     return this._scrollNoFast
   }
 
-  add(text) {
+  add(text: string) {
     this._texts.push(text)
   }
 
-  setFaceImage(faceName, faceIndex) {
+  setFaceImage(faceName: string, faceIndex: number) {
     this._faceName = faceName
     this._faceIndex = faceIndex
   }
 
-  setBackground(background) {
+  setBackground(background: number) {
     this._background = background
   }
 
-  setPositionType(positionType) {
+  setPositionType(positionType: number) {
     this._positionType = positionType
   }
 
-  setChoices(choices, defaultType, cancelType) {
+  setChoices(choices: string[], defaultType: number, cancelType: number) {
     this._choices = choices
     this._choiceDefaultType = defaultType
     this._choiceCancelType = cancelType
   }
 
-  setChoiceBackground(background) {
+  setChoiceBackground(background: number) {
     this._choiceBackground = background
   }
 
-  setChoicePositionType(positionType) {
+  setChoicePositionType(positionType: number) {
     this._choicePositionType = positionType
   }
 
-  setNumberInput(variableId, maxDigits) {
+  setNumberInput(variableId: number, maxDigits: number) {
     this._numInputVariableId = variableId
     this._numInputMaxDigits = maxDigits
   }
 
-  setItemChoice(variableId, itemType) {
+  setItemChoice(variableId: number, itemType: number) {
     this._itemChoiceVariableId = variableId
     this._itemChoiceItypeId = itemType
   }
 
-  setScroll(speed, noFast) {
+  setScroll(speed: number, noFast: boolean) {
     this._scrollMode = true
     this._scrollSpeed = speed
     this._scrollNoFast = noFast
   }
 
-  setChoiceCallback(callback) {
+  setChoiceCallback(callback: (i: number) => void) {
     this._choiceCallback = callback
   }
 
-  onChoice(n) {
+  onChoice(n: number) {
     if (this._choiceCallback) {
       this._choiceCallback(n)
       this._choiceCallback = null

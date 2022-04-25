@@ -1,16 +1,10 @@
+import {Bitmap} from './Bitmap'
+
 export class RequestQueue {
 
-  private _queue: Record<string, any>[]
+  private _queue: { key: string, value: Bitmap }[] = []
 
-  constructor() {
-    this.initialize()
-  }
-
-  initialize() {
-    this._queue = []
-  }
-
-  enqueue(key: string, value: any) {
+  enqueue(key: string, value: Bitmap) {
     this._queue.push({
       key: key,
       value: value,

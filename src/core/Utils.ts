@@ -129,7 +129,7 @@ export class Utils {
     return Utils._id++
   }
 
-  static _supportPassiveEvent = null
+  static _supportPassiveEvent: boolean | null = null
 
   /**
    * Test this browser support passive event feature
@@ -150,6 +150,7 @@ export class Utils {
         passive = true
       }
     })
+    // @ts-ignore TODO can be always true
     window.addEventListener('test', null, options)
     Utils._supportPassiveEvent = passive
     return passive

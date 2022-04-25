@@ -3,8 +3,9 @@ import {Bitmap} from './Bitmap'
 import {Rectangle} from './Rectangle'
 import {Sprite} from './Sprite'
 import {Point} from './Point'
+import {IUpdatable} from '../utils'
 
-export class TilingSprite extends PIXI.extras.PictureTilingSprite {
+export class TilingSprite extends PIXI.extras.PictureTilingSprite implements IUpdatable {
 
   private _bitmap: Bitmap | null = null
   protected override _width = 0
@@ -18,7 +19,7 @@ export class TilingSprite extends PIXI.extras.PictureTilingSprite {
    * @property origin
    * @type Point
    */
-  private origin = new Point()
+  origin = new Point()
 
   /**
    * The image for the tiling sprite.
@@ -62,7 +63,7 @@ export class TilingSprite extends PIXI.extras.PictureTilingSprite {
    * @constructor
    * @param {Bitmap} bitmap The image for the tiling sprite
    */
-  constructor(bitmap?: Bitmap) {
+  constructor(bitmap: Bitmap | null = null) {
     super(new PIXI.Texture(new PIXI.BaseTexture()))
     this.bitmap = bitmap
   }
@@ -103,9 +104,8 @@ export class TilingSprite extends PIXI.extras.PictureTilingSprite {
    * @method update
    */
   update() {
-    this.children.forEach(function (child) {
-      // @ts-ignore
-      child?.update()
+    this.children.forEach((child) => {
+      (child as unknown as IUpdatable).update?.()
     })
   }
 
@@ -149,7 +149,7 @@ export class TilingSprite extends PIXI.extras.PictureTilingSprite {
   }
 
   private _onBitmapLoad() {
-    this.texture.baseTexture = this._bitmap.baseTexture
+    this.texture.baseTexture = this._bitmap!.baseTexture
     this._refresh()
   }
 
@@ -162,7 +162,6 @@ export class TilingSprite extends PIXI.extras.PictureTilingSprite {
     this.texture.frame = frame
     // @ts-ignore
     this.texture._updateID++
-    // @ts-ignore todo 好像没用
-    this.tilingTexture = null
+    // this.tilingTexture = null
   }
 }

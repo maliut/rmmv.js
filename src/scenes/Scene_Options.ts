@@ -7,7 +7,7 @@ import {Window_Options} from '../windows/Window_Options'
 // The scene class of the options screen.
 export class Scene_Options extends Scene_MenuBase {
 
-  private _optionsWindow
+  private _optionsWindow!: Window_Options
 
   override create() {
     super.create()

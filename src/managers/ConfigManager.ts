@@ -9,10 +9,10 @@ export class ConfigManager {
   static alwaysDash = false
   static commandRemember = false
 
-  static bgmVolume
-  static bgsVolume
-  static meVolume
-  static seVolume
+  static bgmVolume = 0
+  static bgsVolume = 0
+  static meVolume = 0
+  static seVolume = 0
 
   get bgmVolume() {
     return AudioManager.bgmVolume
@@ -65,7 +65,7 @@ export class ConfigManager {
   }
 
   static makeData() {
-    const config: Record<string, any> = {}
+    const config: Record<string, number | boolean> = {}
     config.alwaysDash = this.alwaysDash
     config.commandRemember = this.commandRemember
     config.bgmVolume = this.bgmVolume
@@ -75,7 +75,7 @@ export class ConfigManager {
     return config
   }
 
-  static applyData(config) {
+  static applyData(config: Record<string, number | boolean>) {
     this.alwaysDash = this.readFlag(config, 'alwaysDash')
     this.commandRemember = this.readFlag(config, 'commandRemember')
     this.bgmVolume = this.readVolume(config, 'bgmVolume')
@@ -84,11 +84,11 @@ export class ConfigManager {
     this.seVolume = this.readVolume(config, 'seVolume')
   }
 
-  static readFlag(config, name) {
+  static readFlag(config: Record<string, number | boolean>, name: string) {
     return !!config[name]
   }
 
-  static readVolume(config, name) {
+  static readVolume(config: Record<string, number | boolean>, name: string) {
     const value = config[name]
     if (value !== undefined) {
       return Number(value).clamp(0, 100)

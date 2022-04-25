@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js'
 import {Graphics} from './Graphics'
 import {Utils} from './Utils'
+import {assert} from '../utils'
 
 /**
  * The sprite which changes the screen color in 2D canvas mode.
@@ -14,11 +15,6 @@ export class ToneSprite extends PIXI.Container {
   private _green = 0
   private _blue = 0
   private _gray = 0
-
-  constructor() {
-    super()
-    this.clear()
-  }
 
   /**
    * Clears the tone.
@@ -55,6 +51,7 @@ export class ToneSprite extends PIXI.Container {
       const r = renderer.resolution
       const width = Graphics.width
       const height = Graphics.height
+      assert(context !== null)
       context.save()
       context.setTransform(t.a, t.b, t.c, t.d, t.tx * r, t.ty * r)
       if (Graphics.canUseSaturationBlend() && this._gray > 0) {

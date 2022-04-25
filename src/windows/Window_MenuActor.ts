@@ -2,6 +2,7 @@ import {Window_MenuStatus} from './Window_MenuStatus'
 import {Game_Action} from '../objects/Game_Action'
 import {DataManager} from '../managers/DataManager'
 import {global} from '../managers/DataManager'
+import {Data_ItemBase} from '../types/global'
 
 // Window_MenuActor
 //
@@ -25,7 +26,7 @@ export class Window_MenuActor extends Window_MenuStatus {
     this.select(global.$gameParty.targetActor().index() || 0)
   }
 
-  selectForItem(item) {
+  selectForItem(item: Data_ItemBase | null) {
     const actor = global.$gameParty.menuActor()
     const action = new Game_Action(actor)
     action.setItemObject(item)

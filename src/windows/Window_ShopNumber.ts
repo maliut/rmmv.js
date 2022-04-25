@@ -5,6 +5,7 @@ import {Input} from '../core/Input'
 import {TouchInput} from '../core/TouchInput'
 import {ImageManager} from '../managers/ImageManager'
 import {Sprite_Button} from '../sprites/Sprite_Button'
+import {Data_Armor, Data_Item, Data_Weapon} from '../types/global'
 
 // Window_ShopNumber
 //
@@ -12,14 +13,14 @@ import {Sprite_Button} from '../sprites/Sprite_Button'
 // screen.
 export class Window_ShopNumber extends Window_Selectable {
 
-  private _item = null
+  private _item: Data_Armor | Data_Weapon | Data_Item | null = null
   private _max = 1
   private _price = 0
   private _number = 1
   private _currencyUnit = TextManager.currencyUnit
-  private _buttons
+  private readonly _buttons: Sprite_Button[] = []
 
-  override initialize(x, y, height) {
+  override initialize(x: number, y: number, height: number) {
     const width = this.windowWidth()
     super.initialize(x, y, width, height)
     this.createButtons()
@@ -53,7 +54,6 @@ export class Window_ShopNumber extends Window_Selectable {
     const bitmap = ImageManager.loadSystem('ButtonSet')
     const buttonWidth = 48
     const buttonHeight = 48
-    this._buttons = []
     for (let i = 0; i < 5; i++) {
       const button = new Sprite_Button()
       const x = buttonWidth * i
@@ -130,13 +130,13 @@ export class Window_ShopNumber extends Window_Selectable {
     const y = this.itemY()
     const width = this.cursorWidth() - this.textPadding()
     this.resetTextColor()
-    this.drawText(this._number, x, y, width, 'right')
+    this.drawText(this._number.toString(), x, y, width, 'right')
   }
 
   drawTotalPrice() {
     const total = this._price * this._number
     const width = this.contentsWidth() - this.textPadding()
-    this.drawCurrencyValue(total, this._currencyUnit, 0, this.priceY(), width)
+    this.drawCurrencyValue(total.toString(), this._currencyUnit, 0, this.priceY(), width)
   }
 
   itemY() {
@@ -194,7 +194,7 @@ export class Window_ShopNumber extends Window_Selectable {
     }
   }
 
-  changeNumber(amount) {
+  changeNumber(amount: number) {
     const lastNumber = this._number
     this._number = (this._number + amount).clamp(1, this._max)
     if (this._number !== lastNumber) {

@@ -37,10 +37,10 @@ export class Sprite_Timer extends Sprite {
 
   redraw() {
     const text = this.timerText()
-    const width = this.bitmap.width
-    const height = this.bitmap.height
-    this.bitmap.clear()
-    this.bitmap.drawText(text, 0, 0, width, height, 'center')
+    const width = this.bitmap!.width
+    const height = this.bitmap!.height
+    this.bitmap!.clear()
+    this.bitmap!.drawText(text, 0, 0, width, height, 'center')
   }
 
   timerText() {
@@ -50,7 +50,7 @@ export class Sprite_Timer extends Sprite {
   }
 
   updatePosition() {
-    this.x = Graphics.width - this.bitmap.width
+    this.x = Graphics.width - this.bitmap!.width
     this.y = 0
   }
 

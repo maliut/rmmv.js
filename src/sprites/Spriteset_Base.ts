@@ -13,20 +13,19 @@ import {global} from '../managers/DataManager'
 // The superclass of Spriteset_Map and Spriteset_Battle.
 export abstract class Spriteset_Base extends Sprite {
 
-  private _tone
-  protected _baseSprite
-  private _blackScreen
-  private _toneFilter
-  private _toneSprite
-  private _pictureContainer
-  private _timerSprite
-  private _flashSprite
-  private _fadeSprite
+  private _tone = [0, 0, 0, 0]
+  protected _baseSprite!: Sprite
+  private _blackScreen!: ScreenSprite
+  private _toneFilter!: ToneFilter
+  private _toneSprite!: ToneSprite
+  private _pictureContainer!: Sprite
+  private _timerSprite!: Sprite_Timer
+  private _flashSprite!: ScreenSprite
+  private _fadeSprite!: ScreenSprite
 
   constructor() {
     super()
     this.setFrame(0, 0, Graphics.width, Graphics.height)
-    this._tone = [0, 0, 0, 0]
     this.opaque = true
     this.createLowerLayer()
     this.createToneChanger()

@@ -1,4 +1,5 @@
 import {Sprite} from '../core/Sprite'
+import { Data_Animation } from '../types/global'
 import {Sprite_Animation} from './Sprite_Animation'
 
 // Sprite_Base
@@ -6,8 +7,8 @@ import {Sprite_Animation} from './Sprite_Animation'
 // The sprite class with a feature which displays animations.
 export class Sprite_Base extends Sprite {
 
-  protected _animationSprites = []
-  protected _effectTarget = this
+  protected _animationSprites: Sprite_Animation[] = []
+  protected _effectTarget: Sprite_Base = this
   private _hiding = false
 
   override update() {
@@ -45,7 +46,7 @@ export class Sprite_Base extends Sprite {
     }
   }
 
-  startAnimation(animation, mirror, delay) {
+  startAnimation(animation: Data_Animation, mirror: boolean, delay: number) {
     const sprite = new Sprite_Animation()
     sprite.setup(this._effectTarget, animation, mirror, delay)
     this.parent.addChild(sprite)

@@ -1,24 +1,17 @@
 import {CacheEntry} from './CacheEntry'
 
-export class CacheMap {
+/**
+ * Cache for images, audio, or any other kind of resource
+ */
+export class CacheMap<T> {
 
-  manager: any
-  _inner: Record<string, CacheEntry> = {}
-  private _lastRemovedEntries: CacheEntry[] = []
+  // manager: any
+  _inner: Record<string, CacheEntry<T>> = {}
+  private _lastRemovedEntries: CacheEntry<T>[] = []
   updateTicks = 0
   lastCheckTTL = 0
   delayCheckTTL = 100.0
-  updateSeconds: number
-
-  /**
-   * Cache for images, audio, or any other kind of resource
-   * @param manager
-   * @constructor
-   */
-  constructor(manager) {
-    this.manager = manager
-    this.updateSeconds = Date.now()
-  }
+  updateSeconds = Date.now()
 
   /**
    * checks ttl of all elements and removes dead ones
@@ -47,7 +40,7 @@ export class CacheMap {
    * @param key url of cache element
    * @returns {*|null}
    */
-  getItem(key) {
+  getItem(key: string) {
     const entry = this._inner[key]
     if (entry) {
       return entry.item
@@ -62,7 +55,7 @@ export class CacheMap {
     }
   }
 
-  setItem(key, item) {
+  setItem(key: string, item: T) {
     return new CacheEntry(this, key, item).allocate()
   }
 

@@ -3,18 +3,20 @@ import * as PIXI from 'pixi.js'
 import {ImageManager} from '../managers/ImageManager'
 import {ScreenSprite} from '../core/ScreenSprite'
 import {AudioManager} from '../managers/AudioManager'
+import { Data_Animation, Data_AnimationTiming} from '../types/global'
+import {Sprite_Base} from './Sprite_Base'
+import {Bitmap} from '../core/Bitmap'
 
 // Sprite_Animation
 //
 // The sprite for displaying an animation.
 export class Sprite_Animation extends Sprite {
 
-  private static _checker1 = {}
-  private static _checker2 = {}
+  private static _checker1: Record<number, boolean> = {}
+  private static _checker2: Record<number, boolean> = {}
 
-  private _reduceArtifacts = true
-  private _target = null
-  private _animation = null
+  private _target!: Sprite_Base
+  private _animation!: Data_Animation
   private _mirror = false
   private _delay = 0
   private _rate = 4
@@ -23,38 +25,14 @@ export class Sprite_Animation extends Sprite {
   private _flashDuration = 0
   private _screenFlashDuration = 0
   private _hidingDuration = 0
-  private _bitmap1 = null
-  private _bitmap2 = null
-  private _cellSprites = []
-  private _screenFlashSprite = null
+  private _bitmap1!: Bitmap
+  private _bitmap2!: Bitmap
+  private _cellSprites: Sprite[] = []
+  private _screenFlashSprite!: ScreenSprite
   private _duplicated = false
   z = 8
 
-  constructor() {
-    super()
-    this.initMembers()
-  }
-
-  initMembers() {
-    this._target = null
-    this._animation = null
-    this._mirror = false
-    this._delay = 0
-    this._rate = 4
-    this._duration = 0
-    this._flashColor = [0, 0, 0, 0]
-    this._flashDuration = 0
-    this._screenFlashDuration = 0
-    this._hidingDuration = 0
-    this._bitmap1 = null
-    this._bitmap2 = null
-    this._cellSprites = []
-    this._screenFlashSprite = null
-    this._duplicated = false
-    this.z = 8
-  }
-
-  setup(target, animation, mirror, delay) {
+  setup(target: Sprite_Base, animation: Data_Animation, mirror: boolean, delay: number) {
     this._target = target
     this._animation = animation
     this._mirror = mirror
@@ -160,19 +138,19 @@ export class Sprite_Animation extends Sprite {
   }
 
   createSprites() {
-    if (!Sprite_Animation._checker2[this._animation]) {
+    if (!Sprite_Animation._checker2[this._animation.id]) {
       this.createCellSprites()
       if (this._animation.position === 3) {
-        Sprite_Animation._checker2[this._animation] = true
+        Sprite_Animation._checker2[this._animation.id] = true
       }
       this.createScreenFlashSprite()
     }
-    if (Sprite_Animation._checker1[this._animation]) {
+    if (Sprite_Animation._checker1[this._animation.id]) {
       this._duplicated = true
     } else {
       this._duplicated = false
       if (this._animation.position === 3) {
-        Sprite_Animation._checker1[this._animation] = true
+        Sprite_Animation._checker1[this._animation.id] = true
       }
     }
   }
@@ -232,11 +210,11 @@ export class Sprite_Animation extends Sprite {
     if (this._duration > 0) {
       const frameIndex = this.currentFrameIndex()
       this.updateAllCellSprites(this._animation.frames[frameIndex])
-      this._animation.timings.forEach(function (timing) {
+      this._animation.timings.forEach((timing) => {
         if (timing.frame === frameIndex) {
           this.processTimingData(timing)
         }
-      }, this)
+      })
     }
   }
 
@@ -245,7 +223,7 @@ export class Sprite_Animation extends Sprite {
       Math.floor((this._duration + this._rate - 1) / this._rate))
   }
 
-  updateAllCellSprites(frame) {
+  updateAllCellSprites(frame: number[][]) {
     for (let i = 0; i < this._cellSprites.length; i++) {
       const sprite = this._cellSprites[i]
       if (i < frame.length) {
@@ -256,7 +234,7 @@ export class Sprite_Animation extends Sprite {
     }
   }
 
-  updateCellSprite(sprite, cell) {
+  updateCellSprite(sprite: Sprite, cell: number[]) {
     const pattern = cell[0]
     if (pattern >= 0) {
       const sx = pattern % 5 * 192
@@ -287,7 +265,7 @@ export class Sprite_Animation extends Sprite {
     }
   }
 
-  processTimingData(timing) {
+  processTimingData(timing: Data_AnimationTiming) {
     const duration = timing.flashDuration * this._rate
     switch (timing.flashScope) {
     case 1:
@@ -305,12 +283,12 @@ export class Sprite_Animation extends Sprite {
     }
   }
 
-  startFlash(color, duration) {
+  startFlash(color: number[], duration: number) {
     this._flashColor = color.clone()
     this._flashDuration = duration
   }
 
-  startScreenFlash(color, duration) {
+  startScreenFlash(color: number[], duration: number) {
     this._screenFlashDuration = duration
     if (this._screenFlashSprite) {
       this._screenFlashSprite.setColor(color[0], color[1], color[2])
@@ -318,7 +296,7 @@ export class Sprite_Animation extends Sprite {
     }
   }
 
-  startHiding(duration) {
+  startHiding(duration: number) {
     this._hidingDuration = duration
     this._target.hide()
   }

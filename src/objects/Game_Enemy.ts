@@ -1,6 +1,8 @@
 import {global} from '../managers/DataManager'
 import {Game_Battler} from './Game_Battler'
 import {SoundManager} from '../managers/SoundManager'
+import { Game_Action } from './Game_Action'
+import {Data_EnemyAction, Data_ItemBase} from '../types/global'
 
 // Game_Enemy
 //
@@ -10,24 +12,11 @@ export class Game_Enemy extends Game_Battler {
   private _enemyId = 0
   private _letter = ''
   private _plural = false
-  private _screenX = 0
-  private _screenY = 0
+  private readonly _screenX: number
+  private readonly _screenY: number
 
-  constructor(enemyId, x, y) {
+  constructor(enemyId: number, x: number, y: number) {
     super()
-    this.setup(enemyId, x, y)
-  }
-
-  override initMembers() {
-    super.initMembers()
-    this._enemyId = 0
-    this._letter = ''
-    this._plural = false
-    this._screenX = 0
-    this._screenY = 0
-  }
-
-  setup(enemyId, x, y) {
     this._enemyId = enemyId
     this._screenX = x
     this._screenY = y
@@ -38,19 +27,19 @@ export class Game_Enemy extends Game_Battler {
     return true
   }
 
-  friendsUnit() {
+  override friendsUnit() {
     return global.$gameTroop
   }
 
-  opponentsUnit() {
+  override opponentsUnit() {
     return global.$gameParty
   }
 
-  index() {
+  override index() {
     return global.$gameTroop.members().indexOf(this)
   }
 
-  isBattleMember() {
+  override isBattleMember() {
     return this.index() >= 0
   }
 
@@ -66,7 +55,7 @@ export class Game_Enemy extends Game_Battler {
     return super.traitObjects().concat(this.enemy())
   }
 
-  override paramBase(paramId) {
+  override paramBase(paramId: number) {
     return this.enemy().params[paramId]
   }
 
@@ -79,20 +68,21 @@ export class Game_Enemy extends Game_Battler {
   }
 
   makeDropItems() {
-    return this.enemy().dropItems.reduce(function (r, di) {
+    return this.enemy().dropItems.reduce((r, di) => {
       if (di.kind > 0 && Math.random() * di.denominator < this.dropItemRate()) {
-        return r.concat(this.itemObject(di.kind, di.dataId))
+        const item = this.itemObject(di.kind, di.dataId)
+        return item ? r.concat(item) : r
       } else {
         return r
       }
-    }.bind(this), [])
+    }, [] as Data_ItemBase[])
   }
 
   dropItemRate() {
     return global.$gameParty.hasDropItemDouble() ? 2 : 1
   }
 
-  itemObject(kind, dataId) {
+  itemObject(kind: number, dataId: number) {
     if (kind === 1) {
       return global.$dataItems[dataId]
     } else if (kind === 2) {
@@ -136,27 +126,25 @@ export class Game_Enemy extends Game_Battler {
     return this._letter === ''
   }
 
-  setLetter(letter) {
+  setLetter(letter: string) {
     this._letter = letter
   }
 
-  setPlural(plural) {
+  setPlural(plural: boolean) {
     this._plural = plural
   }
 
-  override performActionStart(action) {
+  override performActionStart(action: Game_Action) {
     super.performActionStart(action)
     this.requestEffect('whiten')
   }
 
   override performDamage() {
-    super.performDamage()
     SoundManager.playEnemyDamage()
     this.requestEffect('blink')
   }
 
   override performCollapse() {
-    super.performCollapse()
     switch (this.collapseType()) {
     case 0:
       this.requestEffect('collapse')
@@ -172,7 +160,7 @@ export class Game_Enemy extends Game_Battler {
     }
   }
 
-  transform(enemyId) {
+  transform(enemyId: number) {
     const name = this.originalName()
     this._enemyId = enemyId
     if (this.originalName() !== name) {
@@ -185,7 +173,7 @@ export class Game_Enemy extends Game_Battler {
     }
   }
 
-  meetsCondition(action) {
+  meetsCondition(action: Data_EnemyAction) {
     const param1 = action.conditionParam1
     const param2 = action.conditionParam2
     switch (action.conditionType) {
@@ -206,7 +194,7 @@ export class Game_Enemy extends Game_Battler {
     }
   }
 
-  meetsTurnCondition(param1, param2) {
+  meetsTurnCondition(param1: number, param2: number) {
     const n = global.$gameTroop.turnCount()
     if (param2 === 0) {
       return n === param1
@@ -215,34 +203,32 @@ export class Game_Enemy extends Game_Battler {
     }
   }
 
-  meetsHpCondition(param1, param2) {
+  meetsHpCondition(param1: number, param2: number) {
     return this.hpRate() >= param1 && this.hpRate() <= param2
   }
 
-  meetsMpCondition(param1, param2) {
+  meetsMpCondition(param1: number, param2: number) {
     return this.mpRate() >= param1 && this.mpRate() <= param2
   }
 
-  meetsStateCondition(param) {
+  meetsStateCondition(param: number) {
     return this.isStateAffected(param)
   }
 
-  meetsPartyLevelCondition(param) {
+  meetsPartyLevelCondition(param: number) {
     return global.$gameParty.highestLevel() >= param
   }
 
-  meetsSwitchCondition(param) {
+  meetsSwitchCondition(param: number) {
     return global.$gameSwitches.value(param)
   }
 
-  isActionValid(action) {
+  isActionValid(action: Data_EnemyAction) {
     return this.meetsCondition(action) && this.canUse(global.$dataSkills[action.skillId])
   }
 
-  selectAction(actionList, ratingZero) {
-    const sum = actionList.reduce(function (r, a) {
-      return r + a.rating - ratingZero
-    }, 0)
+  selectAction(actionList: Data_EnemyAction[], ratingZero: number) {
+    const sum = actionList.reduce((r, a) => r + a.rating - ratingZero, 0)
     if (sum > 0) {
       let value = Math.randomInt(sum)
       for (let i = 0; i < actionList.length; i++) {
@@ -257,14 +243,10 @@ export class Game_Enemy extends Game_Battler {
     }
   }
 
-  selectAllActions(actionList) {
-    const ratingMax = Math.max.apply(null, actionList.map(function (a) {
-      return a.rating
-    }))
+  selectAllActions(actionList: Data_EnemyAction[]) {
+    const ratingMax = Math.max.apply(null, actionList.map((a) => a.rating))
     const ratingZero = ratingMax - 3
-    actionList = actionList.filter(function (a) {
-      return a.rating > ratingZero
-    })
+    actionList = actionList.filter((a) => a.rating > ratingZero)
     for (let i = 0; i < this.numActions(); i++) {
       this.action(i).setEnemyAction(this.selectAction(actionList, ratingZero))
     }
@@ -273,9 +255,7 @@ export class Game_Enemy extends Game_Battler {
   override makeActions() {
     super.makeActions()
     if (this.numActions() > 0) {
-      const actionList = this.enemy().actions.filter(function (a) {
-        return this.isActionValid(a)
-      }, this)
+      const actionList = this.enemy().actions.filter((a) => this.isActionValid(a))
       if (actionList.length > 0) {
         this.selectAllActions(actionList)
       }

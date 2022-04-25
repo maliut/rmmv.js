@@ -4,18 +4,18 @@ import {Point} from './Point'
 import {Bitmap} from './Bitmap'
 import {ScreenSprite} from './ScreenSprite'
 import {Sprite} from './Sprite'
+import {IUpdatable} from '../utils'
+import {WeatherType} from '../types/index'
 
-type WeatherType = 'none' | 'rain' | 'storm' | 'snow'
-
-export class Weather extends PIXI.Container {
+export class Weather extends PIXI.Container implements IUpdatable {
 
   private _width = Graphics.width
   private _height = Graphics.height
   private _sprites: Sprite[] = []
-  private _rainBitmap: Bitmap | null = null
-  private _stormBitmap: Bitmap | null = null
-  private _snowBitmap: Bitmap | null = null
-  private _dimmerSprite: ScreenSprite | null = null
+  private readonly _rainBitmap: Bitmap
+  private readonly _stormBitmap: Bitmap
+  private readonly _snowBitmap: Bitmap
+  private readonly _dimmerSprite: ScreenSprite
   viewport?: Bitmap
 
   /**
@@ -50,8 +50,17 @@ export class Weather extends PIXI.Container {
    */
   constructor() {
     super()
-    this._createBitmaps()
-    this._createDimmer()
+    // createBitmaps
+    this._rainBitmap = new Bitmap(1, 60)
+    this._rainBitmap.fillAll('white')
+    this._stormBitmap = new Bitmap(2, 100)
+    this._stormBitmap.fillAll('white')
+    this._snowBitmap = new Bitmap(9, 9)
+    this._snowBitmap.drawCircle(4, 4, 4, 'white')
+    // createDimmer
+    this._dimmerSprite = new ScreenSprite()
+    this._dimmerSprite.setColor(80, 80, 80)
+    this.addChild(this._dimmerSprite)
   }
 
   /**
@@ -64,21 +73,6 @@ export class Weather extends PIXI.Container {
     this._updateAllSprites()
   }
 
-  private _createBitmaps() {
-    this._rainBitmap = new Bitmap(1, 60)
-    this._rainBitmap.fillAll('white')
-    this._stormBitmap = new Bitmap(2, 100)
-    this._stormBitmap.fillAll('white')
-    this._snowBitmap = new Bitmap(9, 9)
-    this._snowBitmap.drawCircle(4, 4, 4, 'white')
-  }
-
-  private _createDimmer() {
-    this._dimmerSprite = new ScreenSprite()
-    this._dimmerSprite.setColor(80, 80, 80)
-    this.addChild(this._dimmerSprite)
-  }
-
   private _updateDimmer() {
     this._dimmerSprite.opacity = Math.floor(this.power * 6)
   }
@@ -89,13 +83,13 @@ export class Weather extends PIXI.Container {
       this._addSprite()
     }
     while (this._sprites.length > maxSprites) {
-      this._removeSprite()
+      this.removeChild(this._sprites.pop()!)
     }
-    this._sprites.forEach(function (sprite) {
+    this._sprites.forEach((sprite) => {
       this._updateSprite(sprite)
       sprite.x = sprite.ax - this.origin.x
       sprite.y = sprite.ay - this.origin.y
-    }, this)
+    })
   }
 
   private _addSprite() {
@@ -103,10 +97,6 @@ export class Weather extends PIXI.Container {
     sprite.opacity = 0
     this._sprites.push(sprite)
     this.addChild(sprite)
-  }
-
-  private _removeSprite() {
-    this.removeChild(this._sprites.pop())
   }
 
   private _updateSprite(sprite: Sprite) {
@@ -150,7 +140,7 @@ export class Weather extends PIXI.Container {
     sprite.opacity -= 3
   }
 
-  private _rebornSprite(sprite) {
+  private _rebornSprite(sprite: Sprite) {
     sprite.ax = Math.randomInt(Graphics.width + 100) - 100 + this.origin.x
     sprite.ay = Math.randomInt(Graphics.height + 200) - 200 + this.origin.y
     sprite.opacity = 160 + Math.randomInt(60)

@@ -45,7 +45,7 @@ export class Window_Options extends Window_Command {
     this.addCommand(TextManager.seVolume, 'seVolume')
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     const rect = this.itemRectForText(index)
     const statusWidth = this.statusWidth()
     const titleWidth = rect.width - statusWidth
@@ -59,65 +59,65 @@ export class Window_Options extends Window_Command {
     return 120
   }
 
-  statusText(index) {
+  statusText(index: number) {
     const symbol = this.commandSymbol(index)
     const value = this.getConfigValue(symbol)
     if (this.isVolumeSymbol(symbol)) {
-      return this.volumeStatusText(value)
+      return this.volumeStatusText(value as number)
     } else {
-      return this.booleanStatusText(value)
+      return this.booleanStatusText(value as boolean)
     }
   }
 
-  isVolumeSymbol(symbol) {
+  isVolumeSymbol(symbol: string) {
     return symbol.contains('Volume')
   }
 
-  booleanStatusText(value) {
+  booleanStatusText(value: boolean) {
     return value ? 'ON' : 'OFF'
   }
 
-  volumeStatusText(value) {
+  volumeStatusText(value: number) {
     return value + '%'
   }
 
   override processOk() {
     const index = this.index()
     const symbol = this.commandSymbol(index)
-    let value = this.getConfigValue(symbol)
+    const value = this.getConfigValue(symbol)
     if (this.isVolumeSymbol(symbol)) {
-      value += this.volumeOffset()
-      if (value > 100) {
-        value = 0
+      let _value = value as number
+      _value += this.volumeOffset()
+      if (_value > 100) {
+        _value = 0
       }
-      value = value.clamp(0, 100)
-      this.changeValue(symbol, value)
+      this.changeValue(symbol, _value.clamp(0, 100))
     } else {
       this.changeValue(symbol, !value)
     }
   }
 
-  override cursorRight(wrap) {
+  override cursorRight(wrap = false) {
     const index = this.index()
     const symbol = this.commandSymbol(index)
-    let value = this.getConfigValue(symbol)
+    const value = this.getConfigValue(symbol)
     if (this.isVolumeSymbol(symbol)) {
-      value += this.volumeOffset()
-      value = value.clamp(0, 100)
-      this.changeValue(symbol, value)
+      let _value = value as number
+      _value += this.volumeOffset()
+      this.changeValue(symbol, _value.clamp(0, 100))
     } else {
       this.changeValue(symbol, true)
     }
   }
 
-  override cursorLeft(wrap) {
+  override cursorLeft(wrap = false) {
     const index = this.index()
     const symbol = this.commandSymbol(index)
-    let value = this.getConfigValue(symbol)
+    const value = this.getConfigValue(symbol)
     if (this.isVolumeSymbol(symbol)) {
-      value -= this.volumeOffset()
-      value = value.clamp(0, 100)
-      this.changeValue(symbol, value)
+      let _value = value as number
+      _value -= this.volumeOffset()
+      this.changeValue(symbol, _value.clamp(0, 100))
     } else {
       this.changeValue(symbol, false)
     }
@@ -127,7 +127,7 @@ export class Window_Options extends Window_Command {
     return 20
   }
 
-  changeValue(symbol, value) {
+  changeValue(symbol: string, value: number | boolean) {
     const lastValue = this.getConfigValue(symbol)
     if (lastValue !== value) {
       this.setConfigValue(symbol, value)
@@ -136,11 +136,11 @@ export class Window_Options extends Window_Command {
     }
   }
 
-  getConfigValue(symbol) {
+  getConfigValue(symbol: string): number | boolean {
     return ConfigManager[symbol]
   }
 
-  setConfigValue(symbol, volume) {
+  setConfigValue(symbol: string, volume: number | boolean) {
     ConfigManager[symbol] = volume
   }
 }

@@ -6,18 +6,19 @@ import {TouchInput} from '../core/TouchInput'
 import {Sprite_Button} from '../sprites/Sprite_Button'
 import {ImageManager} from '../managers/ImageManager'
 import {global} from '../managers/DataManager'
+import {Window_Message} from './Window_Message'
 
 // Window_NumberInput
 //
 // The window used for the event command [Input Number].
 export class Window_NumberInput extends Window_Selectable {
 
-  private readonly _messageWindow
+  private readonly _messageWindow: Window_Message
   private _number = 0
   private _maxDigits = 1
-  private _buttons
+  private readonly _buttons: Sprite_Button[] = []
 
-  constructor(messageWindow) {
+  constructor(messageWindow: Window_Message) {
     super()
     this._messageWindow = messageWindow
   }
@@ -85,7 +86,6 @@ export class Window_NumberInput extends Window_Selectable {
     const bitmap = ImageManager.loadSystem('ButtonSet')
     const buttonWidth = 48
     const buttonHeight = 48
-    this._buttons = []
     for (let i = 0; i < 3; i++) {
       const button = new Sprite_Button()
       const x = buttonWidth * [1, 2, 4][i]
@@ -162,7 +162,7 @@ export class Window_NumberInput extends Window_Selectable {
     }
   }
 
-  changeDigit(up) {
+  changeDigit(up: boolean) {
     const index = this.index()
     const place = Math.pow(10, this._maxDigits - 1 - index)
     let n = Math.floor(this._number / place) % 10
@@ -202,7 +202,7 @@ export class Window_NumberInput extends Window_Selectable {
     this.close()
   }
 
-  override drawItem(index) {
+  override drawItem(index: number) {
     const rect = this.itemRect(index)
     const align = 'center'
     const s = this._number.padZero(this._maxDigits)

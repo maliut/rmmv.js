@@ -12,16 +12,9 @@ export class Sprite_Balloon extends Sprite_Base {
 
   constructor() {
     super()
-    this.initMembers()
-    this.loadBitmap()
-  }
-
-  initMembers() {
-    this._balloonId = 0
-    this._duration = 0
     this.anchor.x = 0.5
     this.anchor.y = 1
-    this.z = 7
+    this.loadBitmap()
   }
 
   loadBitmap() {
@@ -29,7 +22,7 @@ export class Sprite_Balloon extends Sprite_Base {
     this.setFrame(0, 0, 0, 0)
   }
 
-  setup(balloonId) {
+  setup(balloonId: number) {
     this._balloonId = balloonId
     this._duration = 8 * this.speed() + this.waitTime()
   }

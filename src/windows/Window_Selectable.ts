@@ -3,6 +3,8 @@ import {Rectangle} from '../core/Rectangle'
 import {Input} from '../core/Input'
 import {SoundManager} from '../managers/SoundManager'
 import {TouchInput} from '../core/TouchInput'
+import {Window_Help} from './Window_Help'
+import {Data_ItemBase} from '../types/global'
 
 // Window_Selectable
 //
@@ -13,13 +15,13 @@ export class Window_Selectable extends Window_Base {
   private _cursorFixed = false
   private _cursorAll = false
   private _stayCount = 0
-  private _helpWindow = null
-  private _handlers = {}
+  private _helpWindow: Window_Help | null = null
+  private _handlers: Record<string, () => void> = {}
   private _touching = false
   private _scrollX = 0
   private _scrollY = 0
 
-  override initialize(x, y, width, height) {
+  override initialize(x?: number, y?: number, width?: number, height?: number) {
     super.initialize(x, y, width, height)
     this.deactivate()
     return this
@@ -80,7 +82,7 @@ export class Window_Selectable extends Window_Base {
     this.reselect()
   }
 
-  select(index) {
+  select(index: number) {
     this._index = index
     this._stayCount = 0
     this.ensureCursorVisible()
@@ -108,7 +110,7 @@ export class Window_Selectable extends Window_Base {
     return Math.max(0, this.maxRows() - this.maxPageRows())
   }
 
-  setTopRow(row) {
+  setTopRow(row: number) {
     const scrollY = row.clamp(0, this.maxTopRow()) * this.itemHeight()
     if (this._scrollY !== scrollY) {
       this._scrollY = scrollY
@@ -146,7 +148,7 @@ export class Window_Selectable extends Window_Base {
     return this.topRow() * this.maxCols()
   }
 
-  itemRect(index) {
+  itemRect(index: number) {
     const rect = new Rectangle()
     const maxCols = this.maxCols()
     rect.width = this.itemWidth()
@@ -156,14 +158,14 @@ export class Window_Selectable extends Window_Base {
     return rect
   }
 
-  itemRectForText(index) {
+  itemRectForText(index: number) {
     const rect = this.itemRect(index)
     rect.x += this.textPadding()
     rect.width -= this.textPadding() * 2
     return rect
   }
 
-  setHelpWindow(helpWindow) {
+  setHelpWindow(helpWindow: Window_Help | null) {
     this._helpWindow = helpWindow
     this.callUpdateHelp()
   }
@@ -180,15 +182,15 @@ export class Window_Selectable extends Window_Base {
     }
   }
 
-  setHandler(symbol, method) {
+  setHandler(symbol: string, method: () => void) {
     this._handlers[symbol] = method
   }
 
-  isHandled(symbol) {
+  isHandled(symbol: string) {
     return !!this._handlers[symbol]
   }
 
-  callHandler(symbol) {
+  callHandler(symbol: string) {
     if (this.isHandled(symbol)) {
       this._handlers[symbol]()
     }
@@ -221,7 +223,7 @@ export class Window_Selectable extends Window_Base {
     }
   }
 
-  cursorRight(wrap) {
+  cursorRight(wrap = false) {
     const index = this.index()
     const maxItems = this.maxItems()
     const maxCols = this.maxCols()
@@ -230,7 +232,7 @@ export class Window_Selectable extends Window_Base {
     }
   }
 
-  cursorLeft(wrap) {
+  cursorLeft(wrap = false) {
     const index = this.index()
     const maxItems = this.maxItems()
     const maxCols = this.maxCols()
@@ -366,7 +368,7 @@ export class Window_Selectable extends Window_Base {
     return x >= 0 && y >= 0 && x < this.width && y < this.height
   }
 
-  onTouch(triggered) {
+  onTouch(triggered: boolean) {
     const lastIndex = this.index()
     const x = this.canvasToLocalX(TouchInput.x)
     const y = this.canvasToLocalY(TouchInput.y)
@@ -391,7 +393,7 @@ export class Window_Selectable extends Window_Base {
     }
   }
 
-  hitTest(x, y) {
+  hitTest(x: number, y: number) {
     if (this.isContentsArea(x, y)) {
       const cx = x - this.padding
       const cy = y - this.padding
@@ -411,7 +413,7 @@ export class Window_Selectable extends Window_Base {
     return -1
   }
 
-  isContentsArea(x, y) {
+  isContentsArea(x: number, y: number) {
     const left = this.padding
     const top = this.padding
     const right = this.width - this.padding
@@ -526,10 +528,10 @@ export class Window_Selectable extends Window_Base {
   }
 
   updateHelp() {
-    this._helpWindow.clear()
+    this._helpWindow!.clear()
   }
 
-  setHelpWindowItem(item) {
+  setHelpWindowItem(item: Data_ItemBase | null) {
     if (this._helpWindow) {
       this._helpWindow.setItem(item)
     }
@@ -549,16 +551,16 @@ export class Window_Selectable extends Window_Base {
     }
   }
 
-  drawItem(index) {
+  drawItem(index: number) {
     // empty
   }
 
-  clearItem(index) {
+  clearItem(index: number) {
     const rect = this.itemRect(index)
     this.contents.clearRect(rect.x, rect.y, rect.width, rect.height)
   }
 
-  redrawItem(index) {
+  redrawItem(index: number) {
     if (index >= 0) {
       this.clearItem(index)
       this.drawItem(index)

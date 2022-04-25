@@ -3,42 +3,29 @@ import {global} from '../managers/DataManager'
 import {ImageManager} from '../managers/ImageManager'
 import {Sprite} from '../core/Sprite'
 import {Sprite_Balloon} from './Sprite_Balloon'
+import {Game_Character} from '../objects/Game_Character'
 
 // Sprite_Character
 //
 // The sprite for displaying a character.
 export class Sprite_Character extends Sprite_Base {
 
-  private _character
-  private _balloonDuration
-  private _tilesetId
-  private _upperBody
-  private _lowerBody
+  private readonly _character: Game_Character
+  private _balloonDuration = 0
+  private _tilesetId = 0
+  private _upperBody: Sprite | null = null
+  private _lowerBody: Sprite | null = null
   private _tileId
   private _characterName
   private _characterIndex
   private _isBigCharacter
   private _bushDepth
   private _balloonSprite
-  z // todo 看看放在哪里比较好
 
-  constructor(character) {
+  constructor(character: Game_Character) {
     super()
-    this.initMembers()
-    this.setCharacter(character)
-  }
-
-  initMembers() {
     this.anchor.x = 0.5
     this.anchor.y = 1
-    this._character = null
-    this._balloonDuration = 0
-    this._tilesetId = 0
-    this._upperBody = null
-    this._lowerBody = null
-  }
-
-  setCharacter(character) {
     this._character = character
   }
 
@@ -60,10 +47,10 @@ export class Sprite_Character extends Sprite_Base {
   }
 
   isTile() {
-    return this._character.tileId > 0
+    return this._character.tileId() > 0
   }
 
-  tilesetBitmap(tileId) {
+  tilesetBitmap(tileId: number) {
     const tileset = global.$gameMap.tileset()
     const setNumber = 5 + Math.floor(tileId / 256)
     return ImageManager.loadTileset(tileset.tilesetNames[setNumber])
@@ -123,8 +110,8 @@ export class Sprite_Character extends Sprite_Base {
     this.updateHalfBodySprites()
     if (this._bushDepth > 0) {
       const d = this._bushDepth
-      this._upperBody.setFrame(sx, sy, pw, ph - d)
-      this._lowerBody.setFrame(sx, sy + ph - d, pw, d)
+      this._upperBody!.setFrame(sx, sy, pw, ph - d)
+      this._lowerBody!.setFrame(sx, sy + ph - d, pw, d)
       this.setFrame(sx, sy, 0, ph)
     } else {
       this.setFrame(sx, sy, pw, ph)
@@ -161,9 +148,9 @@ export class Sprite_Character extends Sprite_Base {
     if (this._tileId > 0) {
       return global.$gameMap.tileWidth()
     } else if (this._isBigCharacter) {
-      return this.bitmap.width / 3
+      return this.bitmap!.width / 3
     } else {
-      return this.bitmap.width / 12
+      return this.bitmap!.width / 12
     }
   }
 
@@ -171,25 +158,25 @@ export class Sprite_Character extends Sprite_Base {
     if (this._tileId > 0) {
       return global.$gameMap.tileHeight()
     } else if (this._isBigCharacter) {
-      return this.bitmap.height / 4
+      return this.bitmap!.height / 4
     } else {
-      return this.bitmap.height / 8
+      return this.bitmap!.height / 8
     }
   }
 
   updateHalfBodySprites() {
     if (this._bushDepth > 0) {
       this.createHalfBodySprites()
-      this._upperBody.bitmap = this.bitmap
-      this._upperBody.visible = true
-      this._upperBody.y = -this._bushDepth
-      this._lowerBody.bitmap = this.bitmap
-      this._lowerBody.visible = true
-      this._upperBody.setBlendColor(this.getBlendColor())
-      this._lowerBody.setBlendColor(this.getBlendColor())
-      this._upperBody.setColorTone(this.getColorTone())
-      this._lowerBody.setColorTone(this.getColorTone())
-    } else if (this._upperBody) {
+      this._upperBody!.bitmap = this.bitmap
+      this._upperBody!.visible = true
+      this._upperBody!.y = -this._bushDepth
+      this._lowerBody!.bitmap = this.bitmap
+      this._lowerBody!.visible = true
+      this._upperBody!.setBlendColor(this.getBlendColor())
+      this._lowerBody!.setBlendColor(this.getBlendColor())
+      this._upperBody!.setColorTone(this.getColorTone())
+      this._lowerBody!.setColorTone(this.getColorTone())
+    } else if (this._upperBody && this._lowerBody) {
       this._upperBody.visible = false
       this._lowerBody.visible = false
     }

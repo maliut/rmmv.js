@@ -28,12 +28,12 @@ export class Scene_Map extends Scene_Base {
   private _encounterEffectDuration = 0
   private _mapLoaded = false
   private _touchCount = 0
-  private _transfer
-  private _mapNameWindow
-  private _messageWindow
-  private _spriteset
-  private _scrollTextWindow
-  menuCalling
+  private _transfer!: boolean
+  private _mapNameWindow!: Window_MapName
+  private _messageWindow!: Window_Message
+  private _spriteset!: Spriteset_Map
+  private _scrollTextWindow!: Window_ScrollText
+  menuCalling = false
 
   override create() {
     super.create()
@@ -137,7 +137,7 @@ export class Scene_Map extends Scene_Base {
 
     global.$gameScreen.clearZoom()
 
-    this.removeChild(this._fadeSprite)
+    this.removeChild(this._fadeSprite!)
     this.removeChild(this._mapNameWindow)
     this.removeChild(this._windowLayer)
     this.removeChild(this._spriteset)
@@ -234,9 +234,9 @@ export class Scene_Map extends Scene_Base {
   createMessageWindow() {
     this._messageWindow = new Window_Message().initialize()
     this.addWindow(this._messageWindow)
-    this._messageWindow.subWindows().forEach(function (window) {
+    this._messageWindow.subWindows().forEach((window) => {
       this.addWindow(window)
-    }, this)
+    })
   }
 
   createScrollTextWindow() {
@@ -369,7 +369,7 @@ export class Scene_Map extends Scene_Base {
     this._windowLayer.visible = true
   }
 
-  startFlashForEncounter(duration) {
+  startFlashForEncounter(duration: number) {
     const color = [255, 255, 255, 255]
     global.$gameScreen.startFlash(color, duration)
   }

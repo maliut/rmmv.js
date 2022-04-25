@@ -1,15 +1,17 @@
 import {Window_ItemList} from './Window_ItemList'
 import {Graphics} from '../core/Graphics'
 import {DataManager, global} from '../managers/DataManager'
+import {Window_Message} from './Window_Message'
+import {Data_Item, Data_ItemBase} from '../types/global'
 
 // Window_EventItem
 //
 // The window used for the event command [Select Item].
 export class Window_EventItem extends Window_ItemList {
 
-  private readonly _messageWindow
+  private readonly _messageWindow: Window_Message
 
-  constructor(messageWindow) {
+  constructor(messageWindow: Window_Message) {
     super()
     this._messageWindow = messageWindow
     this.setHandler('ok', this.onOk.bind(this))
@@ -49,12 +51,12 @@ export class Window_EventItem extends Window_ItemList {
     }
   }
 
-  override includes(item) {
+  override includes(item: Data_ItemBase | null) {
     const itypeId = global.$gameMessage.itemChoiceItypeId()
-    return DataManager.isItem(item) && item.itypeId === itypeId
+    return DataManager.isItem(item) && (item as Data_Item).itypeId === itypeId
   }
 
-  override isEnabled(item) {
+  override isEnabled(item: Data_ItemBase | null) {
     return true
   }
 

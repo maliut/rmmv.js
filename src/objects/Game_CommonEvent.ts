@@ -7,10 +7,10 @@ import {Game_Interpreter} from './Game_Interpreter'
 // running parallel process events.
 export class Game_CommonEvent {
 
-  private readonly _commonEventId
-  private _interpreter = null
+  private readonly _commonEventId: number
+  private _interpreter: Game_Interpreter | null = null
 
-  constructor(commonEventId) {
+  constructor(commonEventId: number) {
     this._commonEventId = commonEventId
     this.refresh()
   }

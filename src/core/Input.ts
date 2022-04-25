@@ -140,7 +140,7 @@ export class Input {
    * @static
    * @method clear
    */
-  static clear = function () {
+  static clear() {
     this._currentState = {}
     this._previousState = {}
     this._gamepadStates = []
@@ -160,7 +160,7 @@ export class Input {
    */
   static update() {
     this._pollGamepads()
-    if (this._currentState[this._latestButton]) {
+    if (this._latestButton && this._currentState[this._latestButton]) {
       this._pressedTime++
     } else {
       this._latestButton = null
@@ -248,7 +248,6 @@ export class Input {
     if (Utils.isNwjs()) {
       const _alert = window.alert
       window.alert = function (...params) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const gui = globalThis.require('nw.gui')
         const win = gui.Window.get()
         _alert.apply(this, params)
@@ -323,7 +322,7 @@ export class Input {
 
   private static _updateGamepadState(gamepad: Gamepad) {
     const lastState = this._gamepadStates[gamepad.index] || []
-    const newState = []
+    const newState: boolean[] = []
     const buttons = gamepad.buttons
     const axes = gamepad.axes
     const threshold = 0.5

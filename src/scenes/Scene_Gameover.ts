@@ -13,7 +13,7 @@ import {Scene_Title} from './Scene_Title'
 // The scene class of the game over screen.
 export class Scene_Gameover extends Scene_Base {
 
-  private _backSprite
+  private _backSprite!: Sprite
 
   override create() {
     super.create()

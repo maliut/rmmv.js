@@ -1,6 +1,7 @@
 import {Game_Character} from './Game_Character'
 import {global} from '../managers/DataManager'
 import {Game_Interpreter} from './Game_Interpreter'
+import { Data_EventPage } from '../types/global'
 
 // Game_Event
 //
@@ -8,8 +9,8 @@ import {Game_Interpreter} from './Game_Interpreter'
 // switching and running parallel process events.
 export class Game_Event extends Game_Character {
 
-  private readonly _mapId
-  private readonly _eventId
+  private readonly _mapId: number
+  private readonly _eventId: number
   private _moveType = 0
   private _trigger = 0
   private _starting = false
@@ -19,27 +20,14 @@ export class Game_Event extends Game_Character {
   private _originalDirection = 2
   private _prelockDirection = 0
   private _locked = false
-  private _interpreter = null
+  private _interpreter: Game_Interpreter | null = null
 
-  constructor(mapId, eventId) {
+  constructor(mapId: number, eventId: number) {
     super()
     this._mapId = mapId
     this._eventId = eventId
     this.locate(this.event().x, this.event().y)
     this.refresh()
-  }
-
-  override initMembers() {
-    super.initMembers()
-    this._moveType = 0
-    this._trigger = 0
-    this._starting = false
-    this._erased = false
-    this._pageIndex = -2
-    this._originalPattern = 1
-    this._originalDirection = 2
-    this._prelockDirection = 0
-    this._locked = false
   }
 
   eventId() {
@@ -58,17 +46,17 @@ export class Game_Event extends Game_Character {
     return this.page().list
   }
 
-  override isCollidedWithCharacters(x, y) {
+  override isCollidedWithCharacters(x: number, y: number) {
     return (super.isCollidedWithCharacters(x, y) ||
       this.isCollidedWithPlayerCharacters(x, y))
   }
 
-  override isCollidedWithEvents(x, y) {
+  override isCollidedWithEvents(x: number, y: number) {
     const events = global.$gameMap.eventsXyNt(x, y)
     return events.length > 0
   }
 
-  isCollidedWithPlayerCharacters(x, y) {
+  isCollidedWithPlayerCharacters(x: number, y: number) {
     return this.isNormalPriority() && global.$gamePlayer.isCollided(x, y)
   }
 
@@ -174,7 +162,7 @@ export class Game_Event extends Game_Character {
     this._starting = false
   }
 
-  isTriggerIn(triggers) {
+  isTriggerIn(triggers: number[]) {
     return triggers.contains(this._trigger)
   }
 
@@ -212,7 +200,7 @@ export class Game_Event extends Game_Character {
     return -1
   }
 
-  meetsConditions(page) {
+  meetsConditions(page: Data_EventPage) {
     const c = page.conditions
     if (c.switch1Valid) {
       if (!global.$gameSwitches.value(c.switch1Id)) {
@@ -230,8 +218,8 @@ export class Game_Event extends Game_Character {
       }
     }
     if (c.selfSwitchValid) {
-      const key = [this._mapId, this._eventId, c.selfSwitchCh]
-      if (global.$gameSelfSwitches.value(key) !== true) {
+      const key = [this._mapId, this._eventId, c.selfSwitchCh].toString()
+      if (!global.$gameSelfSwitches.value(key)) {
         return false
       }
     }
@@ -243,7 +231,7 @@ export class Game_Event extends Game_Character {
     }
     if (c.actorValid) {
       const actor = global.$gameActors.actor(c.actorId)
-      if (!global.$gameParty.members().contains(actor)) {
+      if (!actor || !global.$gameParty.members().contains(actor)) {
         return false
       }
     }
@@ -264,7 +252,7 @@ export class Game_Event extends Game_Character {
   clearPageSettings() {
     this.setImage('', 0)
     this._moveType = 0
-    this._trigger = null
+    this._trigger = -1
     this._interpreter = null
     this.setThrough(true)
   }

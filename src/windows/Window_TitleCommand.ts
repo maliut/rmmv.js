@@ -8,7 +8,7 @@ import {DataManager} from '../managers/DataManager'
 // The window for selecting New Game/Continue on the title screen.
 export class Window_TitleCommand extends Window_Command {
 
-  private static _lastCommandSymbol = null
+  private static _lastCommandSymbol: string | null = null
 
   static initCommandPosition() {
     this._lastCommandSymbol = null

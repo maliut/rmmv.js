@@ -5,9 +5,9 @@ import {Game_Actor} from './Game_Actor'
 //
 // The wrapper class for an actor array.
 export class Game_Actors {
-  private _data = []
+  private _data: Game_Actor[] = []
 
-  actor(actorId) {
+  actor(actorId: number) {
     if (global.$dataActors[actorId]) {
       if (!this._data[actorId]) {
         this._data[actorId] = new Game_Actor(actorId)

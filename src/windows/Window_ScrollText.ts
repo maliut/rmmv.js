@@ -3,6 +3,7 @@ import {Graphics} from '../core/Graphics'
 import {Input} from '../core/Input'
 import {TouchInput} from '../core/TouchInput'
 import {global} from '../managers/DataManager'
+import {TextState} from '../types/index'
 
 // Window_ScrollText
 //
@@ -10,7 +11,7 @@ import {global} from '../managers/DataManager'
 // is handled as a window for convenience.
 export class Window_ScrollText extends Window_Base {
 
-  private _text = ''
+  private _text: string | null = null
   private _allTextHeight = 0
 
   override initialize() {
@@ -41,14 +42,12 @@ export class Window_ScrollText extends Window_Base {
   }
 
   refresh() {
-    const textState = {index: 0}
-    // @ts-ignore
-    textState.text = this.convertEscapeCharacters(this._text)
+    const textState: TextState = {height: 0, left: 0, text: this.convertEscapeCharacters(this._text!), x: 0, y: 0, index: 0}
     this.resetFontSettings()
     this._allTextHeight = this.calcTextHeight(textState, true)
     this.createContents()
     this.origin.y = -this.height
-    this.drawTextEx(this._text, this.textPadding(), 1)
+    this.drawTextEx(this._text!, this.textPadding(), 1)
   }
 
   override contentsHeight() {

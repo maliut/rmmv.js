@@ -2,22 +2,23 @@ import {Window_Base} from './Window_Base'
 import {ImageManager} from '../managers/ImageManager'
 import {Graphics} from '../core/Graphics'
 import {global} from '../managers/DataManager'
+import {Game_Actor} from '../objects/Game_Actor'
 
 // Window_NameEdit
 //
 // The window for editing an actor's name on the name input screen.
 export class Window_NameEdit extends Window_Base {
 
-  private readonly _actor
-  private _name
-  private _index
-  private readonly _maxLength
-  private readonly _defaultName
+  private readonly _actor: Game_Actor
+  private _name: string
+  private _index: number
+  private readonly _maxLength: number
+  private readonly _defaultName: string
 
-  constructor(actor, maxLength) {
+  constructor(actor: Game_Actor, maxLength: number) {
     super()
     this._actor = actor
-    this._name = actor.name().slice(0, this._maxLength)
+    this._name = actor.name().slice(0, maxLength)
     this._index = this._name.length
     this._maxLength = maxLength
     this._defaultName = this._name
@@ -55,7 +56,7 @@ export class Window_NameEdit extends Window_Base {
     return this._name.length > 0
   }
 
-  add(ch) {
+  add(ch: string) {
     if (this._index < this._maxLength) {
       this._name += ch
       this._index++
@@ -92,7 +93,7 @@ export class Window_NameEdit extends Window_Base {
     return Math.min(nameCenter - nameWidth / 2, this.contentsWidth() - nameWidth)
   }
 
-  itemRect(index) {
+  itemRect(index: number) {
     return {
       x: this.left() + index * this.charWidth(),
       y: 54,
@@ -101,7 +102,7 @@ export class Window_NameEdit extends Window_Base {
     }
   }
 
-  underlineRect(index) {
+  underlineRect(index: number) {
     const rect = this.itemRect(index)
     rect.x++
     rect.y += rect.height - 4
@@ -114,7 +115,7 @@ export class Window_NameEdit extends Window_Base {
     return this.normalColor()
   }
 
-  drawUnderline(index) {
+  drawUnderline(index: number) {
     const rect = this.underlineRect(index)
     const color = this.underlineColor()
     this.contents.paintOpacity = 48
@@ -122,7 +123,7 @@ export class Window_NameEdit extends Window_Base {
     this.contents.paintOpacity = 255
   }
 
-  drawChar(index) {
+  drawChar(index: number) {
     const rect = this.itemRect(index)
     this.resetTextColor()
     this.drawText(this._name[index] || '', rect.x, rect.y)

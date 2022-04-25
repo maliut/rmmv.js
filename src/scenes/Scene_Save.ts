@@ -23,7 +23,6 @@ export class Scene_Save extends Scene_File {
   }
 
   override onSavefileOk() {
-    super.onSavefileOk()
     global.$gameSystem.onBeforeSave()
     if (DataManager.saveGame(this.savefileId())) {
       this.onSaveSuccess()

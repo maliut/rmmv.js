@@ -11,10 +11,10 @@ import {Window_EquipSlot} from '../windows/Window_EquipSlot'
 // The scene class of the equipment screen.
 export class Scene_Equip extends Scene_MenuBase {
 
-  private _statusWindow
-  private _commandWindow
-  private _slotWindow
-  private _itemWindow
+  private _statusWindow!: Window_EquipStatus
+  private _commandWindow!: Window_EquipCommand
+  private _slotWindow!: Window_EquipSlot
+  private _itemWindow!: Window_EquipItem
 
   override create() {
     super.create()
@@ -35,7 +35,7 @@ export class Scene_Equip extends Scene_MenuBase {
     const wx = this._statusWindow.width
     const wy = this._helpWindow.height
     const ww = Graphics.boxWidth - this._statusWindow.width
-    this._commandWindow = new Window_EquipCommand(ww).initialize(wx, wy)
+    this._commandWindow = new Window_EquipCommand().initialize(wx, wy, ww)
     this._commandWindow.setHelpWindow(this._helpWindow)
     this._commandWindow.setHandler('equip', this.commandEquip.bind(this))
     this._commandWindow.setHandler('optimize', this.commandOptimize.bind(this))

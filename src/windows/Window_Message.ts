@@ -9,25 +9,27 @@ import {Window_EventItem} from './Window_EventItem'
 import {Utils} from '../core/Utils'
 import {global} from '../managers/DataManager'
 import {ImageManager} from '../managers/ImageManager'
+import {Bitmap} from '../core/Bitmap'
+import {TextState} from '../types/index'
 
 // Window_Message
 //
 // The window for displaying text messages.
 export class Window_Message extends Window_Base {
 
-  private _imageReservationId
-  private _background
-  private _positionType
-  private _waitCount
-  private _faceBitmap
-  private _textState
-  private _goldWindow
-  private _choiceWindow
-  private _numberWindow
-  private _itemWindow
-  private _showFast
-  private _lineShowFast
-  private _pauseSkip
+  private readonly _imageReservationId = Utils.generateRuntimeId()
+  private _background = 0
+  private _positionType = -2
+  private _waitCount = 0
+  private _faceBitmap: Bitmap | null = null
+  private _textState: TextState | null = null
+  private _goldWindow!: Window_Gold
+  private _choiceWindow!: Window_ChoiceList
+  private _numberWindow!: Window_NumberInput
+  private _itemWindow!: Window_EventItem
+  private _showFast = false
+  private _lineShowFast = false
+  private _pauseSkip = false
 
   override initialize() {
     const width = this.windowWidth()
@@ -35,20 +37,9 @@ export class Window_Message extends Window_Base {
     const x = (Graphics.boxWidth - width) / 2
     super.initialize(x, 0, width, height)
     this.openness = 0
-    this.initMembers()
     this.createSubWindows()
     this.updatePlacement()
     return this
-  }
-
-  initMembers() {
-    this._imageReservationId = Utils.generateRuntimeId()
-    this._background = 0
-    this._positionType = 2
-    this._waitCount = 0
-    this._faceBitmap = null
-    this._textState = null
-    this.clearFlags()
   }
 
   subWindows() {
@@ -117,9 +108,7 @@ export class Window_Message extends Window_Base {
   }
 
   startMessage() {
-    this._textState = {}
-    this._textState.index = 0
-    this._textState.text = this.convertEscapeCharacters(global.$gameMessage.allText())
+    this._textState = {height: 0, index: 0, left: 0, text: this.convertEscapeCharacters(global.$gameMessage.allText()), x: 0, y: 0}
     this.newPage(this._textState)
     this.updatePlacement()
     this.updateBackground()
@@ -260,7 +249,7 @@ export class Window_Message extends Window_Base {
     }
   }
 
-  newPage(textState) {
+  newPage(textState: TextState) {
     this.contents.clear()
     this.resetFontSettings()
     this.clearFlags()
@@ -284,7 +273,7 @@ export class Window_Message extends Window_Base {
     return global.$gameMessage.faceName() === '' ? 0 : 168
   }
 
-  override processNewLine(textState) {
+  override processNewLine(textState: TextState) {
     this._lineShowFast = false
     super.processNewLine(textState)
     if (this.needsNewPage(textState)) {
@@ -292,7 +281,7 @@ export class Window_Message extends Window_Base {
     }
   }
 
-  override processNewPage(textState) {
+  override processNewPage(textState: TextState) {
     super.processNewPage(textState)
     if (textState.text[textState.index] === '\n') {
       textState.index++
@@ -301,16 +290,16 @@ export class Window_Message extends Window_Base {
     this.startPause()
   }
 
-  isEndOfText(textState) {
+  isEndOfText(textState: TextState) {
     return textState.index >= textState.text.length
   }
 
-  needsNewPage(textState) {
+  needsNewPage(textState: TextState) {
     return (!this.isEndOfText(textState) &&
       textState.y + textState.height > this.contents.height)
   }
 
-  override processEscapeCharacter(code, textState) {
+  override processEscapeCharacter(code: string, textState: TextState) {
     switch (code) {
     case '$':
       this._goldWindow.open()
@@ -339,7 +328,7 @@ export class Window_Message extends Window_Base {
     }
   }
 
-  startWait(count) {
+  startWait(count: number) {
     this._waitCount = count
   }
 

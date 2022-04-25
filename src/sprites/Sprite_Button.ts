@@ -6,9 +6,9 @@ import * as PIXI from 'pixi.js'
 export class Sprite_Button extends Sprite {
 
   private _touching = false
-  private _coldFrame = null
-  private _hotFrame = null
-  private _clickHandler = null
+  private _coldFrame: Rectangle | null = null
+  private _hotFrame: Rectangle | null = null
+  private _clickHandler: (() => void) | null = null
 
   override update() {
     super.update()
@@ -17,7 +17,7 @@ export class Sprite_Button extends Sprite {
   }
 
   updateFrame() {
-    let frame
+    let frame: Rectangle | null
     if (this._touching) {
       frame = this._hotFrame
     } else {
@@ -28,22 +28,20 @@ export class Sprite_Button extends Sprite {
     }
   }
 
-  setColdFrame(x, y, width, height) {
+  setColdFrame(x: number, y: number, width: number, height: number) {
     this._coldFrame = new Rectangle(x, y, width, height)
   }
 
-  setHotFrame(x, y, width, height) {
+  setHotFrame(x: number, y: number, width: number, height: number) {
     this._hotFrame = new Rectangle(x, y, width, height)
   }
 
-  setClickHandler(method) {
+  setClickHandler(method: (() => void) | null) {
     this._clickHandler = method
   }
 
   callClickHandler() {
-    if (this._clickHandler) {
-      this._clickHandler()
-    }
+    this._clickHandler?.()
   }
 
   processTouch() {

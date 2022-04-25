@@ -5,6 +5,7 @@ import {BattleManager} from '../managers/BattleManager'
 import {Game_Action} from './Game_Action'
 import {TextManager} from '../managers/TextManager'
 import {SoundManager} from '../managers/SoundManager'
+import {Data_Armor, Data_Class, Data_Item, Data_ItemBase, Data_Skill, Data_State, Data_Weapon} from '../types/global'
 
 // Game_Actor
 //
@@ -21,47 +22,26 @@ export class Game_Actor extends Game_Battler {
   private _faceName = ''
   private _faceIndex = 0
   private _battlerName = ''
-  private _exp = {}
-  private _skills = []
-  private _equips = []
+  private _exp: Record<number, number> = {}
+  private _skills: number[] = []
+  private _equips: Game_Item[] = []
   private _actionInputIndex = 0
   private _lastMenuSkill = new Game_Item()
   private _lastBattleSkill = new Game_Item()
   private _lastCommandSymbol = ''
   private _profile = ''
-  private _stateSteps = {}
+  private _stateSteps: Record<number, number> = {}
 
   get level() {
     return this._level
   }
 
-  constructor(actorId) {
+  constructor(actorId: number) {
     super()
     this.setup(actorId)
   }
 
-  override initMembers() {
-    super.initMembers()
-    // this._actorId = 0
-    // this._name = ''
-    // this._nickname = ''
-    // this._classId = 0
-    // this._level = 0
-    // this._characterName = ''
-    // this._characterIndex = 0
-    // this._faceName = ''
-    // this._faceIndex = 0
-    // this._battlerName = ''
-    // this._exp = {}
-    // this._skills = []
-    // this._equips = []
-    // this._actionInputIndex = 0
-    // this._lastMenuSkill = new Game_Item()
-    // this._lastBattleSkill = new Game_Item()
-    // this._lastCommandSymbol = ''
-  }
-
-  setup(actorId) {
+  setup(actorId: number) {
     const actor = global.$dataActors[actorId]
     this._actorId = actorId
     this._name = actor.name
@@ -89,7 +69,7 @@ export class Game_Actor extends Game_Battler {
     return this._name
   }
 
-  setName(name) {
+  setName(name: string) {
     this._name = name
   }
 
@@ -97,7 +77,7 @@ export class Game_Actor extends Game_Battler {
     return this._nickname
   }
 
-  setNickname(nickname) {
+  setNickname(nickname: string) {
     this._nickname = nickname
   }
 
@@ -134,12 +114,12 @@ export class Game_Actor extends Game_Battler {
     this._stateSteps = {}
   }
 
-  override eraseState(stateId) {
+  override eraseState(stateId: number) {
     super.eraseState(stateId)
     delete this._stateSteps[stateId]
   }
 
-  override resetStateCounts(stateId) {
+  override resetStateCounts(stateId: number) {
     super.resetStateCounts(stateId)
     this._stateSteps[stateId] = global.$dataStates[stateId].stepsToRemove
   }
@@ -153,7 +133,7 @@ export class Game_Actor extends Game_Battler {
     this._battlerName = actor.battlerName
   }
 
-  expForLevel(level) {
+  expForLevel(level: number) {
     const c = this.currentClass()
     const basis = c.expParams[0]
     const extra = c.expParams[1]
@@ -193,14 +173,14 @@ export class Game_Actor extends Game_Battler {
 
   initSkills() {
     this._skills = []
-    this.currentClass().learnings.forEach(function (learning) {
+    this.currentClass().learnings.forEach((learning) => {
       if (learning.level <= this._level) {
         this.learnSkill(learning.skillId)
       }
-    }, this)
+    })
   }
 
-  initEquips(equips) {
+  initEquips(equips: number[]) {
     const slots = this.equipSlots()
     const maxSlots = slots.length
     this._equips = []
@@ -217,7 +197,7 @@ export class Game_Actor extends Game_Battler {
   }
 
   equipSlots() {
-    const slots = []
+    const slots: number[] = []
     for (let i = 1; i < global.$dataSystem.equipTypes.length; i++) {
       slots.push(i)
     }
@@ -228,39 +208,32 @@ export class Game_Actor extends Game_Battler {
   }
 
   equips() {
-    return this._equips.map(function (item) {
-      return item.object()
-    })
+    return this._equips.map((item) => item.object()) as (Data_Weapon | Data_Armor)[] // 装备必然是武器和防具，这里强转一下
   }
 
-  weapons() {
-    return this.equips().filter(function (item) {
-      return item && DataManager.isWeapon(item)
-    })
+  weapons(): Data_Weapon[] {
+    return this.equips().filter((item) => item && DataManager.isWeapon(item)) as Data_Weapon[]
   }
 
-  armors() {
-    return this.equips().filter(function (item) {
-      return item && DataManager.isArmor(item)
-    })
+  armors(): Data_Armor[] {
+    return this.equips().filter((item) => item && DataManager.isArmor(item)) as Data_Armor[]
   }
 
-  hasWeapon(weapon) {
+  hasWeapon(weapon: Data_Weapon) {
     return this.weapons().contains(weapon)
   }
 
-  hasArmor(armor) {
+  hasArmor(armor: Data_Armor) {
     return this.armors().contains(armor)
   }
 
-  isEquipChangeOk(slotId) {
+  isEquipChangeOk(slotId: number) {
     return (!this.isEquipTypeLocked(this.equipSlots()[slotId]) &&
       !this.isEquipTypeSealed(this.equipSlots()[slotId]))
   }
 
-  changeEquip(slotId, item) {
-    if (this.tradeItemWithParty(item, this.equips()[slotId]) &&
-      (!item || this.equipSlots()[slotId] === item.etypeId)) {
+  changeEquip(slotId: number, item: Data_ItemBase | null) {
+    if (this.tradeItemWithParty(item, this.equips()[slotId]) && (!item || this.equipSlots()[slotId] === (item as Data_Weapon | Data_Armor).etypeId)) {
       this._equips[slotId].setObject(item)
       this.refresh()
     }
@@ -272,7 +245,7 @@ export class Game_Actor extends Game_Battler {
     this.refresh()
   }
 
-  tradeItemWithParty(newItem, oldItem) {
+  tradeItemWithParty(newItem: Data_ItemBase | null, oldItem: Data_ItemBase | null) {
     if (newItem && !global.$gameParty.hasItem(newItem)) {
       return false
     } else {
@@ -282,7 +255,7 @@ export class Game_Actor extends Game_Battler {
     }
   }
 
-  changeEquipById(etypeId, itemId) {
+  changeEquipById(etypeId: number, itemId: number) {
     const slotId = etypeId - 1
     if (this.equipSlots()[slotId] === 1) {
       this.changeEquip(slotId, global.$dataWeapons[itemId])
@@ -291,25 +264,25 @@ export class Game_Actor extends Game_Battler {
     }
   }
 
-  isEquipped(item) {
+  isEquipped(item: Data_Armor | Data_Weapon) {
     return this.equips().contains(item)
   }
 
-  discardEquip(item) {
+  discardEquip(item: Data_Armor | Data_Weapon) {
     const slotId = this.equips().indexOf(item)
     if (slotId >= 0) {
       this._equips[slotId].setObject(null)
     }
   }
 
-  releaseUnequippableItems(forcing) {
+  releaseUnequippableItems(forcing: boolean) {
     for (; ;) {
       const slots = this.equipSlots()
       const equips = this.equips()
       let changed = false
       for (let i = 0; i < equips.length; i++) {
         const item = equips[i]
-        if (item && (!this.canEquip(item) || item.etypeId !== slots[i])) {
+        if (item && (!this.canEquip(item) || (item as Data_Weapon | Data_Armor).etypeId !== slots[i])) {
           if (!forcing) {
             this.tradeItemWithParty(null, item)
           }
@@ -342,12 +315,12 @@ export class Game_Actor extends Game_Battler {
     }
   }
 
-  bestEquipItem(slotId) {
+  bestEquipItem(slotId: number) {
     const etypeId = this.equipSlots()[slotId]
-    const items = global.$gameParty.equipItems().filter(function (item) {
+    const items = global.$gameParty.equipItems().filter((item) => {
       return item.etypeId === etypeId && this.canEquip(item)
-    }, this)
-    let bestItem = null
+    })
+    let bestItem: Data_Armor | Data_Weapon | null = null
     let bestPerformance = -1000
     for (let i = 0; i < items.length; i++) {
       const performance = this.calcEquipItemPerformance(items[i])
@@ -359,28 +332,20 @@ export class Game_Actor extends Game_Battler {
     return bestItem
   }
 
-  calcEquipItemPerformance(item) {
-    return item.params.reduce(function (a, b) {
-      return a + b
-    })
+  calcEquipItemPerformance(item: Data_Weapon | Data_Armor) {
+    return item.params.reduce((a, b) => a + b)
   }
 
-  override isSkillWtypeOk(skill) {
+  override isSkillWtypeOk(skill: Data_Skill) {
     const wtypeId1 = skill.requiredWtypeId1
     const wtypeId2 = skill.requiredWtypeId2
-    if ((wtypeId1 === 0 && wtypeId2 === 0) ||
+    return (wtypeId1 === 0 && wtypeId2 === 0) ||
       (wtypeId1 > 0 && this.isWtypeEquipped(wtypeId1)) ||
-      (wtypeId2 > 0 && this.isWtypeEquipped(wtypeId2))) {
-      return true
-    } else {
-      return false
-    }
+      (wtypeId2 > 0 && this.isWtypeEquipped(wtypeId2))
   }
 
-  isWtypeEquipped(wtypeId) {
-    return this.weapons().some(function (weapon) {
-      return weapon.wtypeId === wtypeId
-    })
+  isWtypeEquipped(wtypeId: number) {
+    return this.weapons().some((weapon) => weapon.wtypeId === wtypeId)
   }
 
   override refresh() {
@@ -392,19 +357,19 @@ export class Game_Actor extends Game_Battler {
     return true
   }
 
-  friendsUnit() {
+  override friendsUnit() {
     return global.$gameParty
   }
 
-  opponentsUnit() {
+  override opponentsUnit() {
     return global.$gameTroop
   }
 
-  index() {
+  override index() {
     return global.$gameParty.members().indexOf(this)
   }
 
-  isBattleMember() {
+  override isBattleMember() {
     return global.$gameParty.battleMembers().contains(this)
   }
 
@@ -416,13 +381,13 @@ export class Game_Actor extends Game_Battler {
     return global.$dataClasses[this._classId]
   }
 
-  isClass(gameClass) {
+  isClass(gameClass: Data_Class) {
     return gameClass && this._classId === gameClass.id
   }
 
   skills() {
-    const list = []
-    this._skills.concat(this.addedSkills()).forEach(function (id) {
+    const list: Data_Skill[] = []
+    this._skills.concat(this.addedSkills()).forEach((id) => {
       if (!list.contains(global.$dataSkills[id])) {
         list.push(global.$dataSkills[id])
       }
@@ -431,9 +396,7 @@ export class Game_Actor extends Game_Battler {
   }
 
   usableSkills() {
-    return this.skills().filter(function (skill) {
-      return this.canUse(skill)
-    }, this)
+    return this.skills().filter((skill) => this.canUse(skill))
   }
 
   override traitObjects() {
@@ -465,18 +428,18 @@ export class Game_Actor extends Game_Battler {
     return 1
   }
 
-  override paramMax(paramId) {
+  override paramMax(paramId: number) {
     if (paramId === 0) {
       return 9999    // MHP
     }
     return super.paramMax(paramId)
   }
 
-  override paramBase(paramId) {
+  override paramBase(paramId: number) {
     return this.currentClass().params[paramId][this._level]
   }
 
-  override paramPlus(paramId) {
+  override paramPlus(paramId: number) {
     let value = super.paramPlus(paramId)
     const equips = this.equips()
     for (let i = 0; i < equips.length; i++) {
@@ -506,7 +469,7 @@ export class Game_Actor extends Game_Battler {
     return 1
   }
 
-  changeExp(exp, show) {
+  changeExp(exp: number, show: boolean) {
     this._exp[this._classId] = Math.max(exp, 0)
     const lastLevel = this._level
     const lastSkills = this.skills()
@@ -524,18 +487,18 @@ export class Game_Actor extends Game_Battler {
 
   levelUp() {
     this._level++
-    this.currentClass().learnings.forEach(function (learning) {
+    this.currentClass().learnings.forEach((learning) => {
       if (learning.level === this._level) {
         this.learnSkill(learning.skillId)
       }
-    }, this)
+    })
   }
 
   levelDown() {
     this._level--
   }
 
-  findNewSkills(lastSkills) {
+  findNewSkills(lastSkills: Data_Skill[]) {
     const newSkills = this.skills()
     for (let i = 0; i < lastSkills.length; i++) {
       const index = newSkills.indexOf(lastSkills[i])
@@ -546,16 +509,16 @@ export class Game_Actor extends Game_Battler {
     return newSkills
   }
 
-  displayLevelUp(newSkills) {
+  displayLevelUp(newSkills: Data_Skill[]) {
     const text = TextManager.levelUp.format(this._name, TextManager.level, this._level)
     global.$gameMessage.newPage()
     global.$gameMessage.add(text)
-    newSkills.forEach(function (skill) {
+    newSkills.forEach((skill) => {
       global.$gameMessage.add(TextManager.obtainSkill.format(skill.name))
     })
   }
 
-  gainExp(exp) {
+  gainExp(exp: number) {
     const newExp = this.currentExp() + Math.round(exp * this.finalExpRate())
     this.changeExp(newExp, this.shouldDisplayLevelUp())
   }
@@ -572,36 +535,34 @@ export class Game_Actor extends Game_Battler {
     return true
   }
 
-  changeLevel(level, show) {
+  changeLevel(level: number, show: boolean) {
     level = level.clamp(1, this.maxLevel())
     this.changeExp(this.expForLevel(level), show)
   }
 
-  learnSkill(skillId) {
+  learnSkill(skillId: number) {
     if (!this.isLearnedSkill(skillId)) {
       this._skills.push(skillId)
-      this._skills.sort(function (a, b) {
-        return a - b
-      })
+      this._skills.sort((a, b) => a - b)
     }
   }
 
-  forgetSkill(skillId) {
+  forgetSkill(skillId: number) {
     const index = this._skills.indexOf(skillId)
     if (index >= 0) {
       this._skills.splice(index, 1)
     }
   }
 
-  isLearnedSkill(skillId) {
+  isLearnedSkill(skillId: number) {
     return this._skills.contains(skillId)
   }
 
-  hasSkill(skillId) {
+  hasSkill(skillId: number) {
     return this.skills().contains(global.$dataSkills[skillId])
   }
 
-  changeClass(classId, keepExp) {
+  changeClass(classId: number, keepExp: boolean) {
     if (keepExp) {
       this._exp[classId] = this.currentExp()
     }
@@ -610,17 +571,17 @@ export class Game_Actor extends Game_Battler {
     this.refresh()
   }
 
-  setCharacterImage(characterName, characterIndex) {
+  setCharacterImage(characterName: string, characterIndex: number) {
     this._characterName = characterName
     this._characterIndex = characterIndex
   }
 
-  setFaceImage(faceName, faceIndex) {
+  setFaceImage(faceName: string, faceIndex: number) {
     this._faceName = faceName
     this._faceIndex = faceIndex
   }
 
-  setBattlerImage(battlerName) {
+  setBattlerImage(battlerName: string) {
     this._battlerName = battlerName
   }
 
@@ -628,12 +589,12 @@ export class Game_Actor extends Game_Battler {
     return global.$gameSystem.isSideView()
   }
 
-  override startAnimation(animationId, mirror, delay) {
+  override startAnimation(animationId: number, mirror: boolean, delay: number) {
     mirror = !mirror
     super.startAnimation(animationId, mirror, delay)
   }
 
-  override performAction(action) {
+  override performAction(action: Game_Action) {
     super.performAction(action)
     if (action.isAttack()) {
       this.performAttack()
@@ -665,7 +626,6 @@ export class Game_Actor extends Game_Battler {
   }
 
   override performDamage() {
-    super.performDamage()
     if (this.isSpriteVisible()) {
       this.requestMotion('damage')
     } else {
@@ -690,7 +650,6 @@ export class Game_Actor extends Game_Battler {
   }
 
   override performCollapse() {
-    super.performCollapse()
     if (global.$gameParty.inBattle()) {
       SoundManager.playActorCollapse()
     }
@@ -709,15 +668,15 @@ export class Game_Actor extends Game_Battler {
   }
 
   makeActionList() {
-    const list = []
+    const list: Game_Action[] = []
     let action = new Game_Action(this)
     action.setAttack()
     list.push(action)
-    this.usableSkills().forEach(function (skill) {
+    this.usableSkills().forEach((skill) => {
       action = new Game_Action(this)
       action.setSkill(skill.id)
       list.push(action)
-    }, this)
+    })
     return list
   }
 
@@ -762,15 +721,15 @@ export class Game_Actor extends Game_Battler {
     this.checkFloorEffect()
     if (global.$gamePlayer.isNormal()) {
       this.turnEndOnMap()
-      this.states().forEach(function (state) {
+      this.states().forEach((state) => {
         this.updateStateSteps(state)
-      }, this)
+      })
       this.showAddedStates()
       this.showRemovedStates()
     }
   }
 
-  updateStateSteps(state) {
+  updateStateSteps(state: Data_State) {
     if (state.removeByWalking) {
       if (this._stateSteps[state.id] > 0) {
         if (--this._stateSteps[state.id] === 0) {
@@ -781,19 +740,19 @@ export class Game_Actor extends Game_Battler {
   }
 
   showAddedStates() {
-    this.result().addedStateObjects().forEach(function (state) {
+    this.result().addedStateObjects().forEach((state) => {
       if (state.message1) {
         global.$gameMessage.add(this._name + state.message1)
       }
-    }, this)
+    })
   }
 
   showRemovedStates() {
-    this.result().removedStateObjects().forEach(function (state) {
+    this.result().removedStateObjects().forEach((state) => {
       if (state.message4) {
         global.$gameMessage.add(this._name + state.message4)
       }
-    }, this)
+    })
   }
 
   stepsForTurn() {
@@ -866,18 +825,18 @@ export class Game_Actor extends Game_Battler {
   }
 
   lastMenuSkill() {
-    return this._lastMenuSkill.object()
+    return this._lastMenuSkill.object() as Data_Skill | null
   }
 
-  setLastMenuSkill(skill) {
+  setLastMenuSkill(skill: Data_ItemBase | null) {
     this._lastMenuSkill.setObject(skill)
   }
 
   lastBattleSkill() {
-    return this._lastBattleSkill.object()
+    return this._lastBattleSkill.object() as Data_Skill | null
   }
 
-  setLastBattleSkill(skill) {
+  setLastBattleSkill(skill: Data_Skill) {
     this._lastBattleSkill.setObject(skill)
   }
 
@@ -889,13 +848,11 @@ export class Game_Actor extends Game_Battler {
     this._lastCommandSymbol = symbol
   }
 
-  testEscape(item) {
-    return item.effects.some(function (effect, index, ar) {
-      return effect && effect.code === Game_Action.EFFECT_SPECIAL
-    })
+  testEscape(item: Data_Skill | Data_Item) {
+    return item.effects.some((effect) => effect && effect.code === Game_Action.EFFECT_SPECIAL)
   }
 
-  override meetsUsableItemConditions(item) {
+  override meetsUsableItemConditions(item: Data_Skill | Data_Item) {
     if (global.$gameParty.inBattle() && !BattleManager.canEscape() && this.testEscape(item)) {
       return false
     }

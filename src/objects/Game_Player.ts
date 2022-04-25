@@ -6,6 +6,8 @@ import {BattleManager} from '../managers/BattleManager'
 import {ConfigManager} from '../managers/ConfigManager'
 import {TouchInput} from '../core/TouchInput'
 import {Game_Followers} from './Game_Followers'
+import {VehicleType} from '../types/index'
+import {Data_MapEncounter} from '../types/global'
 
 // Game_Player
 //
@@ -13,7 +15,7 @@ import {Game_Followers} from './Game_Followers'
 // determinants and map scrolling functions.
 export class Game_Player extends Game_Character {
 
-  private _vehicleType = 'walk'
+  private _vehicleType: VehicleType = 'walk'
   private _vehicleGettingOn = false
   private _vehicleGettingOff = false
   private _dashing = false
@@ -30,23 +32,6 @@ export class Game_Player extends Game_Character {
   constructor() {
     super()
     this.setTransparent(global.$dataSystem.optTransparent)
-  }
-
-  override initMembers() {
-    super.initMembers()
-    // this._vehicleType = 'walk'
-    // this._vehicleGettingOn = false
-    // this._vehicleGettingOff = false
-    // this._dashing = false
-    // this._needsMapReload = false
-    // this._transferring = false
-    // this._newMapId = 0
-    // this._newX = 0
-    // this._newY = 0
-    // this._newDirection = 0
-    // this._fadeType = 0
-    // this._followers = new Game_Followers()
-    // this._encounterCount = 0
   }
 
   clearTransferInfo() {
@@ -114,7 +99,7 @@ export class Game_Player extends Game_Character {
     }
   }
 
-  override isMapPassable(x, y, d) {
+  override isMapPassable(x: number, y: number, d: number) {
     const vehicle = this.vehicle()
     if (vehicle) {
       return vehicle.isMapPassable(x, y, d)
@@ -175,12 +160,12 @@ export class Game_Player extends Game_Character {
     return global.$gameMap.setDisplayPos(x - this.centerX(), y - this.centerY())
   }
 
-  override locate(x, y) {
+  override locate(x: number, y: number) {
     super.locate(x, y)
     this.center(x, y)
     this.makeEncounterCount()
     if (this.isInVehicle()) {
-      this.vehicle().refresh()
+      this.vehicle()!.refresh()
     }
     this._followers.synchronize(x, y, this.direction())
   }
@@ -198,14 +183,14 @@ export class Game_Player extends Game_Character {
   }
 
   makeEncounterTroopId() {
-    const encounterList = []
+    const encounterList: Data_MapEncounter[] = []
     let weightSum = 0
-    global.$gameMap.encounterList().forEach(function (encounter) {
+    global.$gameMap.encounterList().forEach((encounter) => {
       if (this.meetsEncounterConditions(encounter)) {
         encounterList.push(encounter)
         weightSum += encounter.weight
       }
-    }, this)
+    })
     if (weightSum > 0) {
       let value = Math.randomInt(weightSum)
       for (let i = 0; i < encounterList.length; i++) {
@@ -218,7 +203,7 @@ export class Game_Player extends Game_Character {
     return 0
   }
 
-  meetsEncounterConditions(encounter) {
+  meetsEncounterConditions(encounter: Data_MapEncounter) {
     return (encounter.regionSet.length === 0 ||
       encounter.regionSet.contains(this.regionId()))
   }
@@ -255,8 +240,8 @@ export class Game_Player extends Game_Character {
       if (direction > 0) {
         global.$gameTemp.clearDestination()
       } else if (global.$gameTemp.isDestinationValid()) {
-        const x = global.$gameTemp.destinationX()
-        const y = global.$gameTemp.destinationY()
+        const x = global.$gameTemp.destinationX()!
+        const y = global.$gameTemp.destinationY()!
         direction = this.findDirectionTo(x, y)
       }
       if (direction > 0) {
@@ -275,7 +260,7 @@ export class Game_Player extends Game_Character {
     if (this._vehicleGettingOn || this._vehicleGettingOff) {
       return false
     }
-    if (this.isInVehicle() && !this.vehicle().canMove()) {
+    if (this.isInVehicle() && !this.vehicle()!.canMove()) {
       return false
     }
     return true
@@ -285,11 +270,11 @@ export class Game_Player extends Game_Character {
     return Input.dir4
   }
 
-  executeMove(direction) {
+  executeMove(direction: number) {
     this.moveStraight(direction)
   }
 
-  override update(sceneActive) {
+  override update(sceneActive = false) {
     const lastScrolledX = this.scrolledX()
     const lastScrolledY = this.scrolledY()
     const wasMoving = this.isMoving()
@@ -326,7 +311,7 @@ export class Game_Player extends Game_Character {
     }
   }
 
-  updateScroll(lastScrolledX, lastScrolledY) {
+  updateScroll(lastScrolledX: number, lastScrolledY: number) {
     const x1 = lastScrolledX
     const y1 = lastScrolledY
     const x2 = this.scrolledX()
@@ -352,33 +337,33 @@ export class Game_Player extends Game_Character {
       } else if (this._vehicleGettingOff) {
         this.updateVehicleGetOff()
       } else {
-        this.vehicle().syncWithPlayer()
+        this.vehicle()!.syncWithPlayer()
       }
     }
   }
 
   updateVehicleGetOn() {
     if (!this.areFollowersGathering() && !this.isMoving()) {
-      this.setDirection(this.vehicle().direction())
-      this.setMoveSpeed(this.vehicle().moveSpeed())
+      this.setDirection(this.vehicle()!.direction())
+      this.setMoveSpeed(this.vehicle()!.moveSpeed())
       this._vehicleGettingOn = false
       this.setTransparent(true)
       if (this.isInAirship()) {
         this.setThrough(true)
       }
-      this.vehicle().getOn()
+      this.vehicle()!.getOn()
     }
   }
 
   updateVehicleGetOff() {
-    if (!this.areFollowersGathering() && this.vehicle().isLowest()) {
+    if (!this.areFollowersGathering() && this.vehicle()!.isLowest()) {
       this._vehicleGettingOff = false
       this._vehicleType = 'walk'
       this.setTransparent(false)
     }
   }
 
-  updateNonmoving(wasMoving) {
+  updateNonmoving(wasMoving: boolean) {
     if (!global.$gameMap.isEventRunning()) {
       if (wasMoving) {
         global.$gameParty.onPlayerWalk()
@@ -449,7 +434,7 @@ export class Game_Player extends Game_Character {
     return false
   }
 
-  triggerTouchActionD1(x1, y1) {
+  triggerTouchActionD1(x1: number, y1: number) {
     if (global.$gameMap.airship().pos(x1, y1)) {
       if (TouchInput.isTriggered() && this.getOnOffVehicle()) {
         return true
@@ -459,7 +444,7 @@ export class Game_Player extends Game_Character {
     return global.$gameMap.setupStartingEvent()
   }
 
-  triggerTouchActionD2(x2, y2) {
+  triggerTouchActionD2(x2: number, y2: number) {
     if (global.$gameMap.boat().pos(x2, y2) || global.$gameMap.ship().pos(x2, y2)) {
       if (TouchInput.isTriggered() && this.getOnVehicle()) {
         return true
@@ -474,7 +459,7 @@ export class Game_Player extends Game_Character {
     return global.$gameMap.setupStartingEvent()
   }
 
-  triggerTouchActionD3(x2, y2) {
+  triggerTouchActionD3(x2: number, y2: number) {
     if (global.$gameMap.isCounter(x2, y2)) {
       this.checkEventTriggerThere([0, 1, 2])
     }
@@ -503,13 +488,13 @@ export class Game_Player extends Game_Character {
     return value
   }
 
-  checkEventTriggerHere(triggers) {
+  checkEventTriggerHere(triggers: number[]) {
     if (this.canStartLocalEvents()) {
       this.startMapEvent(this.x, this.y, triggers, false)
     }
   }
 
-  checkEventTriggerThere(triggers) {
+  checkEventTriggerThere(triggers: number[]) {
     if (this.canStartLocalEvents()) {
       const direction = this.direction()
       const x1 = this.x
@@ -525,7 +510,7 @@ export class Game_Player extends Game_Character {
     }
   }
 
-  override checkEventTriggerTouch(x, y) {
+  override checkEventTriggerTouch(x: number, y: number) {
     if (this.canStartLocalEvents()) {
       this.startMapEvent(x, y, [1, 2], true)
     }
@@ -568,12 +553,12 @@ export class Game_Player extends Game_Character {
   }
 
   getOffVehicle() {
-    if (this.vehicle().isLandOk(this.x, this.y, this.direction())) {
+    if (this.vehicle()!.isLandOk(this.x, this.y, this.direction())) {
       if (this.isInAirship()) {
         this.setDirection(2)
       }
       this._followers.synchronize(this.x, this.y, this.direction())
-      this.vehicle().getOff()
+      this.vehicle()!.getOff()
       if (!this.isInAirship()) {
         this.forceMoveForward()
         this.setTransparent(false)
@@ -597,21 +582,21 @@ export class Game_Player extends Game_Character {
     return global.$gameMap.isDamageFloor(this.x, this.y) && !this.isInAirship()
   }
 
-  override moveStraight(d) {
+  override moveStraight(d: number) {
     if (this.canPass(this.x, this.y, d)) {
       this._followers.updateMove()
     }
     super.moveStraight(d)
   }
 
-  override moveDiagonally(horz, vert) {
+  override moveDiagonally(horz: number, vert: number) {
     if (this.canPassDiagonally(this.x, this.y, horz, vert)) {
       this._followers.updateMove()
     }
     super.moveDiagonally(horz, vert)
   }
 
-  override jump(xPlus, yPlus) {
+  override jump(xPlus: number, yPlus: number) {
     super.jump(xPlus, yPlus)
     this._followers.jumpAll()
   }

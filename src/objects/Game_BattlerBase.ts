@@ -1,4 +1,6 @@
 import {DataManager, global} from '../managers/DataManager'
+import {Data_Armor, Data_Item, Data_ItemBase, Data_Skill, Data_Trait, Data_Weapon} from '../types/global'
+import {Game_Unit} from './Game_Unit'
 
 // Game_BattlerBase
 //
@@ -40,8 +42,8 @@ export class Game_BattlerBase {
   private _tp = 0
   private _hidden = false
   private _paramPlus = [0, 0, 0, 0, 0, 0, 0, 0]
-  private _states = []
-  private _stateTurns = {}
+  private _states: number[] = []
+  private _stateTurns: Record<number, number> = {}
   private _buffs = [0, 0, 0, 0, 0, 0, 0, 0]
   private _buffTurns = [0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -201,20 +203,6 @@ export class Game_BattlerBase {
     return this.sparam(9)
   }
 
-  constructor() {
-    this.initMembers()
-  }
-
-  initMembers() {
-    this._hp = 1
-    this._mp = 0
-    this._tp = 0
-    this._hidden = false
-    this.clearParamPlus()
-    this.clearStates()
-    this.clearBuffs()
-  }
-
   clearParamPlus() {
     this._paramPlus = [0, 0, 0, 0, 0, 0, 0, 0]
   }
@@ -224,7 +212,7 @@ export class Game_BattlerBase {
     this._stateTurns = {}
   }
 
-  eraseState(stateId) {
+  eraseState(stateId: number) {
     const index = this._states.indexOf(stateId)
     if (index >= 0) {
       this._states.splice(index, 1)
@@ -232,7 +220,7 @@ export class Game_BattlerBase {
     delete this._stateTurns[stateId]
   }
 
-  isStateAffected(stateId) {
+  isStateAffected(stateId: number) {
     return this._states.contains(stateId)
   }
 
@@ -244,22 +232,22 @@ export class Game_BattlerBase {
     return 1
   }
 
-  resetStateCounts(stateId) {
+  resetStateCounts(stateId: number) {
     const state = global.$dataStates[stateId]
     const variance = 1 + Math.max(state.maxTurns - state.minTurns, 0)
     this._stateTurns[stateId] = state.minTurns + Math.randomInt(variance)
   }
 
-  isStateExpired(stateId) {
+  isStateExpired(stateId: number) {
     return this._stateTurns[stateId] === 0
   }
 
   updateStateTurns() {
-    this._states.forEach(function (stateId) {
+    this._states.forEach((stateId) => {
       if (this._stateTurns[stateId] > 0) {
         this._stateTurns[stateId]--
       }
-    }, this)
+    })
   }
 
   clearBuffs() {
@@ -267,7 +255,7 @@ export class Game_BattlerBase {
     this._buffTurns = [0, 0, 0, 0, 0, 0, 0, 0]
   }
 
-  eraseBuff(paramId) {
+  eraseBuff(paramId: number) {
     this._buffs[paramId] = 0
     this._buffTurns[paramId] = 0
   }
@@ -276,49 +264,49 @@ export class Game_BattlerBase {
     return this._buffs.length
   }
 
-  buff(paramId) {
+  buff(paramId: number) {
     return this._buffs[paramId]
   }
 
-  isBuffAffected(paramId) {
+  isBuffAffected(paramId: number) {
     return this._buffs[paramId] > 0
   }
 
-  isDebuffAffected(paramId) {
+  isDebuffAffected(paramId: number) {
     return this._buffs[paramId] < 0
   }
 
-  isBuffOrDebuffAffected(paramId) {
+  isBuffOrDebuffAffected(paramId: number) {
     return this._buffs[paramId] !== 0
   }
 
-  isMaxBuffAffected(paramId) {
+  isMaxBuffAffected(paramId: number) {
     return this._buffs[paramId] === 2
   }
 
-  isMaxDebuffAffected(paramId) {
+  isMaxDebuffAffected(paramId: number) {
     return this._buffs[paramId] === -2
   }
 
-  increaseBuff(paramId) {
+  increaseBuff(paramId: number) {
     if (!this.isMaxBuffAffected(paramId)) {
       this._buffs[paramId]++
     }
   }
 
-  decreaseBuff(paramId) {
+  decreaseBuff(paramId: number) {
     if (!this.isMaxDebuffAffected(paramId)) {
       this._buffs[paramId]--
     }
   }
 
-  overwriteBuffTurns(paramId, turns) {
+  overwriteBuffTurns(paramId: number, turns: number) {
     if (this._buffTurns[paramId] < turns) {
       this._buffTurns[paramId] = turns
     }
   }
 
-  isBuffExpired(paramId) {
+  isBuffExpired(paramId: number) {
     return this._buffTurns[paramId] === 0
   }
 
@@ -343,21 +331,15 @@ export class Game_BattlerBase {
   }
 
   states() {
-    return this._states.map(function (id) {
-      return global.$dataStates[id]
-    })
+    return this._states.map((id) => global.$dataStates[id])
   }
 
   stateIcons() {
-    return this.states().map(function (state) {
-      return state.iconIndex
-    }).filter(function (iconIndex) {
-      return iconIndex > 0
-    })
+    return this.states().map((state) => state.iconIndex).filter((iconIndex) => iconIndex > 0)
   }
 
   buffIcons() {
-    const icons = []
+    const icons: number[] = []
     for (let i = 0; i < this._buffs.length; i++) {
       if (this._buffs[i] !== 0) {
         icons.push(this.buffIconIndex(this._buffs[i], i))
@@ -366,7 +348,7 @@ export class Game_BattlerBase {
     return icons
   }
 
-  buffIconIndex(buffLevel, paramId) {
+  buffIconIndex(buffLevel: number, paramId: number) {
     if (buffLevel > 0) {
       return Game_BattlerBase.ICON_BUFF_START + (buffLevel - 1) * 8 + paramId
     } else if (buffLevel < 0) {
@@ -380,7 +362,7 @@ export class Game_BattlerBase {
     return this.stateIcons().concat(this.buffIcons())
   }
 
-  traitObjects() {
+  traitObjects(): { traits: Data_Trait[] }[] {
     // Returns an array of the all objects having traits. States only here.
     return this.states()
   }
@@ -388,54 +370,48 @@ export class Game_BattlerBase {
   allTraits() {
     return this.traitObjects().reduce(function (r, obj) {
       return r.concat(obj.traits)
-    }, [])
+    }, [] as Data_Trait[])
   }
 
-  traits(code) {
-    return this.allTraits().filter(function (trait) {
+  traits(code: number) {
+    return this.allTraits().filter((trait) => {
       return trait.code === code
     })
   }
 
-  traitsWithId(code, id) {
-    return this.allTraits().filter(function (trait) {
+  traitsWithId(code: number, id: number) {
+    return this.allTraits().filter((trait) => {
       return trait.code === code && trait.dataId === id
     })
   }
 
-  traitsPi(code, id) {
-    return this.traitsWithId(code, id).reduce(function (r, trait) {
-      return r * trait.value
-    }, 1)
+  traitsPi(code: number, id: number) {
+    return this.traitsWithId(code, id).reduce((r, trait) => r * trait.value, 1)
   }
 
-  traitsSum(code, id) {
-    return this.traitsWithId(code, id).reduce(function (r, trait) {
-      return r + trait.value
-    }, 0)
+  traitsSum(code: number, id: number) {
+    return this.traitsWithId(code, id).reduce((r, trait) => r + trait.value, 0)
   }
 
-  traitsSumAll(code) {
-    return this.traits(code).reduce(function (r, trait) {
-      return r + trait.value
-    }, 0)
+  traitsSumAll(code: number) {
+    return this.traits(code).reduce((r, trait) => r + trait.value, 0)
   }
 
-  traitsSet(code) {
-    return this.traits(code).reduce(function (r, trait) {
+  traitsSet(code: number) {
+    return this.traits(code).reduce((r, trait) => {
       return r.concat(trait.dataId)
-    }, [])
+    }, [] as number[])
   }
 
-  paramBase(paramId) {
+  paramBase(paramId: number) {
     return 0
   }
 
-  paramPlus(paramId) {
+  paramPlus(paramId: number) {
     return this._paramPlus[paramId]
   }
 
-  paramMin(paramId) {
+  paramMin(paramId: number) {
     if (paramId === 1) {
       return 0   // MMP
     } else {
@@ -443,7 +419,7 @@ export class Game_BattlerBase {
     }
   }
 
-  paramMax(paramId) {
+  paramMax(paramId: number) {
     if (paramId === 0) {
       return 999999  // MHP
     } else if (paramId === 1) {
@@ -453,15 +429,15 @@ export class Game_BattlerBase {
     }
   }
 
-  paramRate(paramId) {
+  paramRate(paramId: number) {
     return this.traitsPi(Game_BattlerBase.TRAIT_PARAM, paramId)
   }
 
-  paramBuffRate(paramId) {
+  paramBuffRate(paramId: number) {
     return this._buffs[paramId] * 0.25 + 1.0
   }
 
-  param(paramId) {
+  param(paramId: number) {
     let value = this.paramBase(paramId) + this.paramPlus(paramId)
     value *= this.paramRate(paramId) * this.paramBuffRate(paramId)
     const maxValue = this.paramMax(paramId)
@@ -469,23 +445,23 @@ export class Game_BattlerBase {
     return Math.round(value.clamp(minValue, maxValue))
   }
 
-  xparam(xparamId) {
+  xparam(xparamId: number) {
     return this.traitsSum(Game_BattlerBase.TRAIT_XPARAM, xparamId)
   }
 
-  sparam(sparamId) {
+  sparam(sparamId: number) {
     return this.traitsPi(Game_BattlerBase.TRAIT_SPARAM, sparamId)
   }
 
-  elementRate(elementId) {
+  elementRate(elementId: number) {
     return this.traitsPi(Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId)
   }
 
-  debuffRate(paramId) {
+  debuffRate(paramId: number) {
     return this.traitsPi(Game_BattlerBase.TRAIT_DEBUFF_RATE, paramId)
   }
 
-  stateRate(stateId) {
+  stateRate(stateId: number) {
     return this.traitsPi(Game_BattlerBase.TRAIT_STATE_RATE, stateId)
   }
 
@@ -493,7 +469,7 @@ export class Game_BattlerBase {
     return this.traitsSet(Game_BattlerBase.TRAIT_STATE_RESIST)
   }
 
-  isStateResist(stateId) {
+  isStateResist(stateId: number) {
     return this.stateResistSet().contains(stateId)
   }
 
@@ -505,7 +481,7 @@ export class Game_BattlerBase {
     return this.traitsSet(Game_BattlerBase.TRAIT_ATTACK_STATE)
   }
 
-  attackStatesRate(stateId) {
+  attackStatesRate(stateId: number) {
     return this.traitsSum(Game_BattlerBase.TRAIT_ATTACK_STATE, stateId)
   }
 
@@ -521,7 +497,7 @@ export class Game_BattlerBase {
     return this.traitsSet(Game_BattlerBase.TRAIT_STYPE_ADD)
   }
 
-  isSkillTypeSealed(stypeId) {
+  isSkillTypeSealed(stypeId: number) {
     return this.traitsSet(Game_BattlerBase.TRAIT_STYPE_SEAL).contains(stypeId)
   }
 
@@ -529,23 +505,23 @@ export class Game_BattlerBase {
     return this.traitsSet(Game_BattlerBase.TRAIT_SKILL_ADD)
   }
 
-  isSkillSealed(skillId) {
+  isSkillSealed(skillId: number) {
     return this.traitsSet(Game_BattlerBase.TRAIT_SKILL_SEAL).contains(skillId)
   }
 
-  isEquipWtypeOk(wtypeId) {
+  isEquipWtypeOk(wtypeId: number) {
     return this.traitsSet(Game_BattlerBase.TRAIT_EQUIP_WTYPE).contains(wtypeId)
   }
 
-  isEquipAtypeOk(atypeId) {
+  isEquipAtypeOk(atypeId: number) {
     return this.traitsSet(Game_BattlerBase.TRAIT_EQUIP_ATYPE).contains(atypeId)
   }
 
-  isEquipTypeLocked(etypeId) {
+  isEquipTypeLocked(etypeId: number) {
     return this.traitsSet(Game_BattlerBase.TRAIT_EQUIP_LOCK).contains(etypeId)
   }
 
-  isEquipTypeSealed(etypeId) {
+  isEquipTypeSealed(etypeId: number) {
     return this.traitsSet(Game_BattlerBase.TRAIT_EQUIP_SEAL).contains(etypeId)
   }
 
@@ -559,15 +535,11 @@ export class Game_BattlerBase {
   }
 
   actionPlusSet() {
-    return this.traits(Game_BattlerBase.TRAIT_ACTION_PLUS).map(function (trait) {
-      return trait.value
-    })
+    return this.traits(Game_BattlerBase.TRAIT_ACTION_PLUS).map((trait) => trait.value)
   }
 
-  specialFlag(flagId) {
-    return this.traits(Game_BattlerBase.TRAIT_SPECIAL_FLAG).some(function (trait) {
-      return trait.dataId === flagId
-    })
+  specialFlag(flagId: number) {
+    return this.traits(Game_BattlerBase.TRAIT_SPECIAL_FLAG).some((trait) => trait.dataId === flagId)
   }
 
   collapseType() {
@@ -575,10 +547,8 @@ export class Game_BattlerBase {
     return set.length > 0 ? Math.max.apply(null, set) : 0
   }
 
-  partyAbility(abilityId) {
-    return this.traits(Game_BattlerBase.TRAIT_PARTY_ABILITY).some(function (trait) {
-      return trait.dataId === abilityId
-    })
+  partyAbility(abilityId: number) {
+    return this.traits(Game_BattlerBase.TRAIT_PARTY_ABILITY).some((trait) => trait.dataId === abilityId)
   }
 
   isAutoBattle() {
@@ -597,22 +567,22 @@ export class Game_BattlerBase {
     return this.specialFlag(Game_BattlerBase.FLAG_ID_PRESERVE_TP)
   }
 
-  addParam(paramId, value) {
+  addParam(paramId: number, value: number) {
     this._paramPlus[paramId] += value
     this.refresh()
   }
 
-  setHp(hp) {
+  setHp(hp: number) {
     this._hp = hp
     this.refresh()
   }
 
-  setMp(mp) {
+  setMp(mp: number) {
     this._mp = mp
     this.refresh()
   }
 
-  setTp(tp) {
+  setTp(tp: number) {
     this._tp = tp
     this.refresh()
   }
@@ -622,9 +592,9 @@ export class Game_BattlerBase {
   }
 
   refresh() {
-    this.stateResistSet().forEach(function (stateId) {
+    this.stateResistSet().forEach((stateId) => {
       this.eraseState(stateId)
-    }, this)
+    })
     this._hp = this._hp.clamp(0, this.mhp)
     this._mp = this._mp.clamp(0, this.mmp)
     this._tp = this._tp.clamp(0, this.maxTp())
@@ -704,8 +674,24 @@ export class Game_BattlerBase {
     return false
   }
 
+  isBattleMember() {
+    return false
+  }
+
+  friendsUnit() {
+    return new Game_Unit()
+  }
+
+  opponentsUnit() {
+    return new Game_Unit()
+  }
+
+  index() {
+    return 0
+  }
+
   sortStates() {
-    this._states.sort(function (a, b) {
+    this._states.sort((a, b) => {
       const p1 = global.$dataStates[a].priority
       const p2 = global.$dataStates[b].priority
       if (p1 !== p2) {
@@ -716,12 +702,10 @@ export class Game_BattlerBase {
   }
 
   restriction() {
-    return Math.max.apply(null, this.states().map(function (state) {
-      return state.restriction
-    }).concat(0))
+    return Math.max(0, ...this.states().map((state) => state.restriction))
   }
 
-  addNewState(stateId) {
+  addNewState(stateId: number) {
     if (stateId === this.deathStateId()) {
       this.die()
     }
@@ -734,6 +718,7 @@ export class Game_BattlerBase {
   }
 
   onRestrict() {
+    // empty
   }
 
   mostImportantStateText() {
@@ -764,28 +749,28 @@ export class Game_BattlerBase {
     }
   }
 
-  isSkillWtypeOk(skill) {
+  isSkillWtypeOk(skill: Data_Skill) {
     return true
   }
 
-  skillMpCost(skill) {
+  skillMpCost(skill: Data_Skill) {
     return Math.floor(skill.mpCost * this.mcr)
   }
 
-  skillTpCost(skill) {
+  skillTpCost(skill: Data_Skill) {
     return skill.tpCost
   }
 
-  canPaySkillCost(skill) {
+  canPaySkillCost(skill: Data_Skill) {
     return this._tp >= this.skillTpCost(skill) && this._mp >= this.skillMpCost(skill)
   }
 
-  paySkillCost(skill) {
+  paySkillCost(skill: Data_Skill) {
     this._mp -= this.skillMpCost(skill)
     this._tp -= this.skillTpCost(skill)
   }
 
-  isOccasionOk(item) {
+  isOccasionOk(item: Data_Item | Data_Skill) {
     if (global.$gameParty.inBattle()) {
       return item.occasion === 0 || item.occasion === 1
     } else {
@@ -793,49 +778,49 @@ export class Game_BattlerBase {
     }
   }
 
-  meetsUsableItemConditions(item) {
+  meetsUsableItemConditions(item: Data_Item | Data_Skill) {
     return this.canMove() && this.isOccasionOk(item)
   }
 
-  meetsSkillConditions(skill) {
+  meetsSkillConditions(skill: Data_Skill) {
     return (this.meetsUsableItemConditions(skill) &&
       this.isSkillWtypeOk(skill) && this.canPaySkillCost(skill) &&
       !this.isSkillSealed(skill.id) && !this.isSkillTypeSealed(skill.stypeId))
   }
 
-  meetsItemConditions(item) {
+  meetsItemConditions(item: Data_Item) {
     return this.meetsUsableItemConditions(item) && global.$gameParty.hasItem(item)
   }
 
-  canUse(item) {
+  canUse(item: Data_ItemBase | null) {
     if (!item) {
       return false
     } else if (DataManager.isSkill(item)) {
-      return this.meetsSkillConditions(item)
+      return this.meetsSkillConditions(item as Data_Skill)
     } else if (DataManager.isItem(item)) {
-      return this.meetsItemConditions(item)
+      return this.meetsItemConditions(item as Data_Item)
     } else {
       return false
     }
   }
 
-  canEquip(item) {
+  canEquip(item: Data_ItemBase | null) {
     if (!item) {
       return false
     } else if (DataManager.isWeapon(item)) {
-      return this.canEquipWeapon(item)
+      return this.canEquipWeapon(item as Data_Weapon)
     } else if (DataManager.isArmor(item)) {
-      return this.canEquipArmor(item)
+      return this.canEquipArmor(item as Data_Armor)
     } else {
       return false
     }
   }
 
-  canEquipWeapon(item) {
+  canEquipWeapon(item: Data_Weapon) {
     return this.isEquipWtypeOk(item.wtypeId) && !this.isEquipTypeSealed(item.etypeId)
   }
 
-  canEquipArmor(item) {
+  canEquipArmor(item: Data_Armor) {
     return this.isEquipAtypeOk(item.atypeId) && !this.isEquipTypeSealed(item.etypeId)
   }
 

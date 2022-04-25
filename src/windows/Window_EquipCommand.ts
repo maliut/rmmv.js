@@ -6,11 +6,11 @@ import {TextManager} from '../managers/TextManager'
 // The window for selecting a command on the equipment screen.
 export class Window_EquipCommand extends Window_HorzCommand {
 
-  private readonly _windowWidth
+  private _windowWidth = 0
 
-  constructor(width) {
-    super()
+  override initialize(x: number, y: number, width: number) {
     this._windowWidth = width
+    return super.initialize(x, y, width)
   }
 
   override windowWidth() {

@@ -6,10 +6,10 @@ import {TextManager} from '../managers/TextManager'
 // The window for selecting buy/sell on the shop screen.
 export class Window_ShopCommand extends Window_HorzCommand {
 
-  private readonly _windowWidth
-  private readonly _purchaseOnly
+  private readonly _windowWidth: number
+  private readonly _purchaseOnly: boolean
 
-  constructor(width, purchaseOnly) {
+  constructor(width: number, purchaseOnly: boolean) {
     super()
     this._windowWidth = width
     this._purchaseOnly = purchaseOnly

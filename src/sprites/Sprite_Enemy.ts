@@ -4,30 +4,24 @@ import {Graphics} from '../core/Graphics'
 import {SoundManager} from '../managers/SoundManager'
 import {global} from '../managers/DataManager'
 import {Sprite_StateIcon} from './Sprite_StateIcon'
+import {Game_Enemy} from '../objects/Game_Enemy'
 
 // Sprite_Enemy
 //
 // The sprite for displaying an enemy.
 export class Sprite_Enemy extends Sprite_Battler {
 
-  private _enemy = null
+  private _enemy!: Game_Enemy
   private _appeared = false
   private _battlerName = ''
   private _battlerHue = 0
-  private _effectType = null
+  private _effectType: string | null = null
   private _effectDuration = 0
   private _shake = 0
-  private _stateIconSprite
+  private _stateIconSprite!: Sprite_StateIcon
 
-  override initMembers() {
-    super.initMembers()
-    this._enemy = null
-    this._appeared = false
-    this._battlerName = ''
-    this._battlerHue = 0
-    this._effectType = null
-    this._effectDuration = 0
-    this._shake = 0
+  constructor(battler: Game_Enemy) {
+    super(battler)
     this.createStateIconSprite()
   }
 
@@ -36,7 +30,7 @@ export class Sprite_Enemy extends Sprite_Battler {
     this.addChild(this._stateIconSprite)
   }
 
-  override setBattler(battler) {
+  override setBattler(battler: Game_Enemy) {
     super.setBattler(battler)
     this._enemy = battler
     this.setHome(battler.screenX(), battler.screenY())
@@ -52,7 +46,6 @@ export class Sprite_Enemy extends Sprite_Battler {
   }
 
   override updateBitmap() {
-    super.updateBitmap()
     const name = this._enemy.battlerName()
     const hue = this._enemy.battlerHue()
     if (this._battlerName !== name || this._battlerHue !== hue) {
@@ -63,7 +56,7 @@ export class Sprite_Enemy extends Sprite_Battler {
     }
   }
 
-  loadBitmap(name, hue) {
+  loadBitmap(name: string, hue?: number) {
     if (global.$gameSystem.isSideView()) {
       this.bitmap = ImageManager.loadSvEnemy(name, hue)
     } else {
@@ -72,12 +65,11 @@ export class Sprite_Enemy extends Sprite_Battler {
   }
 
   override updateFrame() {
-    super.updateFrame()
-    let frameHeight = this.bitmap.height
+    let frameHeight = this.bitmap?.height
     if (this._effectType === 'bossCollapse') {
       frameHeight = this._effectDuration
     }
-    this.setFrame(0, 0, this.bitmap.width, frameHeight)
+    this.setFrame(0, 0, this.bitmap?.width || 0, frameHeight || 0)
   }
 
   override updatePosition() {
@@ -86,7 +78,7 @@ export class Sprite_Enemy extends Sprite_Battler {
   }
 
   updateStateSprite() {
-    this._stateIconSprite.y = -Math.round((this.bitmap.height + 40) * 0.9)
+    this._stateIconSprite.y = -Math.round(((this.bitmap?.height || 0) + 40) * 0.9)
     if (this._stateIconSprite.y < 20 - this.y) {
       this._stateIconSprite.y = 20 - this.y
     }
@@ -111,7 +103,7 @@ export class Sprite_Enemy extends Sprite_Battler {
     }
   }
 
-  startEffect(effectType) {
+  startEffect(effectType: string | null) {
     this._effectType = effectType
     switch (this._effectType) {
     case 'appear':
@@ -163,7 +155,7 @@ export class Sprite_Enemy extends Sprite_Battler {
   }
 
   startBossCollapse() {
-    this._effectDuration = this.bitmap.height
+    this._effectDuration = this.bitmap?.height || 0
     this._appeared = false
   }
 

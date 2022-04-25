@@ -15,27 +15,32 @@ import {Scene_Gameover} from '../scenes/Scene_Gameover'
 import {Window_MenuCommand} from '../windows/Window_MenuCommand'
 import {Scene_Name} from '../scenes/Scene_Name'
 import {Scene_Shop} from '../scenes/Scene_Shop'
+import {Data_EventCommand} from '../types/global'
+import {assert} from '../utils'
+import { Game_Actor } from './Game_Actor'
+import {Game_Enemy} from './Game_Enemy'
+import {Game_Battler} from './Game_Battler'
 
 // Game_Interpreter
 //
 // The interpreter for running event commands.
 export class Game_Interpreter {
 
-  private readonly _depth
-  private _branch = {}
-  private _params = []
+  private readonly _depth: number
+  private _branch: Record<number, any> = {}
+  private _params: any[] = []
   private _indent = 0
   private _frameCount = 0
   private _freezeChecker = 0
   private _mapId = 0
   private _eventId = 0
-  private _list = null
+  private _list: Data_EventCommand[] | null = null
   private _index = 0
   private _waitCount = 0
   private _waitMode = ''
-  private _comments = []
-  private _character = null
-  private _childInterpreter = null
+  private _comments: any[] = []
+  private _character: Game_Character | null = null
+  private _childInterpreter: Game_Interpreter | null = null
   private _imageReservationId?
 
   constructor(depth = 0) {
@@ -62,7 +67,7 @@ export class Game_Interpreter {
     this._childInterpreter = null
   }
 
-  setup(list, eventId = 0) {
+  setup(list: Data_EventCommand[] | null, eventId = 0) {
     this.clear()
     this._mapId = global.$gameMap.mapId()
     this._eventId = eventId
@@ -146,12 +151,15 @@ export class Game_Interpreter {
       waiting = global.$gameMap.isScrolling()
       break
     case 'route':
+      assert(this._character !== null)
       waiting = this._character.isMoveRouteForcing()
       break
     case 'animation':
+      assert(this._character !== null)
       waiting = this._character.isAnimationPlaying()
       break
     case 'balloon':
+      assert(this._character !== null)
       waiting = this._character.isBalloonPlaying()
       break
     case 'gather':
@@ -173,11 +181,11 @@ export class Game_Interpreter {
     return waiting
   }
 
-  setWaitMode(waitMode) {
+  setWaitMode(waitMode: string) {
     this._waitMode = waitMode
   }
 
-  wait(duration) {
+  wait(duration: number) {
     this._waitCount = duration
   }
 
@@ -208,11 +216,7 @@ export class Game_Interpreter {
       this._frameCount = Graphics.frameCount
       this._freezeChecker = 0
     }
-    if (this._freezeChecker++ >= 100000) {
-      return true
-    } else {
-      return false
-    }
+    return this._freezeChecker++ >= 100000
   }
 
   terminate() {
@@ -221,16 +225,19 @@ export class Game_Interpreter {
   }
 
   skipBranch() {
+    assert(this._list !== null)
     while (this._list[this._index + 1].indent > this._indent) {
       this._index++
     }
   }
 
   currentCommand() {
+    assert(this._list !== null)
     return this._list[this._index]
   }
 
   nextEventCode() {
+    assert(this._list !== null)
     const command = this._list[this._index + 1]
     if (command) {
       return command.code
@@ -239,7 +246,7 @@ export class Game_Interpreter {
     }
   }
 
-  iterateActorId(param, callback) {
+  iterateActorId(param: number, callback: (value: Game_Actor) => void) {
     if (param === 0) {
       global.$gameParty.members().forEach(callback)
     } else {
@@ -250,7 +257,7 @@ export class Game_Interpreter {
     }
   }
 
-  iterateActorEx(param1, param2, callback) {
+  iterateActorEx(param1: number, param2: number, callback: (value: Game_Actor) => void) {
     if (param1 === 0) {
       this.iterateActorId(param2, callback)
     } else {
@@ -258,7 +265,7 @@ export class Game_Interpreter {
     }
   }
 
-  iterateActorIndex(param, callback) {
+  iterateActorIndex(param: number, callback: (value: Game_Actor) => void) {
     if (param < 0) {
       global.$gameParty.members().forEach(callback)
     } else {
@@ -269,7 +276,7 @@ export class Game_Interpreter {
     }
   }
 
-  iterateEnemyIndex(param, callback) {
+  iterateEnemyIndex(param: number, callback: (value: Game_Enemy) => void) {
     if (param < 0) {
       global.$gameTroop.members().forEach(callback)
     } else {
@@ -280,7 +287,7 @@ export class Game_Interpreter {
     }
   }
 
-  iterateBattler(param1, param2, callback) {
+  iterateBattler(param1: number, param2: number, callback: (value: Game_Battler) => void) {
     if (global.$gameParty.inBattle()) {
       if (param1 === 0) {
         this.iterateEnemyIndex(param2, callback)
@@ -290,7 +297,7 @@ export class Game_Interpreter {
     }
   }
 
-  character(param) {
+  character(param: number) {
     if (global.$gameParty.inBattle()) {
       return null
     } else if (param < 0) {
@@ -302,12 +309,12 @@ export class Game_Interpreter {
     }
   }
 
-  operateValue(operation, operandType, operand) {
+  operateValue(operation: number, operandType: number, operand: number) {
     const value = operandType === 0 ? operand : global.$gameVariables.value(operand)
     return operation === 0 ? value : -value
   }
 
-  changeHp(target, value, allowDeath) {
+  changeHp(target: Game_Battler, value: number, allowDeath: boolean) {
     if (target.isAlive()) {
       if (!allowDeath && target.hp <= -value) {
         value = 1 - target.hp
@@ -359,21 +366,21 @@ export class Game_Interpreter {
     return false
   }
 
-  setupChoices(params) {
+  setupChoices(params: any[]) {
     const choices = params[0].clone()
     let cancelType = params[1]
-    const defaultType = params.length > 2 ? params[2] : 0
-    const positionType = params.length > 3 ? params[3] : 2
-    const background = params.length > 4 ? params[4] : 0
+    const defaultType = params.length > 2 ? params[2]! : 0
+    const positionType = params.length > 3 ? params[3]! : 2
+    const background = params.length > 4 ? params[4]! : 0
     if (cancelType >= choices.length) {
       cancelType = -2
     }
     global.$gameMessage.setChoices(choices, defaultType, cancelType)
     global.$gameMessage.setChoiceBackground(background)
     global.$gameMessage.setChoicePositionType(positionType)
-    global.$gameMessage.setChoiceCallback(function (n) {
+    global.$gameMessage.setChoiceCallback((n) => {
       this._branch[this._indent] = n
-    }.bind(this))
+    })
   }
 
   // When [**]
@@ -402,7 +409,7 @@ export class Game_Interpreter {
     return false
   }
 
-  setupNumInput(params) {
+  setupNumInput(params: number[]) {
     global.$gameMessage.setNumberInput(params[0], params[1])
   }
 
@@ -416,7 +423,7 @@ export class Game_Interpreter {
     return false
   }
 
-  setupItemChoice(params) {
+  setupItemChoice(params: number[]) {
     global.$gameMessage.setItemChoice(params[0], params[1] || 2)
   }
 
@@ -483,7 +490,7 @@ export class Game_Interpreter {
     } // Variable
     case 2:  // Self Switch
       if (this._eventId > 0) {
-        const key = [this._mapId, this._eventId, this._params[1]]
+        const key = [this._mapId, this._eventId, this._params[1]].toString()
         result = (global.$gameSelfSwitches.value(key) === (this._params[2] === 0))
       }
       break
@@ -610,7 +617,7 @@ export class Game_Interpreter {
   // Break Loop
   command113() {
     let depth = 0
-    while (this._index < this._list.length - 1) {
+    while (this._index < this._list!.length - 1) {
       this._index++
       const command = this.currentCommand()
 
@@ -629,7 +636,7 @@ export class Game_Interpreter {
 
   // Exit Event Processing
   command115() {
-    this._index = this._list.length
+    this._index = this._list!.length
     return true
   }
 
@@ -643,7 +650,7 @@ export class Game_Interpreter {
     return true
   }
 
-  setupChild(list, eventId) {
+  setupChild(list: Data_EventCommand[], eventId: number) {
     this._childInterpreter = new Game_Interpreter(this._depth + 1)
     this._childInterpreter.setup(list, eventId)
   }
@@ -656,8 +663,8 @@ export class Game_Interpreter {
   // Jump to Label
   command119() {
     const labelName = this._params[0]
-    for (let i = 0; i < this._list.length; i++) {
-      const command = this._list[i]
+    for (let i = 0; i < this._list!.length; i++) {
+      const command = this._list![i]
       if (command.code === 118 && command.parameters[0] === labelName) {
         this.jumpTo(i)
         return
@@ -666,13 +673,13 @@ export class Game_Interpreter {
     return true
   }
 
-  jumpTo(index) {
+  jumpTo(index: number) {
     const lastIndex = this._index
     const startIndex = Math.min(index, lastIndex)
     const endIndex = Math.max(index, lastIndex)
     let indent = this._indent
     for (let i = startIndex; i <= endIndex; i++) {
-      const newIndent = this._list[i].indent
+      const newIndent = this._list![i].indent
       if (newIndent !== indent) {
         this._branch[indent] = null
         indent = newIndent
@@ -720,7 +727,7 @@ export class Game_Interpreter {
     return true
   }
 
-  gameDataOperand(type, param1, param2) {
+  gameDataOperand(type: number, param1: number, param2: number) {
     switch (type) {
     case 0:  // Item
       return global.$gameParty.numItems(global.$dataItems[param1])
@@ -814,7 +821,7 @@ export class Game_Interpreter {
     return 0
   }
 
-  operateVariable(variableId, operationType, value) {
+  operateVariable(variableId: number, operationType: number, value: number) {
     try {
       let oldValue = global.$gameVariables.value(variableId)
       switch (operationType) {
@@ -845,7 +852,7 @@ export class Game_Interpreter {
   // Control Self Switch
   command123() {
     if (this._eventId > 0) {
-      const key = [this._mapId, this._eventId, this._params[0]]
+      const key = [this._mapId, this._eventId, this._params[0]].toString()
       global.$gameSelfSwitches.setValue(key, this._params[1] === 0)
     }
     return true
@@ -895,7 +902,7 @@ export class Game_Interpreter {
     if (actor) {
       if (this._params[1] === 0) {  // Add
         if (this._params[2]) {   // Initialize
-          global.$gameActors.actor(this._params[0]).setup(this._params[0])
+          actor.setup(this._params[0])
         }
         global.$gameParty.addActor(this._params[0])
       } else {  // Remove
@@ -1341,11 +1348,9 @@ export class Game_Interpreter {
       this._imageReservationId = Utils.generateRuntimeId()
     }
 
-    const allReady = tileset.tilesetNames.map(function (tilesetName) {
-      return ImageManager.reserveTileset(tilesetName, 0, this._imageReservationId)
-    }, this).every(function (bitmap) {
-      return bitmap.isReady()
-    })
+    const allReady = tileset.tilesetNames
+      .map((tilesetName) => ImageManager.reserveTileset(tilesetName, 0, this._imageReservationId))
+      .every((bitmap) => bitmap.isReady())
 
     if (allReady) {
       global.$gameMap.changeTileset(this._params[0])
@@ -1415,9 +1420,9 @@ export class Game_Interpreter {
       }
       if (global.$dataTroops[troopId]) {
         BattleManager.setup(troopId, this._params[2], this._params[3])
-        BattleManager.setEventCallback(function (n) {
+        BattleManager.setEventCallback((n) => {
           this._branch[this._indent] = n
-        }.bind(this))
+        })
         global.$gamePlayer.makeEncounterCount()
         SceneManager.push(Scene_Battle)
       }
@@ -1452,7 +1457,7 @@ export class Game_Interpreter {
   // Shop Processing
   command302() {
     if (!global.$gameParty.inBattle()) {
-      const goods = [this._params]
+      const goods: number[][] = [this._params]
       while (this.nextEventCode() === 605) {
         this._index++
         goods.push(this.currentCommand().parameters)
@@ -1477,33 +1482,33 @@ export class Game_Interpreter {
   // Change HP
   command311() {
     const value = this.operateValue(this._params[2], this._params[3], this._params[4])
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       this.changeHp(actor, value, this._params[5])
-    }.bind(this))
+    })
     return true
   }
 
   // Change MP
   command312() {
     const value = this.operateValue(this._params[2], this._params[3], this._params[4])
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       actor.gainMp(value)
-    }.bind(this))
+    })
     return true
   }
 
   // Change TP
   command326() {
     const value = this.operateValue(this._params[2], this._params[3], this._params[4])
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       actor.gainTp(value)
-    }.bind(this))
+    })
     return true
   }
 
   // Change State
   command313() {
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       const alreadyDead = actor.isDead()
       if (this._params[2] === 0) {
         actor.addState(this._params[3])
@@ -1514,54 +1519,54 @@ export class Game_Interpreter {
         actor.performCollapse()
       }
       actor.clearResult()
-    }.bind(this))
+    })
     return true
   }
 
   // Recover All
   command314() {
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       actor.recoverAll()
-    }.bind(this))
+    })
     return true
   }
 
   // Change EXP
   command315() {
     const value = this.operateValue(this._params[2], this._params[3], this._params[4])
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       actor.changeExp(actor.currentExp() + value, this._params[5])
-    }.bind(this))
+    })
     return true
   }
 
   // Change Level
   command316() {
     const value = this.operateValue(this._params[2], this._params[3], this._params[4])
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       actor.changeLevel(actor.level + value, this._params[5])
-    }.bind(this))
+    })
     return true
   }
 
   // Change Parameter
   command317() {
     const value = this.operateValue(this._params[3], this._params[4], this._params[5])
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       actor.addParam(this._params[2], value)
-    }.bind(this))
+    })
     return true
   }
 
   // Change Skill
   command318() {
-    this.iterateActorEx(this._params[0], this._params[1], function (actor) {
+    this.iterateActorEx(this._params[0], this._params[1], (actor) => {
       if (this._params[2] === 0) {
         actor.learnSkill(this._params[3])
       } else {
         actor.forgetSkill(this._params[3])
       }
-    }.bind(this))
+    })
     return true
   }
 
@@ -1634,33 +1639,33 @@ export class Game_Interpreter {
   // Change Enemy HP
   command331() {
     const value = this.operateValue(this._params[1], this._params[2], this._params[3])
-    this.iterateEnemyIndex(this._params[0], function (enemy) {
+    this.iterateEnemyIndex(this._params[0], (enemy) => {
       this.changeHp(enemy, value, this._params[4])
-    }.bind(this))
+    })
     return true
   }
 
   // Change Enemy MP
   command332() {
     const value = this.operateValue(this._params[1], this._params[2], this._params[3])
-    this.iterateEnemyIndex(this._params[0], function (enemy) {
+    this.iterateEnemyIndex(this._params[0], (enemy) => {
       enemy.gainMp(value)
-    }.bind(this))
+    })
     return true
   }
 
   // Change Enemy TP
   command342() {
     const value = this.operateValue(this._params[1], this._params[2], this._params[3])
-    this.iterateEnemyIndex(this._params[0], function (enemy) {
+    this.iterateEnemyIndex(this._params[0], (enemy) => {
       enemy.gainTp(value)
-    }.bind(this))
+    })
     return true
   }
 
   // Change Enemy State
   command333() {
-    this.iterateEnemyIndex(this._params[0], function (enemy) {
+    this.iterateEnemyIndex(this._params[0], (enemy) => {
       const alreadyDead = enemy.isDead()
       if (this._params[1] === 0) {
         enemy.addState(this._params[2])
@@ -1671,63 +1676,63 @@ export class Game_Interpreter {
         enemy.performCollapse()
       }
       enemy.clearResult()
-    }.bind(this))
+    })
     return true
   }
 
   // Enemy Recover All
   command334() {
-    this.iterateEnemyIndex(this._params[0], function (enemy) {
+    this.iterateEnemyIndex(this._params[0], (enemy) => {
       enemy.recoverAll()
-    }.bind(this))
+    })
     return true
   }
 
   // Enemy Appear
   command335() {
-    this.iterateEnemyIndex(this._params[0], function (enemy) {
+    this.iterateEnemyIndex(this._params[0], (enemy) => {
       enemy.appear()
       global.$gameTroop.makeUniqueNames()
-    }.bind(this))
+    })
     return true
   }
 
   // Enemy Transform
   command336() {
-    this.iterateEnemyIndex(this._params[0], function (enemy) {
+    this.iterateEnemyIndex(this._params[0], (enemy) => {
       enemy.transform(this._params[1])
       global.$gameTroop.makeUniqueNames()
-    }.bind(this))
+    })
     return true
   }
 
   // Show Battle Animation
   command337() {
     if (this._params[2] == true) {
-      this.iterateEnemyIndex(-1, function (enemy) {
+      this.iterateEnemyIndex(-1, (enemy) => {
         if (enemy.isAlive()) {
           enemy.startAnimation(this._params[1], false, 0)
         }
-      }.bind(this))
+      })
     } else {
-      this.iterateEnemyIndex(this._params[0], function (enemy) {
+      this.iterateEnemyIndex(this._params[0], (enemy) => {
         if (enemy.isAlive()) {
           enemy.startAnimation(this._params[1], false, 0)
         }
-      }.bind(this))
+      })
     }
     return true
   }
 
   // Force Action
   command339() {
-    this.iterateBattler(this._params[0], this._params[1], function (battler) {
+    this.iterateBattler(this._params[0], this._params[1], (battler) => {
       if (!battler.isDeathStateAffected()) {
         battler.forceAction(this._params[2], this._params[3])
         BattleManager.forceAction(battler)
         this.setWaitMode('action')
       }
-    }.bind(this))
+    })
     return true
   }
 
@@ -1789,7 +1794,7 @@ export class Game_Interpreter {
     // to be overridden by plugins
   }
 
-  static requestImages(list, commonList = []) {
+  static requestImages(list: Data_EventCommand[] | null, commonList: number[] = []) {
     if (!list) return
 
     list.forEach(function (command) {
@@ -1825,7 +1830,7 @@ export class Game_Interpreter {
       // Set Movement Route
       case 205:
         if (params[1]) {
-          params[1].list.forEach(function (command) {
+          params[1].list.forEach((command) => {
             const params = command.parameters
             if (command.code === Game_Character.ROUTE_CHANGE_IMAGE) {
               ImageManager.requestCharacter(params[0])
@@ -1851,7 +1856,7 @@ export class Game_Interpreter {
         // Change Player Followers
       case 216:
         if (params[0] === 0) {
-          global.$gamePlayer.followers().forEach(function (follower) {
+          global.$gamePlayer.followers().forEach((follower) => {
             const name = follower.characterName()
             ImageManager.requestCharacter(name)
           })
@@ -1866,7 +1871,7 @@ export class Game_Interpreter {
         // Change Tileset
       case 282: {
         const tileset = global.$dataTilesets[params[0]]
-        tileset.tilesetNames.forEach(function (tilesetName) {
+        tileset.tilesetNames.forEach((tilesetName) => {
           ImageManager.requestTileset(tilesetName)
         })
         break

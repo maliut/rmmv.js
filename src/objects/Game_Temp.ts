@@ -8,14 +8,14 @@ export class Game_Temp {
 
   private _isPlaytest = Utils.isOptionValid('test')
   private _commonEventId = 0
-  private _destinationX = null
-  private _destinationY = null
+  private _destinationX: number | null = null
+  private _destinationY: number | null = null
 
   isPlaytest() {
     return this._isPlaytest
   }
 
-  reserveCommonEvent(commonEventId) {
+  reserveCommonEvent(commonEventId: number) {
     this._commonEventId = commonEventId
   }
 
@@ -31,7 +31,7 @@ export class Game_Temp {
     return global.$dataCommonEvents[this._commonEventId]
   }
 
-  setDestination(x, y) {
+  setDestination(x: number, y: number) {
     this._destinationX = x
     this._destinationY = y
   }

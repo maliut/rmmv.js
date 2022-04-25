@@ -8,6 +8,7 @@ import {AudioManager} from '../managers/AudioManager'
 import {SceneManager} from '../managers/SceneManager'
 import {global} from '../managers/DataManager'
 import {Scene_Gameover} from './Scene_Gameover'
+import {IUpdatable} from '../utils'
 
 /**
  * The Superclass of all scene within the game.
@@ -21,9 +22,9 @@ export abstract class Scene_Base extends Stage {
   private _active = false
   private _fadeSign = 0
   private _fadeDuration = 0
-  protected _fadeSprite = null
+  protected _fadeSprite: ScreenSprite | null = null
   private _imageReservationId = Utils.generateRuntimeId()
-  protected _windowLayer
+  protected _windowLayer!: WindowLayer
 
   /**
    * Attach a reservation to the reserve queue.
@@ -55,6 +56,10 @@ export abstract class Scene_Base extends Stage {
    * @memberof Scene_Base
    */
   create() {
+    // empty
+  }
+
+  prepare(...args) {
     // empty
   }
 
@@ -166,7 +171,7 @@ export abstract class Scene_Base extends Stage {
    * @memberof Scene_Base
    */
   addWindow(window) {
-    this._windowLayer.addChild(window)
+    this._windowLayer!.addChild(window)
   }
 
   /**
@@ -183,7 +188,7 @@ export abstract class Scene_Base extends Stage {
     this.createFadeSprite(white)
     this._fadeSign = 1
     this._fadeDuration = duration
-    this._fadeSprite.opacity = 255
+    this._fadeSprite!.opacity = 255
   }
 
   /**
@@ -200,7 +205,7 @@ export abstract class Scene_Base extends Stage {
     this.createFadeSprite(white)
     this._fadeSign = -1
     this._fadeDuration = duration
-    this._fadeSprite.opacity = 0
+    this._fadeSprite!.opacity = 0
   }
 
   /**
@@ -234,9 +239,9 @@ export abstract class Scene_Base extends Stage {
     if (this._fadeDuration > 0) {
       const d = this._fadeDuration
       if (this._fadeSign > 0) {
-        this._fadeSprite.opacity -= this._fadeSprite.opacity / d
+        this._fadeSprite!.opacity -= this._fadeSprite!.opacity / d
       } else {
-        this._fadeSprite.opacity += (255 - this._fadeSprite.opacity) / d
+        this._fadeSprite!.opacity += (255 - this._fadeSprite!.opacity) / d
       }
       this._fadeDuration--
     }
@@ -250,9 +255,8 @@ export abstract class Scene_Base extends Stage {
    * @memberof Scene_Base
    */
   updateChildren() {
-    this.children.forEach(function (child) {
-      // @ts-ignore
-      child.update?.()
+    this.children.forEach((child) => {
+      (child as unknown as IUpdatable).update?.()
     })
   }
 

@@ -9,13 +9,13 @@ export class PluginManager {
   private static _parameters = {}
 
   static setup(plugins) {
-    plugins.forEach(function (plugin) {
-      if (plugin.status && !this._scripts.contains(plugin.name)) {
-        this.setParameters(plugin.name, plugin.parameters)
-        this.loadScript(plugin.name + '.js')
-        this._scripts.push(plugin.name)
-      }
-    }, this)
+    // plugins.forEach((plugin) => {
+    //   if (plugin.status && !this._scripts.contains(plugin.name)) {
+    //     this.setParameters(plugin.name, plugin.parameters)
+    //     this.loadScript(plugin.name + '.js')
+    //     this._scripts.push(plugin.name)
+    //   }
+    // })
   }
 
   static checkErrors() {
@@ -46,6 +46,6 @@ export class PluginManager {
   }
 
   static onError(e) {
-    this._errorUrls.push(e.target._url)
+    // this._errorUrls.push(e.target._url)
   }
 }

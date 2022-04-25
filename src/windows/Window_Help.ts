@@ -1,5 +1,6 @@
 import {Window_Base} from './Window_Base'
 import {Graphics} from '../core/Graphics'
+import {Data_ItemBase} from '../types/global'
 
 // Window_Help
 //
@@ -15,7 +16,7 @@ export class Window_Help extends Window_Base {
     return this
   }
 
-  setText(text) {
+  setText(text: string) {
     if (this._text !== text) {
       this._text = text
       this.refresh()
@@ -26,7 +27,7 @@ export class Window_Help extends Window_Base {
     this.setText('')
   }
 
-  setItem(item) {
+  setItem(item: Data_ItemBase | null) {
     this.setText(item ? item.description : '')
   }
 

@@ -1,4 +1,3 @@
-import {CacheMap} from '../core/CacheMap'
 import {ImageCache} from '../core/ImageCache'
 import {RequestQueue} from '../core/RequestQueue'
 import {Utils} from '../core/Utils'
@@ -8,7 +7,7 @@ import {Bitmap} from '../core/Bitmap'
 //
 // The static class that loads images, creates bitmap objects and retains them.
 export class ImageManager {
-  static cache = new CacheMap(ImageManager)
+  // static cache = new CacheMap(ImageManager)
 
   private static _imageCache = new ImageCache()
   private static _requestQueue = new RequestQueue()
@@ -102,8 +101,8 @@ export class ImageManager {
     let bitmap = this._imageCache.get(key)
     if (!bitmap) {
       bitmap = Bitmap.load(decodeURIComponent(path))
-      bitmap.addLoadListener(function () {
-        bitmap.rotateHue(hue)
+      bitmap.addLoadListener(() => {
+        bitmap!.rotateHue(hue)
       })
       this._imageCache.add(key, bitmap)
     } else if (!bitmap.isReady()) {
@@ -123,7 +122,7 @@ export class ImageManager {
 
   static isObjectCharacter(filename: string) {
     const sign = filename.match(/^[!$]+/)
-    return sign && sign[0].contains('!')
+    return !!sign && sign[0].contains('!')
   }
 
   static isBigCharacter(filename: string) {
@@ -203,18 +202,18 @@ export class ImageManager {
     }
   }
 
-  static reserveNormalBitmap(path: string, hue: number, reservationId) {
+  static reserveNormalBitmap(path: string, hue: number, reservationId?: number) {
     const bitmap = this.loadNormalBitmap(path, hue)
     this._imageCache.reserve(this._generateCacheKey(path, hue), bitmap, reservationId)
 
     return bitmap
   }
 
-  static releaseReservation(reservationId) {
+  static releaseReservation(reservationId: number) {
     this._imageCache.releaseReservation(reservationId)
   }
 
-  static setDefaultReservationId(reservationId) {
+  static setDefaultReservationId(reservationId: number) {
     this._defaultReservationId = reservationId
   }
 
@@ -291,8 +290,8 @@ export class ImageManager {
     let bitmap = this._imageCache.get(key)
     if (!bitmap) {
       bitmap = Bitmap.request(path)
-      bitmap.addLoadListener(function () {
-        bitmap.rotateHue(hue)
+      bitmap.addLoadListener(() => {
+        bitmap!.rotateHue(hue)
       })
       this._imageCache.add(key, bitmap)
       this._requestQueue.enqueue(key, bitmap)
